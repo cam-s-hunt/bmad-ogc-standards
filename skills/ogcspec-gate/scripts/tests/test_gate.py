@@ -1,5 +1,7 @@
+import contextlib
 import copy
 import importlib.util
+import io
 import json
 import sys
 import tempfile
@@ -323,6 +325,20 @@ class BaselineTests(unittest.TestCase):
             code, summary = gate.run(cfg, base)
             self.assertEqual(code, 1)
             self.assertEqual(summary["baseline"]["missing"], ["M007:/req/core/gone"])
+
+    def test_malformed_baselines_are_a_usage_error_not_a_crash(self):
+        tmp, cfg = build(GOOD)
+        with tmp:
+            base = cfg.parent / "baseline.json"
+            for bad in ("[]", '"x"', "{}", '{"expected": "M007"}', '{"expected": [1]}', "not json"):
+                base.write_text(bad, encoding="utf-8")
+                with contextlib.redirect_stderr(io.StringIO()) as err:
+                    code = gate.main(["--config", str(cfg), "--baseline", str(base)])
+                self.assertEqual(code, 2, bad)
+                self.assertIn("baseline unusable", err.getvalue(), bad)
+            base.write_text('{"expected": []}', encoding="utf-8")
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(gate.main(["--config", str(cfg), "--baseline", str(base)]), 0)
 
     def test_every_rule_has_a_basis_and_a_source_and_no_spec_rule_is_unconfirmed(self):
         for rule, (description, basis, source) in gate.RULES.items():

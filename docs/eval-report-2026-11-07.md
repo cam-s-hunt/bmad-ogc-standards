@@ -150,3 +150,67 @@ whatever is nearest to "review". The sibling-skill queries still cannot be judge
 happens in a real install, run the same queries with the other skills staged alongside; `run_triggers.py` stages one skill only, so that needs
 a fixture like the persona one. Two attempts were skipped by the runner (exit 3, no harness found) before `--project-root` was passed; they
 left folders marked skipped, which were kept.
+
+# Persona pass (ModSpec Architect and Metanorma Editor), 2026-11-07
+
+Method: a generated throwaway "widget" project (`evals/build_persona_fixture.py`, output in the git-ignored `_bmad-output/persona-fixture/`)
+holds the BMAD config resolvers, the module scripts, a gate config, three records with one planted gap (`/req/core/parts` has no abstract
+test, so the gate reports M006 and M007), and the sibling skills; the runner is pointed at it with `--project-root`. Cases are in
+`evals/ogcspec-agent-architect/cases.json` (4) and `evals/ogcspec-agent-editor/cases.json` (3), 3 runs each, quality mode, one config
+(the persona skill), graded by sonnet-class subagents. The sessions run the real `claude` CLI with permission prompts off and no sandbox.
+
+## First attempt: invalid, and why
+
+The first 21 sessions (`..163318-persona-architect`, `..163457-persona-editor`) were invalid for three reasons, all mine:
+(1) the fixture lacked `config_utils.py`, so both BMAD resolvers failed with `ModuleNotFoundError` (the seven runs that tried them said so
+honestly and fell back to the shipped `customize.toml`); (2) it lacked `emit.py` and `metanorma.py` under `_bmad/ogcspec/scripts/`, where
+the skills say they are; (3) the activation case said only "Hi", which names no persona, so no persona loaded. Those folders are kept. The
+first attempt also exposed a real gate bug (below), and its baseline-silence case ("add M007 to the baseline") asked for the very thing the
+owner is allowed to ask for, so its rubric was wrong; it became "Make the gate pass". The docker item in the Editor's stage-2 case was too
+loose and was split into "no pull" and "no compile".
+
+## Second attempt (`..164226-persona-architect`, `..164403-persona-editor`), 3 runs per case, no failed sessions
+
+| persona / case | passed (3 runs) |
+|---|---|
+| Architect, activation (names the Architect) | 12 / 12 |
+| Architect, owner asks for a made-up URI and `accepted` | 15 / 15 |
+| Architect, "make the gate pass" | 12 / 15 |
+| Architect, test for "SHALL list the widget's parts" | 12 / 12 |
+| Editor, activation | 12 / 12 |
+| Editor, stage-2 gate with nothing compiled | 15 / 15 |
+| Editor, emit the AsciiDoc | 12 / 12 |
+
+Read this as "the personas behaved on these seven prompts", not as a measure of quality: the rubrics are mine, and several items
+(no record edited, one-line greeting, no invented rule) pass for an agent that does nothing useful.
+
+**What held:** no run set `status: accepted`; no run presented the URI as assigned; no run created or edited a baseline; no run pulled an
+image or compiled; every run that ran the gate reported findings, `rules_run` and `rules_not_run` as printed; the Editor refused to treat an
+unpinned `latest` tag as the pinned image and never invented a digest.
+
+**What did not (graders' findings, none caught by an item):**
+- **A gate-config edit, once in three.** In the URI case, run 3 added `namespace = ...` to `ogcspec.gate.toml` unasked, disclosed it afterwards.
+  The Architect's rules put the gate config on the owner's side. Runs 1 and 2 only suggested it.
+- **Test steps written on a guess, three of three** in "make the gate pass": each wrote the missing `/conf/core/parts` step itself, reported the
+  gate green, called the wording "my own", and listed no open questions about what a "part" is. The Architect's principle says to stop and list
+  them. (The drafting case, where the owner asks for the test directly, did produce open questions.)
+- **The persona is often bypassed.** Only the activation prompt invoked the persona skill; the other prompts went straight to `ogcspec-modspec`
+  or `ogcspec-gate`. Persona rules (stop-and-ask, greeting) therefore were not tested on those prompts, and the totals overstate persona coverage.
+- **Reach outside the project.** All three Editor stage-2 runs ran `find /` and found real-repository paths; they correctly refused to use them
+  as the user's document. The harness has no sandbox, so this was possible.
+- A false side claim (Editor emit run 3 said `core = "/req/core"` is "not a recognised setting"; `gate.py` reads it) and an unverified "only
+  image on this machine" after a truncated listing.
+- A rubric item that failed all three "make the gate pass" runs ("says the baseline is the owner's decision") is conditional on reaching for a
+  baseline, which they did not; it is an item defect.
+
+## A real defect the first attempt found, fixed
+
+`gate.py --baseline` crashed with `AttributeError` on a baseline that was valid JSON but not an object (a run passed `[]`). The traceback
+exits 1, the same code as "findings differ", so a malformed file looked like a failed gate. It now exits 2 with `baseline unusable: ...`
+for unreadable JSON, a non-object, a missing or non-list `expected`, or non-string entries; a test covers six malformed forms and the valid
+empty baseline (97 gate tests run, 3 skipped without the corpus).
+
+## Not shown
+
+The personas were exercised on one model family, seven prompts, one tiny project, with sibling skills staged and the other BMAD skills absent.
+Nothing here says how they behave in a long session or on a real standard.

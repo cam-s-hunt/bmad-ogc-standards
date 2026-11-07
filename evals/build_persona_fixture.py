@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-BMAD_SCRIPTS = ("resolve_config.py", "resolve_customization.py")
+BMAD_SCRIPTS = ("resolve_config.py", "resolve_customization.py", "config_utils.py")
 SIBLINGS = ("ogcspec-modspec", "ogcspec-gate", "ogcspec-review", "ogcspec-metanorma")
 
 CONFIG = """[core]
@@ -93,7 +93,9 @@ def build(out: Path) -> None:
             sys.exit(f"missing {src}: install BMAD in this repository first (see docs/HANDOFF.md)")
         shutil.copy2(src, out / "_bmad" / "scripts" / name)
     (out / "_bmad" / "config.toml").write_text(CONFIG, encoding="utf-8")
-    shutil.copy2(REPO / "skills" / "ogcspec-gate" / "scripts" / "gate.py", out / "_bmad" / "ogcspec" / "scripts" / "gate.py")
+    # the module's scripts, where `bmad setup` puts them in a real install (skills/*/bmod.toml `scripts`)
+    for skill, script in (("ogcspec-gate", "gate.py"), ("ogcspec-metanorma", "emit.py"), ("ogcspec-metanorma", "metanorma.py")):
+        shutil.copy2(REPO / "skills" / skill / "scripts" / script, out / "_bmad" / "ogcspec" / "scripts" / script)
     (out / "ogcspec.gate.toml").write_text(GATE_CONFIG, encoding="utf-8")
     (out / "records" / "core.yaml").write_text(RECORDS, encoding="utf-8")
     for name in SIBLINGS:

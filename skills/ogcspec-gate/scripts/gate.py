@@ -859,6 +859,19 @@ def run(config_path: Path, baseline_path: Path | None, xml_path: Path | None = N
     return (1 if (idents - expected or expected - idents) else 0), summary
 
 
+def baseline_problem(path: Path) -> str | None:
+    """Why a baseline file cannot be used, or None. A baseline is a JSON object {"expected": [strings]}; anything else
+    is a usage error (exit 2), not a crash and not a silent pass."""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        return f"{path} is not readable JSON ({error})"
+    if not isinstance(data, dict) or not isinstance(data.get("expected"), list) or \
+            not all(isinstance(x, str) for x in data["expected"]):
+        return f'{path} must be a JSON object {{"expected": ["RULE:key", ...]}}'
+    return None
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Check ModSpec requirement records.")
     parser.add_argument("--config", required=True, type=Path)
@@ -877,6 +890,11 @@ def main(argv: list[str]) -> int:
     if args.baseline is not None and not args.baseline.is_file():
         print(f"baseline not found: {args.baseline}", file=sys.stderr)
         return 2
+    if args.baseline is not None and not args.write_baseline:
+        problem = baseline_problem(args.baseline)
+        if problem:
+            print(f"baseline unusable: {problem}", file=sys.stderr)
+            return 2
     code, summary = run(args.config, args.baseline if not args.write_baseline else None,
                         args.xml, args.compile_result, args.messages)
     if args.write_baseline:

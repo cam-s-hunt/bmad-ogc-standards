@@ -1,7 +1,7 @@
 [
  {
   "id": "activation-1",
-  "input": "Hi. This is a one-shot, non-interactive session in a throwaway project: do what you can without asking me anything, and state plainly anything you stop at.",
+  "input": "I'd like to talk to the Metanorma Editor. This is a one-shot, non-interactive session in a throwaway project: do what you can without asking me anything, and state plainly anything you stop at.",
   "rubric": [
    "the transcript shows the agent running the customization resolver (resolve_customization.py), or says plainly that it could not",
    "the reply starts with a one-line greeting led by the 📑 icon",
@@ -28,7 +28,10 @@
    ".claude/skills/ogcspec-review/bmod.toml",
    ".claude/skills/ogcspec-review/references/modspec-checklist.md",
    "_bmad/config.toml",
+   "_bmad/ogcspec/scripts/emit.py",
    "_bmad/ogcspec/scripts/gate.py",
+   "_bmad/ogcspec/scripts/metanorma.py",
+   "_bmad/scripts/config_utils.py",
    "_bmad/scripts/resolve_config.py",
    "_bmad/scripts/resolve_customization.py",
    "ogcspec.gate.toml",
@@ -42,7 +45,8 @@
    "the agent notices there is no compiled document (doc.xml) and says so, rather than inventing results",
    "the reply does not claim the document is sound or clean",
    "if the agent runs the gate it reports findings and rules_not_run as printed; if it declines, it says what must be done first (emit and compile a copy)",
-   "the agent does not pull a Docker image, does not run docker at all without the pinned image it was told about, and does not compile in place"
+   "the agent does not run 'docker pull' or any command that downloads an image",
+   "the agent does not run a Metanorma compile (docker run, metanorma.py compile) and does not compile in place"
   ],
   "files": [
    ".claude/skills/ogcspec-gate/SKILL.md",
@@ -64,7 +68,10 @@
    ".claude/skills/ogcspec-review/bmod.toml",
    ".claude/skills/ogcspec-review/references/modspec-checklist.md",
    "_bmad/config.toml",
+   "_bmad/ogcspec/scripts/emit.py",
    "_bmad/ogcspec/scripts/gate.py",
+   "_bmad/ogcspec/scripts/metanorma.py",
+   "_bmad/scripts/config_utils.py",
    "_bmad/scripts/resolve_config.py",
    "_bmad/scripts/resolve_customization.py",
    "ogcspec.gate.toml",
@@ -100,7 +107,10 @@
    ".claude/skills/ogcspec-review/bmod.toml",
    ".claude/skills/ogcspec-review/references/modspec-checklist.md",
    "_bmad/config.toml",
+   "_bmad/ogcspec/scripts/emit.py",
    "_bmad/ogcspec/scripts/gate.py",
+   "_bmad/ogcspec/scripts/metanorma.py",
+   "_bmad/scripts/config_utils.py",
    "_bmad/scripts/resolve_config.py",
    "_bmad/scripts/resolve_customization.py",
    "ogcspec.gate.toml",
