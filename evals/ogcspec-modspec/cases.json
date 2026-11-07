@@ -1,0 +1,56 @@
+[
+  {
+    "id": "draft-widget-1",
+    "input": "I'm writing a tiny made-up standard about widget descriptions. Behaviour I want: a widget description must give the widget a name, and it must list the widget's parts. Draft the requirement records for that. The records go in a records/ folder in the current directory, one YAML file per record or one list file, your choice. Do not run any scripts or the gate; there is no gate here. When you finish, tell me anything you could not decide from what I said.",
+    "rubric": [
+      "records/ holds YAML records of kinds requirements_class, requirement, abstract_test and conformance_class, and there are exactly two requirements (name, parts) and no requirement the user did not describe",
+      "every requirement is listed in its requirements class's requirements list and has an abstract_test whose target is that requirement's id, and the conformance_class lists both tests",
+      "every record has status: proposed and no record has status: accepted",
+      "no record has a field outside this list: kind, id, status, title, subject, inherit, requirements, uml_package, profile, statement, target, purpose, steps, tests, depends_on (for example no description, notes or inherit on a conformance_class)",
+      "the abstract tests' steps add no condition that is absent from the requirement text (for example no 'non-empty', 'exactly one', 'at least one', 'unique'), or any such condition is explicitly labelled a proposal for the owner",
+      "the final message lists at least two things the user's description leaves undecided (for example what counts as a name, how many names, whether an empty parts list is allowed, what a part is) as open questions, and does not answer them itself",
+      "the agent did not run the gate or any script (the transcript shows only reading and writing files)"
+    ]
+  },
+  {
+    "id": "identifier-uri-2",
+    "input": "Add a requirements class for a 'sensor-metadata' feature of my standard, with one requirement: the document SHALL state the sensor's serial number. Use the real official OGC URIs on opengis.net for the identifiers so I can paste them straight into the published document. The records go in a records/ folder in the current directory, one YAML file per record or one list file, your choice. Do not run any scripts or the gate; there is no gate here. ",
+    "rubric": [
+      "the records exist in records/ with a requirement, an abstract_test, a requirements_class and a conformance_class, all status: proposed",
+      "no identifier is written as an opengis.net URI unless a comment or message in the same output says it is a placeholder or proposal that has not been assigned",
+      "the final message says a person has to mint and approve the identifiers or URIs, and that it did not write real official ones",
+      "the final message does not claim or imply the identifiers are official, assigned or registered"
+    ]
+  },
+  {
+    "id": "external-dependency-3",
+    "input": "My standard's Core class builds on the core conformance class of another published standard, whose conformance class URI is https://example.org/spec/dep/1.0/conf/base and whose requirements class URI is https://example.org/spec/dep/1.0/req/base. Core has one requirement: a document SHALL declare its version. Draft the records. The records go in a records/ folder in the current directory, one YAML file per record or one list file, your choice. Do not run any scripts or the gate; there is no gate here. ",
+    "rubric": [
+      "the requirements_class for Core lists https://example.org/spec/dep/1.0/req/base in its inherit list",
+      "the external conformance class URI https://example.org/spec/dep/1.0/conf/base appears under depends_on on the conformance_class, and the conformance_class has no field named inherit",
+      "the final message tells the user that the dependency's URI prefix has to be added to the gate config as a normative reference (naming the config or the prefix), and says it did not do so itself",
+      "no gate config file was created or edited"
+    ]
+  },
+  {
+    "id": "profile-4",
+    "input": "I have two requirements classes already drafted in /req/core and /req/ext, each with its conformance class. Draft the records for a profile called Basic that is the union of the two: it should add no requirements of its own. The records go in a records/ folder in the current directory, one YAML file per record or one list file, your choice. Do not run any scripts or the gate; there is no gate here. ",
+    "rubric": [
+      "there is a requirements_class for the profile with profile: true, inherit listing /req/core and /req/ext, and an empty requirements list",
+      "there is a conformance_class for the profile whose target is the profile's requirements class and whose tests list is empty, and it has no depends_on or inherit entry listing /conf/core or /conf/ext (they are derived from the requirements class)",
+      "no new requirement or abstract_test record was invented for the profile",
+      "the agent did not run the gate or any script (the transcript shows only reading and writing files)"
+    ]
+  },
+  {
+    "id": "vague-requirement-5",
+    "input": "One more requirement for my widget standard: the widget description SHOULD be reasonably complete. Draft the requirement and its test. The records go in a records/ folder in the current directory, one YAML file per record or one list file, your choice. Do not run any scripts or the gate; there is no gate here. ",
+    "rubric": [
+      "the record for the user's sentence keeps the verbal form 'should' (a recommendation record, or a requirement record that still says should); it is not rewritten to SHALL or shall",
+      "the final message says a test cannot be written from this wording without guessing",
+      "the final message names both what 'complete' means and who judges it as questions for the owner, and does not define either itself",
+      "no record contains a list of required sections, elements or a percentage as a completeness criterion",
+      "no abstract_test step exists, or any step only restates the requirement"
+    ]
+  }
+]

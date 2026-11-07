@@ -1,0 +1,42 @@
+[
+  {
+    "query": "I need to write the normative requirements for my OGC standard as ModSpec records. Can you draft a requirements class and tests?",
+    "should_trigger": true
+  },
+  {
+    "query": "add a conformance class and abstract tests for the new requirement /req/core/version in our standard's records folder",
+    "should_trigger": true
+  },
+  {
+    "query": "revise the wording of requirement /req/sensor/serial so it uses shall properly, in the YAML record",
+    "should_trigger": true
+  },
+  {
+    "query": "how do I write a profile that combines two requirements classes in ModSpec? draft the records",
+    "should_trigger": true
+  },
+  {
+    "query": "write the requirement records for the pub/sub part of our API standard",
+    "should_trigger": true
+  },
+  {
+    "query": "explain what a conformance class is in plain terms",
+    "should_trigger": false
+  },
+  {
+    "query": "review these records for me, second pair of eyes please",
+    "should_trigger": false
+  },
+  {
+    "query": "compile the Metanorma document and tell me which warnings matter",
+    "should_trigger": false
+  },
+  {
+    "query": "write a python function that validates a JSON schema",
+    "should_trigger": false
+  },
+  {
+    "query": "draft a product requirements document for a mobile app",
+    "should_trigger": false
+  }
+]

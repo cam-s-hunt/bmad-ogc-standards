@@ -38,7 +38,7 @@ Identifiers may be relative (`/req/core`) or absolute under the document's `name
 
 ## How to work
 
-1. Draft only what was asked. Do not add requirements the user did not describe.
+1. Draft only what was asked. Do not add requirements the user did not describe. Keep the verbal form the user used: "shall/must" becomes a `requirement`, "should" a `recommendation` (no test), "may" a `permission`. Never upgrade "should" to SHALL to fit the kind you would prefer; if the choice looks wrong, keep the user's form and ask.
 2. Every `requirement` needs an `abstract_test` that targets it, listed by exactly one `conformance_class`;
    every requirement is listed by its `requirements_class`. Write the test `steps` only from what the
    requirement text says. If a requirement cannot be turned into a step without guessing, say so and stop
