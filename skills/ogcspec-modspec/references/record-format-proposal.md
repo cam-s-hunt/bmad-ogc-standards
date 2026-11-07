@@ -2,7 +2,7 @@
 
 **Status: proposal, 2026-11-06. Nothing here is enforced.** `gate.py`, `emit.py` and the `SKILL.md` kind table were not
 changed. The proposal says what the tools do today with each proposed field (section 7, run on the pinned image) and what
-step 3 would have to change. Several points are **open** and need the owner or the ModSpec maintainers.
+step 3 would have to change. The owner decided the open points on 2026-11-06 (see "Decisions" at the end); implementing them is plan step 3.
 
 Markers: **read** (from a source opened for this work), **observed** (produced by running the pinned tools, section 7),
 **inferred** (my reasoning), **open** (undecided). ModSpec Part 1 means OGC 08-131r7, read from the local copy of its
@@ -44,7 +44,7 @@ All optional, all additive: a record without them stays valid and means what it 
 | `depends_on` | `conformance_class` | list of ids, **external conformance classes only** (section 4) | Req 12 (**read**) | `inherit::` on the conformance class block; Metanorma keeps it and the gate reads it back (v5b) | ignored, not emitted (v3) |
 | `uml_package` | `requirements_class` | one string, the qualified name of the UML package | Part 2 REQ004-006 define no notation (**read** via digest); this is the project's own convention (section 6) | none: record-only | ignored (v2) |
 | `status` | any kind | `proposed` or `accepted` | design doc H1; no ModSpec basis | none: record-only | ignored (v1) |
-| `title` | `requirements_class`, `conformance_class` | string | Req 14: classes "explicitly named", corresponding ones "similar names" (**read**) | not emitted; how Metanorma would carry it is untested (**open**) | ignored (v2); the gate reads it on requirements classes only |
+| `title` | `requirements_class`, `conformance_class` | string | Req 14: classes "explicitly named", corresponding ones "similar names" (**read**) | not emitted today; the owner decided to emit it after a test compile shows how Metanorma carries it | ignored (v2); the gate reads it on requirements classes only |
 
 Not proposed: dependencies between individual requirements. Part 1 Reqs 12, 16, 17 and 18 speak of classes; I read no
 Part 1 requirement on dependencies between single requirements.
@@ -64,7 +64,7 @@ Options:
 
 - **A. Author `depends_on` for every dependency.** Matches the text of Req 12 literally, but the internal part repeats
   what the requirements class's `inherit` already says (through Req 8, one-to-one), so the two lists can disagree.
-- **B. Derive internal dependencies, author external ones.** (**Recommended**, **open**.) For each `inherit` entry of
+- **B. Derive internal dependencies, author external ones.** (**Chosen by the owner, 2026-11-06.**) For each `inherit` entry of
   a requirements class that is another requirements class of the document, the emitter writes the `inherit::` of the
   corresponding conformance class (Req 8). `depends_on` lists only dependencies that cannot be derived: external
   conformance classes. There is one source of truth for each fact. A step 3 rule would reject a `depends_on` entry that
@@ -73,8 +73,8 @@ Options:
   mapping from an external requirements class to its conformance class (**read**: Req 13 says an imported requirements
   class "SHALL be a conformance class of the source standard", not how to name it). Guessing it would invent URIs.
 
-Open: whether the owner accepts B, and whether the maintainers read Req 12 as covering a dependency that exists only
-through a requirements class's `inherit`.
+Still open, for the ModSpec maintainers: whether Req 12 covers a dependency that exists only through a requirements
+class's `inherit`.
 
 ## 5. Test target type (Req 5): no field
 
@@ -153,12 +153,12 @@ Not tested: the Metanorma representation of `title` or of a profile; any ModSpec
 
 Req 19 (**read**): conformance tests for a profile "SHALL be defined as the union of a list of conformance classes". A
 `profile` kind would need both tools to change (v6), and how Metanorma would represent it is untested. A profile may also
-be expressible as a conformance class that depends on the constituent ones, but I did not test that. Deferred: a template
-for new standards need not support profiles at first. **Open.**
+be expressible as a conformance class that depends on the constituent ones, but I did not test that. **Decided 2026-11-06:** design profiles in step 3. A test compile comes first: how Metanorma represents a profile, and whether a
+conformance class that depends on the constituent classes is enough. The gate and emitter change only after that.
 
 ## 10. Layout: one record per file (convention)
 
-Recommended, not required (**open**): one record per file, with the path following the id, for example `records/req/core.yaml`
+Chosen 2026-11-06, with the check opt-in: one record per file, with the path following the id, for example `records/req/core.yaml`
 for `/req/core` and `records/req/core/first.yaml` for `/req/core/first`. Reasons (**inferred**): a review diff is one record,
 ownership can follow the path, and a duplicate id is a visible collision. Observed (with numbered file names, not the path rule): splitting records into one file each changes nothing in the
 emitted text (v9, byte-identical to a single list file), and a duplicate id across files is caught (v10). Against: a large standard
@@ -170,7 +170,7 @@ opt-in style rule (`S`), because no ModSpec or Policy text asks for it.
 A misspelled or unsupported field is silently ignored today (v7). With only the fields in section 1 that is a nuisance; with
 record-only fields it becomes ambiguous, because a typo and a deliberate record-only field look the same. Step 3 should add
 a rule that reports any field outside a per-kind table (a new `G` rule, not an OGC-derived one), before or together with the
-fields in section 3. Whether project-private fields get a reserved prefix is **open**.
+fields in section 3. Decided 2026-11-06: report unknown fields; no reserved prefix for project-private fields.
 
 ## 12. What step 3 would change if this is accepted
 
@@ -178,17 +178,18 @@ fields in section 3. Whether project-private fields get a reserved prefix is **o
    redundancy rule (section 4); optional rules for `uml_package` (section 6) and `status`/layout (sections 8, 10).
 2. Emitter: write `inherit::` on conformance classes from the derived and authored dependencies; stage 2 then compares it.
 3. Fixtures: the variants in section 7 as test cases, with `record-format-example.yaml` as the clean case.
-4. Nothing for Req 5 (section 5); nothing for Req 19 until section 9 is decided.
+4. Profiles (section 9): test compile first, then design. Titles: test compile of a class title, then emit it (section 3).
+5. Nothing for Req 5 (section 5).
 
-## Open decisions, in one place
+## Decisions (owner, 2026-11-06)
 
-| # | question | who |
+| # | question | decision |
 |---|---|---|
-| 1 | Accept option B for conformance-class dependencies? | owner |
-| 2 | Does Req 12 cover a dependency that exists only through a requirements class's `inherit`? | ModSpec maintainers (add to the question list) |
-| 3 | Is `uml_package` wanted, and when is Part 2 "relevant" so the rule is on? | owner; maintainers (existing question 3) |
-| 4 | Adopt `status`, and by what control are `accepted` records protected? | owner |
-| 5 | Should `title` be emitted, and how does Metanorma carry it? | owner; needs a compile test |
-| 6 | Profiles: in the template at all? | owner |
-| 7 | One record per file, and the path rule? | owner |
-| 8 | Reserved prefix for project-private fields? | owner |
+| 1 | Conformance-class dependencies | Option B: derive dependencies inside the standard from `inherit`, author external ones in `depends_on`. |
+| 2 | Does Req 12 cover a dependency that exists only through a requirements class's `inherit`? | Not the owner's to decide: added to the questions for the ModSpec maintainers (PLAN, question 6). |
+| 3 | `uml_package` | Add as an optional field; its rules are opt-in. |
+| 4 | `status` (proposed or accepted) | Add the label. Protecting `accepted` records against an agent that can edit them is a separate control and is not decided. |
+| 5 | `title` | Emit it in the document, after a test compile shows how Metanorma carries it. |
+| 6 | Profiles | Design them in step 3, after a test compile. |
+| 7 | One record per file | Yes, path follows the id; the check is opt-in. |
+| 8 | Unknown fields | Report them. No reserved prefix for private fields. |

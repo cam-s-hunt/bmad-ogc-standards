@@ -36,14 +36,15 @@ tools), **inferred**, or **open**.
    YAML record per component, ModSpec kinds, listing-based membership, a `namespace`, dependency lists on both
    requirements and conformance classes (Req 12), and an explicit field for the UML-package-to-class mapping that
    ModSpec Part 2 leaves undefined. Put it in `ogcspec-modspec/references/` first, as a proposal.
-   **Proposal written 2026-11-06, awaiting the owner:** `skills/ogcspec-modspec/references/record-format-proposal.md`
-   (worked example beside it; its eight open decisions are listed at the end). Findings that change step 3 are below.
+   **Proposal written and decided 2026-11-06:** `skills/ogcspec-modspec/references/record-format-proposal.md` (worked
+   example beside it; the owner's decisions are its last section). Still not implemented: that is step 3.
 3. **Extend the gate only where a requirement can be checked from records:** conformance-class dependencies (Req 12,
    proposed: derive internal ones from the requirements class's `inherit`, author external ones; emitter and gate
    change together), a rule for unknown record fields (needed before any record-only field is safe), and opt-in rules
    for a UML-package field and for `status`. **Corrected by step 2:** Req 5 needs no target-type field on tests; it
    follows from Reqs 4, 8, 11, 15 (rules M004-M006). Profile conformance (Req 19) is not designed: a new record kind breaks
-   both tools. Leave the rest as HUMAN review steps in the BMAD workflow. Both ATS 12 and ATS 19 are "inspect the
+   both tools: the owner decided to design it in step 3, after a test compile; class titles likewise get a test compile and
+   are then emitted. Leave the rest as HUMAN review steps in the BMAD workflow. Both ATS 12 and ATS 19 are "inspect the
    document" tests, so the gate checks structure only.
 4. **Put the questions to OGC** (list below) before encoding any contested reading as a blocking rule.
 5. **Ground the vocabulary** in BFO/CCO and SOSA/SSN. Working references (inference, caveats in
@@ -68,6 +69,8 @@ tools), **inferred**, or **open**.
 4. What is the URI form of a conformance class for use in Part 3 REQ004 (`appinfo`)?
 5. Is a Draft Policy (25-001) already enforceable on SWG submissions, and which ISO Directives edition applies to
    clause 7?
+6. Req 12: does "specify any other conformance class upon which it is dependent" cover a dependency that exists only
+   because the requirements class lists another class in its dependencies?
 
 ## What is still not verified
 

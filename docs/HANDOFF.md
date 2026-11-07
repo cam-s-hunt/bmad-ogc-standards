@@ -33,8 +33,10 @@ a target standard repository, to be created later). Prototype; not registered wi
   `record-format-example.yaml`, and `docs/design/record-format-experiment.py` (reproduces section 7: emit, pinned-image
   compile, gate stage 2, 12 variants). **Observed:** the proposed record-only fields are ignored by the current tools; a
   conformance-class `inherit` gives X003 unless emitter and gate change together; a new record kind is refused by the
-  emitter; a misspelled field is silently ignored. `gate.py`, `emit.py` and the SKILL.md kind table are unchanged. Eight
-  decisions are open and listed at the end of the proposal. The installed copy in `.claude/skills/` predates it.
+  emitter; a misspelled field is silently ignored. `gate.py`, `emit.py` and the SKILL.md kind table are unchanged. The owner
+  decided all eight points the same day (last section of the proposal); implementation is plan step 3. The installed copy in
+  `.claude/skills/` was reinstalled after the proposal (`skills@1.7.6 add ./skills --skill '*' --agent claude-code --copy -y`, offline
+  from the npx cache); `bmad setup --status` reports current with no problems.
 
 ## Pins
 - BMAD: `BMAD-PIN` (main at `e734d3ac…`, v7 preview alpha, version string `6.13.0-next`). Not vendored; clone it by commit.
