@@ -15,3 +15,4 @@ Rules that have already cost time:
 - MIT licensed (owner's decision, 2026-11-07). The license covers this repository's own files only: not OGC documents, ISO PDFs or third-party material under `docs/references/` and `~/ogc-references/`. Nothing here is endorsed by or registered with OGC.
 - Report skipped checks, unverified claims and corrections plainly; the project has already had to retract two
   confident claims (see docs/real-document-check-2026-11-06.md, "Corrections").
+- Always provide questions or decisions to the user in a card, providing plentiful context in plain English
