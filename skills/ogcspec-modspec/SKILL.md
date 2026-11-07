@@ -42,7 +42,10 @@ Identifiers may be relative (`/req/core`) or absolute under the document's `name
 2. Every `requirement` needs an `abstract_test` that targets it, listed by exactly one `conformance_class`;
    every requirement is listed by its `requirements_class`. Write the test `steps` only from what the
    requirement text says. If a requirement cannot be turned into a step without guessing, say so and stop
-   rather than inventing a step.
+   rather than inventing a step. A step that merely restates its requirement (no input, no pass/fail rule) leaves the
+   test unrepeatable: after drafting, list what the requirement does not decide (what counts as the thing, how many, what
+   fails, the empty or partial case, undefined terms) as open questions for the owner, and do not settle them yourself.
+   The owner's answer changes the requirement first and the steps second. (Review run 2026-11-07: every lens flagged this.)
 3. Write `status: proposed` on every record you draft; never write `accepted`, which is a person's act. Identifiers you write are proposals. A person mints and approves identifiers and any `opengis.net`
    URI; never present one as assigned.
 4. External `inherit` targets must match a `[[normative_references]]` `uri_prefix` in the gate config. Add

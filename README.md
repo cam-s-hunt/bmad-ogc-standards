@@ -59,4 +59,4 @@ endorsed by OGC.**
   Policy links the current edition and a newer one was not checked.
 - CI (`module-quality`, first runs 2026-11-07): manifest validation and the per-skill checks pass on the runner; the unit-test step failed twice on a Python 3.12-only f-string in `tests/corpus/run_corpus.py` (the runner has 3.11), fixed afterwards. The run after the fix (`bb5fe1d`) passed all steps. The CI never runs the Metanorma round trips or the corpus tests (no pinned image, no corpus), so those skip there.
 
-No LICENSE is included yet; choosing one is the owner's decision.
+Licensed under the MIT License (`LICENSE`). That covers this repository's own files only; OGC documents, ISO/IEC material and other third-party sources keep their own terms. Whether OGC has rules about contributed material was not checked.

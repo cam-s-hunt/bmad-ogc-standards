@@ -4,7 +4,7 @@ For a fresh session started in this repository. Read `CLAUDE.md` first, then `do
 
 ## What this is
 A BMAD module (`ogcspec`) for agentic, spec-anchored development of a standard intended for OGC submission (built for
-a target standard repository, to be created later). Prototype; not registered with or endorsed by OGC; no LICENSE (owner's decision).
+a target standard repository, to be created later). Prototype; not registered with or endorsed by OGC; MIT licensed (owner's decision 2026-11-07; OGC's own rules on contributed material not checked).
 
 ## What exists (all tested; see README for what is and is not verified)
 - `skills/ogcspec-gate/scripts/gate.py`: the canonical rule engine. Rules M (ModSpec Part 1 requirement numbers),
@@ -100,7 +100,7 @@ To reproduce: fetch the pinned commit, run `add <dir> --skill '*' --agent claude
 - Module in a sibling repo; BMAD pinned at v7 main commit.
 - No table-style requirements: this framework defines its own requirement format.
 - Req 22 (transitive vs direct) is undecided; the gate reports three states and defaults to the literal text.
-- No license yet.
+- License: MIT (2026-11-07).
 - This repository is a **template** for BMAD-managed OGC standards and must stay free of any specific target standard. A target
   standard gets its own repository later, after the template is finished (decided 2026-11-06). References to the earlier target
   were removed from the working tree; earlier commits may still contain them.

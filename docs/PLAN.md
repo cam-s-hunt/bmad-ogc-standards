@@ -57,15 +57,15 @@ tools), **inferred**, or **open**.
 6. **BMAD side:** design the standards-authoring personas and workflow (what a ModSpec Architect, a Metanorma editor and
    a reviewer each do, and where a human must approve: identifiers, normative wording, anything sent to OGC).
    Proposal written 2026-11-06, awaiting the owner: `docs/design/personas-and-workflow.md`.
-7. **Housekeeping:** a license (owner's decision); a remote and CI (the workflow in `.github/` first ran 2026-11-07: validators passed, unit tests failed on a 3.12-only f-string
+7. **Housekeeping:** a license (MIT, chosen 2026-11-07); a remote and CI (the workflow in `.github/` first ran 2026-11-07: validators passed, unit tests failed on a 3.12-only f-string
    under the runner's Python 3.11, fixed; action versions still unverified); re-run the install trial after each skill change; refresh the corpus snapshot
    when the pinned image or the pinned standards change.
 
-## Questions for the ModSpec maintainers / OGC (not yet asked)
+## Questions for the ModSpec maintainers / OGC (not yet asked; ready-to-post drafts in `docs/maintainer-questions.md`, 2026-11-07)
 
 1. Req 22 B / ATS 22: if class C lists only class B and B lists the core, does C have the core as a direct dependency?
    If a chain is acceptable, should the wording say "direct or transitive"?
-2. Req 23 in published r7 duplicates Req 20 (commit b8955012). Intended?
+2. Req 23 in published r7 duplicates Req 20. Commit b8955012 ("Issue 88", 2025-08-23) replaced its original text with Req 20's wording (verified via the GitHub API 2026-11-07). Intended?
 3. Which ModSpec Parts are "relevant" to a standard that defines a conceptual model in UML and encodings in JSON?
 4. What is the URI form of a conformance class for use in Part 3 REQ004 (`appinfo`)?
 5. Is a Draft Policy (25-001) already enforceable on SWG submissions, and which ISO Directives edition applies to
