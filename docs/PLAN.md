@@ -36,9 +36,15 @@ tools), **inferred**, or **open**.
    YAML record per component, ModSpec kinds, listing-based membership, a `namespace`, dependency lists on both
    requirements and conformance classes (Req 12), and an explicit field for the UML-package-to-class mapping that
    ModSpec Part 2 leaves undefined. Put it in `ogcspec-modspec/references/` first, as a proposal.
-3. **Extend the gate only where a requirement can be checked from records:** conformance-class dependencies (Req 12),
-   single target type per conformance class's tests (Req 5, needs a target-type field on tests), profile conformance as
-   a union of classes (Req 19). Leave the rest as HUMAN review steps in the BMAD workflow.
+   **Proposal written 2026-11-06, awaiting the owner:** `skills/ogcspec-modspec/references/record-format-proposal.md`
+   (worked example beside it; its eight open decisions are listed at the end). Findings that change step 3 are below.
+3. **Extend the gate only where a requirement can be checked from records:** conformance-class dependencies (Req 12,
+   proposed: derive internal ones from the requirements class's `inherit`, author external ones; emitter and gate
+   change together), a rule for unknown record fields (needed before any record-only field is safe), and opt-in rules
+   for a UML-package field and for `status`. **Corrected by step 2:** Req 5 needs no target-type field on tests; it
+   follows from Reqs 4, 8, 11, 15 (rules M004-M006). Profile conformance (Req 19) is not designed: a new record kind breaks
+   both tools. Leave the rest as HUMAN review steps in the BMAD workflow. Both ATS 12 and ATS 19 are "inspect the
+   document" tests, so the gate checks structure only.
 4. **Put the questions to OGC** (list below) before encoding any contested reading as a blocking rule.
 5. **Ground the vocabulary** in BFO/CCO and SOSA/SSN. Working references (inference, caveats in
    `docs/research/ontology-alignments.md`): SSN-to-BFO tag v2026-07-18 (`221c65a`, CC0, maps the 2017 SSN/SOSA against

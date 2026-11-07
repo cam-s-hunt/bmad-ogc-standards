@@ -24,10 +24,17 @@ a target standard repository, to be created later). Prototype; not registered wi
   `skills/bmod-ogcspec/roster.toml`, a `decisions_dir` setup question, module version 0.2.0 and an updated `help.md`.
   **Checked:** `init_skill.py --check --any-name`, `scan_paths.py`, `validate_manifests.py` pass; the agents' `[agent]` blocks and the
   `modules.ogcspec.*` config keys resolve through `_bmad/scripts`. **Not done:** no Smithy review lenses, no trigger or baseline eval,
-  no run of either agent or of `ogcspec-review` on real records (none exist: the template's record format is plan step 2), no
+  no run of either agent or of `ogcspec-review` on real records (none exist; the record format is a proposal, see below), no
   re-run of the gate/emitter test suites. `ogcspec-review` has no `customize.toml` (the approved plan listed one; omitted because no
   value in it would be read). Everything is uncommitted. The ogcspec module is installed in `.claude/skills/` (copy) and set up
   (`bmad setup`, defaults accepted); after editing `skills/`, reinstall with the same `add ... --skill '*'` command and run `bmad setup`.
+
+- Plan step 2 (record format) written 2026-11-06 as a **proposal**: `skills/ogcspec-modspec/references/record-format-proposal.md`,
+  `record-format-example.yaml`, and `docs/design/record-format-experiment.py` (reproduces section 7: emit, pinned-image
+  compile, gate stage 2, 12 variants). **Observed:** the proposed record-only fields are ignored by the current tools; a
+  conformance-class `inherit` gives X003 unless emitter and gate change together; a new record kind is refused by the
+  emitter; a misspelled field is silently ignored. `gate.py`, `emit.py` and the SKILL.md kind table are unchanged. Eight
+  decisions are open and listed at the end of the proposal. The installed copy in `.claude/skills/` predates it.
 
 ## Pins
 - BMAD: `BMAD-PIN` (main at `e734d3ac…`, v7 preview alpha, version string `6.13.0-next`). Not vendored; clone it by commit.

@@ -1,0 +1,92 @@
+# Worked example for references/record-format-proposal.md. Every identifier, name and URI here is a placeholder
+# for illustration; none is assigned, registered or proposed for a real standard.
+#
+# Uses every field the proposal adds: `status`, `uml_package`, `title`, and `depends_on` (external dependencies only).
+# With the tools as they are today the added fields are ignored (observed, see the proposal, section 7); this file
+# therefore passes the current gate and emitter without exercising the new fields.
+#
+# Gate config this example assumes (ogcspec.gate.toml):
+#   records_dir = "records"
+#   core = "/req/core"
+#   [[normative_references]]
+#   name = "Example dependency"
+#   uri_prefix = "https://example.org/spec/dep/1.0/"
+
+- kind: requirements_class
+  id: /req/core
+  title: Core
+  status: proposed
+  uml_package: example::core
+  subject: Example document
+  inherit:
+    - https://example.org/spec/dep/1.0/req/base
+  requirements:
+    - /req/core/first
+    - /req/core/second
+
+- kind: requirement
+  id: /req/core/first
+  status: proposed
+  statement: A document SHALL do the first thing.
+
+- kind: requirement
+  id: /req/core/second
+  status: proposed
+  statement: A document SHALL do the second thing.
+
+- kind: abstract_test
+  id: /conf/core/first
+  status: proposed
+  target: /req/core/first
+  purpose: Verify the first thing.
+  steps:
+    - Check that the document does the first thing.
+
+- kind: abstract_test
+  id: /conf/core/second
+  status: proposed
+  target: /req/core/second
+  purpose: Verify the second thing.
+
+- kind: conformance_class
+  id: /conf/core
+  title: Core
+  status: proposed
+  target: /req/core
+  # Req 12: the other conformance class this one depends on. External only. The dependency on `/conf/core`
+  # that /conf/ext has is NOT written here: it is derived from /req/ext's `inherit` (proposal, section 4).
+  depends_on:
+    - https://example.org/spec/dep/1.0/conf/base
+  tests:
+    - /conf/core/first
+    - /conf/core/second
+
+- kind: requirements_class
+  id: /req/ext
+  title: Extension
+  status: proposed
+  uml_package: example::ext
+  subject: Example document
+  inherit:
+    - /req/core
+  requirements:
+    - /req/ext/third
+
+- kind: requirement
+  id: /req/ext/third
+  status: proposed
+  statement: A document SHALL do the third thing.
+
+- kind: abstract_test
+  id: /conf/ext/third
+  status: proposed
+  target: /req/ext/third
+  purpose: Verify the third thing.
+
+- kind: conformance_class
+  id: /conf/ext
+  title: Extension
+  status: proposed
+  target: /req/ext
+  tests:
+    - /conf/ext/third

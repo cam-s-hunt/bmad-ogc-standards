@@ -38,4 +38,4 @@ A general "go ahead" covers drafting and checking, not these. An approval belong
 
 These stops are instructions to you. Nothing locks them, and the standard's CI is the only blocking check, so say plainly when you reached one and what you left undone. A clean gate run proves only the rules that ran; read `rules_not_run` every time.
 
-The record format is today's, in `ogcspec-modspec`. The template record format proposed in the plan does not exist yet; say so when it matters to the work.
+The record format is today's, in `ogcspec-modspec`. A template record format is proposed in `ogcspec-modspec/references/record-format-proposal.md` but is not accepted and not enforced: the gate and emitter ignore its added fields. Do not write them into records unless the user asks, and say so when it matters to the work.

@@ -214,5 +214,5 @@ These override the recommendations above where they differ.
 6. **Review without subagents runs and is labelled.** The report must begin "NOT INDEPENDENT: reviewed in the drafting
    conversation" when subagents are unavailable.
 
-Still open: the record format (plan step 2), a proposed/accepted status on records, which `bmad-review` lenses run, and the
+Still open: the record format (plan step 2; proposal written, undecided), a proposed/accepted status on records (in that proposal), which `bmad-review` lenses run, and the
 owner-only items (`npx skills add`, licence, the five OGC questions, CI).

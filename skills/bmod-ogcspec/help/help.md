@@ -36,7 +36,7 @@ An agent drafts; a named human decides. The agents stop for the owner at identif
 
 ## Where things land
 
-Decision records for contested readings go to `modules.ogcspec.decisions_dir`, set at `bmad setup ogcspec`. The gate config path is `modules.ogcspec.gate_config_path`. The record format is still today's (`ogcspec-modspec`); the planned template record format is not written yet.
+Decision records for contested readings go to `modules.ogcspec.decisions_dir`, set at `bmad setup ogcspec`. The gate config path is `modules.ogcspec.gate_config_path`. The record format is still today's (`ogcspec-modspec`); a proposed template record format is in `ogcspec-modspec/references/record-format-proposal.md` (not accepted, not enforced).
 
 ## Dependencies
 
