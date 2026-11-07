@@ -142,7 +142,7 @@ Existing tools are named; **new** marks something that does not exist yet.
 | 3 | Stage-1 gate | script | `gate.py --config … --baseline …` |
 | 4 | Independent review | fresh readers | `ogcspec-review` (**new**) |
 | — | **H1, H2, H4** as they apply | human | see below |
-| 5 | Emit AsciiDoc fragments | script | `emit.py --records … --out …` |
+| 5 | Emit AsciiDoc fragments | script | `emit.py --records … --out … --config …` |
 | 6 | Compile **a copy** of the repository | script | `metanorma.py --image … --adoc … --formats xml [--root …]` |
 | 7 | Stage-2 gate | script | `gate.py … --xml … --compile-result …` |
 | 8 | Human walk-through of the diff | human | `bmad-walkthrough` (description only; **not read**) |

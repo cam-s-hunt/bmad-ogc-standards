@@ -1,6 +1,6 @@
 # ModSpec review checklist
 
-Areas for the reviewers to keep in mind alongside their normal method. The gate already checks the rules it lists as `M`, `P`, `S` and `X`; these are the things it cannot.
+Areas for the reviewers to keep in mind alongside their normal method. The gate already checks the rules it lists as `G`, `M`, `P`, `S` and `X`; these are the things it cannot.
 
 - **Testability.** Could someone decide pass or fail from a requirement's `statement` alone? Flag vague quantities, unstated conditions, and statements joining two things that could fail separately.
 - **Test fidelity.** Does each abstract test's `purpose` and `steps` check what its requirement says, no more and no less? A step that tests behaviour the requirement never states is a finding, and so is a requirement whose stated condition no step reaches.
@@ -10,3 +10,5 @@ Areas for the reviewers to keep in mind alongside their normal method. The gate 
 - **Terms.** Flag a term used in a statement that no record, definition or referenced standard defines, and a term used with two meanings.
 - **Dependencies.** Flag an `inherit` that names a class the requirement text relies on without listing it, and one listed but unused.
 - **Contested readings.** Flag any place where the records depend on a reading of ModSpec that has two answers, such as whether a transitive dependency on the core class counts. Do not choose between them.
+- **Conformance dependencies and profiles.** The gate checks that a conformance class's `depends_on` entries resolve and that a profile has no requirements or tests of its own (Reqs 12 and 19); it cannot check that the dependency is *used* to test (both ModSpec tests are "inspect the document"). Flag a conformance class whose tests rely on another conformance class it does not list, and a profile whose constituent classes are not the ones the owner means.
+- **Status.** Flag a record with `status: accepted` that you cannot attribute to a person's own commit. Nothing locks the field.

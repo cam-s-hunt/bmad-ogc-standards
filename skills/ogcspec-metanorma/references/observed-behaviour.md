@@ -35,3 +35,16 @@ NoMethodError in `Metanorma::Utils::LineStatus#process`, metanorma-utils 2.0.11)
 (exit 1) when compiled from its own folder because it includes `../../openapi/...`; compiled from the repository
 root with `--root` it succeeds. Features writes its requirements as tables, which compile to no requirement
 elements, so even a successful compile would give the gate nothing to read (X004).
+
+## Titles, conformance-class dependencies and profiles (2026-11-06, same image, offline)
+
+Observed with `docs/design/step3-compile-tests.py` and `docs/design/record-format-experiment.py`:
+
+| situation | compiler exit | what appears |
+|---|---|---|
+| `.Core` block title on a requirements class or conformance class | 0 | XML `<title>Core</title>` on the class; no new message |
+| the same title with markup written as plain text (`.Core *bold* _x_ <<x>>`) | 0 | the markup is applied (bold, cross-reference lost); `STANDOC_38` and eight `STANDOC_7` XML-validation messages |
+| the same title as `.pass:c[Core *bold* _x_ <<x>>]` | 0 | text kept literal; `--` becomes an em dash and quotes are curled; no new message (this is what `emit.py` writes) |
+| `inherit::` on a conformance class | 0 | kept: `<inherit>/conf/core</inherit>` in the XML; an external target also gives `MODSPEC_2` on the conformance class |
+| a duplicated `inherit::` line | 0 | kept twice in the XML; the gate's X003 reports it |
+| a requirements class with no requirements, and its conformance class with no tests (a profile) | 0 | `MODSPEC_1` on each ("has no corresponding Requirement" / "...Conformance test"); both appear in the XML with their `inherit` lists |

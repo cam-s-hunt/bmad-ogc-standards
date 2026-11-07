@@ -27,4 +27,4 @@ jobs:
       - name: Unit tests
         run: |
           (cd skills/ogcspec-gate/scripts && uv run --with pyyaml python -m unittest discover -s tests)
-          (cd skills/ogcspec-metanorma/scripts && uv run python -m unittest discover -s tests)
+          (cd skills/ogcspec-metanorma/scripts && uv run --with pyyaml python -m unittest discover -s tests)
