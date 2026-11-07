@@ -12,6 +12,11 @@ For each variant: emit, compile with the pinned image, run the gate with stage 2
 
 Usage:  uv run --with pyyaml python docs/design/record-format-experiment.py <empty-or-scratch-output-dir>
 Run on 2026-11-06 with the image in METANORMA-PIN; the observations are in the proposal, section 7.
+
+The "before" observations were made against the tools at commit b401284. Run against later commits several variants differ
+by design (v3 gives G004, v4 and v7 give G002, v5a/v5b give X003 because the hand patch now duplicates a line the emitter
+writes, v2 emits the title); section 7 lists both. The config puts `core` before the [[normative_references]] table: keys
+after a table belong to it (the first run had them inside it, so `core` was not configured; a rerun gave the same results).
 """
 import copy, importlib.util, json, subprocess, sys, tempfile, shutil
 from pathlib import Path
@@ -23,7 +28,7 @@ def load(name, path):
     sys.modules[name] = m; spec.loader.exec_module(m); return m
 T = load("t_emit", REPO/"skills/ogcspec-metanorma/scripts/tests/test_emit.py")
 emit, gate, wrapper, HEADER, IMAGE = T.emit, T.gate, T.wrapper, T.HEADER, T.IMAGE
-CONFIG = T.CONFIG + 'core = "/req/core"\n'
+CONFIG = 'core = "/req/core"\n' + T.CONFIG  # top-level keys must precede the [[normative_references]] table
 OUT = Path(sys.argv[1]); shutil.rmtree(OUT, ignore_errors=True); OUT.mkdir(parents=True)
 
 EXT = [

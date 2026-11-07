@@ -1,8 +1,9 @@
-# Requirement record format: proposal (plan step 2)
+# Requirement record format (plan steps 2 and 3)
 
-**Status: proposal, 2026-11-06. Nothing here is enforced.** `gate.py`, `emit.py` and the `SKILL.md` kind table were not
-changed. The proposal says what the tools do today with each proposed field (section 7, run on the pinned image) and what
-step 3 would have to change. The owner decided the open points on 2026-11-06 (see "Decisions" at the end); implementing them is plan step 3.
+**Status: decided by the owner on 2026-11-06 and implemented in plan step 3.** Written first as a proposal (commit `d304d5c`);
+the gate (`c885300`) and the emitter (`a6e69d7`) now implement it. Sections 7 and 13 give what the tools did *before*
+(commit `b401284`, observed) and what they do now. The sections are still worded as the proposal was; where they say "step 3
+would", step 3 has done it, and section 12 lists what.
 
 Markers: **read** (from a source opened for this work), **observed** (produced by running the pinned tools, section 7),
 **inferred** (my reasoning), **open** (undecided). ModSpec Part 1 means OGC 08-131r7, read from the local copy of its
@@ -23,8 +24,8 @@ writes today (`gate.py` header, `emit.py` `emit_record`).
 | `abstract_test` | `id`, `target` (a requirement id), `purpose`, `steps[]` optional | `identifier`, `target`, `test-purpose`, `test-method` with `step` entries |
 | `conformance_class` | `id`, `target` (a requirements class id), `tests[]` | `identifier`, `target`, `conformance-test` (one per entry) |
 
-- `title` is read by the gate, which resolves an `inherit` entry given by title (OGC API - Records does this). The emitter
-  does not emit it (**observed**, v2).
+- `title` is read by the gate, which resolves an `inherit` entry given by title (OGC API - Records does this). Before step 3 the
+  emitter did not emit it (**observed**, v2); now it does (section 13).
 - Membership of a requirement in a class is the class's `requirements` list (Req 28, **read**).
 - `kind` is the discriminator. The emitter refuses an unknown kind (exit 2) and the gate reports G001 (**observed**, v6).
 
@@ -37,14 +38,16 @@ already satisfied by the config.
 
 ## 3. Fields this proposal adds
 
-All optional, all additive: a record without them stays valid and means what it meant before.
+All optional, all additive: a record without them stays valid and means what it meant before. Any field outside the table
+for its kind is G002.
 
-| field | on | type | basis | Metanorma mapping | today (observed) |
-|---|---|---|---|---|---|
-| `depends_on` | `conformance_class` | list of ids, **external conformance classes only** (section 4) | Req 12 (**read**) | `inherit::` on the conformance class block; Metanorma keeps it and the gate reads it back (v5b) | ignored, not emitted (v3) |
-| `uml_package` | `requirements_class` | one string, the qualified name of the UML package | Part 2 REQ004-006 define no notation (**read** via digest); this is the project's own convention (section 6) | none: record-only | ignored (v2) |
-| `status` | any kind | `proposed` or `accepted` | design doc H1; no ModSpec basis | none: record-only | ignored (v1) |
-| `title` | `requirements_class`, `conformance_class` | string | Req 14: classes "explicitly named", corresponding ones "similar names" (**read**) | not emitted today; the owner decided to emit it after a test compile shows how Metanorma carries it | ignored (v2); the gate reads it on requirements classes only |
+| field | on | type | basis | Metanorma mapping | before step 3 (b401284, observed) | now |
+|---|---|---|---|---|---|---|
+| `depends_on` | `conformance_class` | list of ids, **external conformance classes only** (section 4) | Req 12 (**read**) | `inherit::` on the conformance class block, after the derived entries; Metanorma keeps it (v5b) | ignored, not emitted (v3) | emitted; G003 wrong type, G004 names a class of this document, M014 unresolved |
+| `uml_package` | `requirements_class` | one string, the qualified name of the UML package | Part 2 REQ004-006 define no notation (**read** via digest); this is the project's own convention (section 6) | none: record-only | ignored (v2) | not emitted; G003; opt-in S003, S004 |
+| `status` | any kind | `proposed` or `accepted` | design doc H1; no ModSpec basis | none: record-only | ignored (v1) | not emitted; G003 for any other value |
+| `title` | `requirements_class`, `conformance_class` | non-empty string | Req 14: classes "explicitly named", corresponding ones "similar names" (**read**) | block title `.pass:c[...]`; compiles to the XML `<title>` (section 13) | not emitted (v2); the gate read it on requirements classes only | emitted; compared in X003 for both kinds; G003 |
+| `profile` | `requirements_class` | `true` or `false` | this project's design for Req 19 (section 9), not in the owner's list | none: record-only | unknown field | not emitted; M013 |
 
 Not proposed: dependencies between individual requirements. Part 1 Reqs 12, 16, 17 and 18 speak of classes; I read no
 Part 1 requirement on dependencies between single requirements.
@@ -55,10 +58,18 @@ Req 12 (**read**): a conformance class "SHALL specify any other conformance clas
 class "SHALL be used to test the specified dependency". ATS 12 and ATS 19 are "Inspect the document" tests, so no tool can
 check the second half; the gate can only check that dependencies are stated and resolve.
 
-Today a conformance class's dependencies are not in the records at all: a YAML `inherit` on a conformance class is dropped
-by the emitter and then reported as X003 (**observed**, v4), and M009/M010 read `inherit` on requirements classes only
-(**read** in `gate.py`). Adding the line to the AsciiDoc by hand without the YAML also gives X003 (v5a). With both, the
-round trip is clean (v5b).
+Before step 3 a conformance class's dependencies were not in the records at all: a YAML `inherit` on a conformance class was
+dropped by the emitter and then reported as X003 (**observed**, v4), and M009/M010 read `inherit` on requirements classes
+only (**read** in `gate.py`). Adding the line to the AsciiDoc by hand without the YAML also gave X003 (v5a). With both, the
+round trip was clean (v5b).
+
+**Implemented.** `conformance_inherit` (in `gate.py`, with an identical copy in `emit.py` and a test that keeps them equal)
+derives each conformance class's dependency list; the emitter writes it as `inherit::` lines and stage 2 compares it with
+the compiled document (X003), so any drift between the two derivations shows up as a build failure. The rules about it run
+on authored records only: they never run on a document rebuilt from compiled XML, because a completeness rule for Req 12
+would encode the contested reading (maintainer question 6) and fire on approved OGC documents. Only `depends_on` is
+checked: G004 (names a class of this document) and M014 (a relative id that is no class here, or an external id matching no
+declared normative reference, when references are declared).
 
 Options:
 
@@ -106,59 +117,83 @@ uml_package: example::core     # qualified name in the standard's own UML model;
 - It is one string because REQ005 says "a unique package"; leaf packages below it belong to the class by containment.
 - It is record-only: not emitted, not compared in stage 2 (**observed**, v2). It documents the mapping; it does not put it in
   the Metanorma document.
-- A step 3 rule can check only what the records hold: present (opt-in, since Part 2 is an optional Part and whether it
-  applies to a given standard is **open**), and unique across classes. It cannot check that the package exists or that
-  package dependencies match class dependencies (REQ008-009) without a model export, which this format does not define.
+- The rules check only what the records hold, and only with `style = ["uml"]` (Part 2 is an optional Part and whether it
+  applies to a given standard is **open**): S003 every requirements class names a package, S004 no two share one. They cannot
+  check that the package exists or that package dependencies match class dependencies (REQ008-009) without a model export,
+  which this format does not define.
 
-## 7. Observed behaviour of the current tools
+## 7. Observed behaviour: the tools before step 3, and after
 
 `docs/design/record-format-experiment.py` builds a baseline of two requirements/conformance class pairs, applies one change
 per variant, then runs emit, a compile with the pinned image (`METANORMA-PIN`, metanorma 2.5.16, offline) and the gate with
-stage 2. Run 2026-11-06. Every variant compiled (exit 0) unless noted. "Baseline Metanorma messages" are the five messages the baseline always produces (`MODSPEC_1` twice, `MODSPEC_2`,
+stage 2. Run 2026-11-06, first against the tools at commit `b401284` (the "before" column, which is what the proposal was
+written from), then against the implementation (the "after" column). Every variant compiled (exit 0) unless noted. "Baseline Metanorma messages" are the five messages the baseline always produces (`MODSPEC_1` twice, `MODSPEC_2`,
 `OGC_14`, `STANDOC_40`; the gate reports each as X010), so the gate exits 1 on all variants unless a baseline file accepts
 them. The table lists other findings only.
 
-| variant | change | emitted bytes vs baseline | findings besides the baseline messages |
+| variant | change | before: findings besides the baseline messages | after step 3 |
 |---|---|---|---|
-| v0 | baseline | - | none |
-| v1 | `status: proposed` on every record | identical | none |
-| v2 | `uml_package` and `title` on classes | identical | none |
-| v3 | `depends_on` on a conformance class | identical | none |
-| v4 | `inherit` on a conformance class, YAML only | identical | `X003 /conf/ext#inherit` |
-| v5a | `inherit::` added to the AsciiDoc only | differs (that file) | `X003 /conf/ext#inherit` |
-| v5b | `inherit` in YAML and in the AsciiDoc | differs (that file) | none; XML carries `<inherit>/conf/core` |
-| v6 | a `profile` record kind | emitter refuses (exit 2) | gate: `G001` unknown kind |
-| v7 | a misspelled field (`requirments`) beside the right one | identical | none: silently ignored |
-| v8 | a test of another class's requirement listed by a conformance class | differs | `M006` (YAML and XML) |
-| v9 | one record per file instead of one list | identical | none |
-| v10 | the same id in two files | differs | `M001`; the compile fails (exit 1) and the gate adds `X000`; Metanorma adds `STANDOC_36` and `MODSPEC_3` |
-| v11 | the worked example, `record-format-example.yaml` | - | none |
+| v0 | baseline | none | none |
+| v1 | `status: proposed` on every record | none; emitted bytes identical | none |
+| v2 | `uml_package` and `title` on classes | none; bytes identical (title not emitted) | none; the title is emitted and X003 compares it |
+| v3 | `depends_on` naming `/conf/core` on `/conf/ext` | none; ignored | `G004` (it is derived from `/req/ext`'s `inherit`) |
+| v4 | `inherit` on a conformance class, YAML only | `X003 /conf/ext#inherit` | `G002`, with a message pointing to `depends_on` |
+| v5a | `inherit::` added to the AsciiDoc only | `X003 /conf/ext#inherit` | `X003`: the patch duplicates the line the emitter now writes, and the duplicate is caught |
+| v5b | `inherit` in YAML and in the AsciiDoc | none; XML carried `<inherit>/conf/core` | `G002` and `X003` (same duplicate); obsolete as a test of the emitter |
+| v6 | a `profile` record kind | emitter refuses (exit 2); gate `G001` | unchanged |
+| v7 | a misspelled field (`requirments`) beside the right one | none: silently ignored | `G002`, "did you mean 'requirements'?" |
+| v8 | a test of another class's requirement listed by a conformance class | `M006` (YAML and XML) | unchanged |
+| v9 | one record per file instead of one list | none; bytes identical | none; bytes identical |
+| v10 | the same id in two files | `M001`; compile fails (exit 1), gate adds `X000`; Metanorma adds `STANDOC_36`, `MODSPEC_3` | unchanged |
+| v11 | the worked example, `record-format-example.yaml` | none (the earlier version of the file, without a profile) | none (with the profile pair; `S003`/`S004` also clean, checked separately) |
 
-What this shows. The proposed record-only fields cost nothing today and do nothing today. The one place a new field
-would change output is the conformance-class `inherit`, and there the emitter and gate must change together (v4, v5a, v5b).
-Not tested: the Metanorma representation of `title` or of a profile; any ModSpec rule beyond what the gate already has.
+The first run of the script had `core = "/req/core"` appended after the `[[normative_references]]` table, where TOML makes it
+a key of that table, so M011/M012 did not run. The config was corrected and the "before" runs repeated against `b401284`;
+every result above is unchanged.
 
-## 8. `status: proposed | accepted` (needs the owner's decision)
+What this shows. Before step 3 the added fields cost nothing and did nothing, and a conformance-class `inherit` needed
+emitter and gate to change together; they now do. Not tested: any ModSpec rule beyond what the gate already has; the
+corpus of approved OGC documents (see the status of the corpus test in `docs/HANDOFF.md`).
+
+## 8. `status`: proposed or accepted
 
 `docs/design/personas-and-workflow.md` lists this as open, tied to H1 (a person mints and approves identifiers).
 
-- Agents write only `proposed`. Moving a record to `accepted` is a human act, made in a commit authored by that person.
-- A record without `status` stays valid and means "no workflow state recorded". The module's agents would treat it as `proposed`.
-- It is record-only: not emitted (the published document must not carry draft markers) and ignored by the tools today (v1).
+- Agents write only `proposed`; the ModSpec Architect's instructions say so. Moving a record to `accepted` is a human act, made in a commit authored by that person.
+- A record without `status` stays valid and means "no workflow state recorded". The agents treat it as `proposed`.
+- It is record-only: not emitted (the published document must not carry draft markers). The gate checks only that the value is one of the two (G003).
 - It is a marker, **not a control**: an agent with write access can edit the field. Mechanical enforcement needs a control
   outside the record, such as the "approved identifiers" file or code-owner review that the design doc sketches. **Open**
   (owner), as is whether one field per record is enough when identifiers (H1) and normative wording (H2) are approved separately.
 
-## 9. Profiles (Req 19): not designed
+## 9. Profiles (Req 19)
 
-Req 19 (**read**): conformance tests for a profile "SHALL be defined as the union of a list of conformance classes". A
-`profile` kind would need both tools to change (v6), and how Metanorma would represent it is untested. A profile may also
-be expressible as a conformance class that depends on the constituent ones, but I did not test that. **Decided 2026-11-06:** design profiles in step 3. A test compile comes first: how Metanorma represents a profile, and whether a
-conformance class that depends on the constituent classes is enough. The gate and emitter change only after that.
+Req 19 (**read**): conformance tests for a profile "SHALL be defined as the union of a list of conformance classes". ModSpec's
+own definition (`profile`, **read**): "a set of requirements classes or conformance classes (either preexisting or locally
+defined) of the base standards". A new record kind would break both tools (v6), so the design uses the existing kinds:
+
+- A profile is a **requirements class** that lists no requirements and has the classes it builds on in `inherit`, marked
+  `profile: true`, and its **conformance class** with no tests. Its conformance class's dependencies are derived (section 4),
+  so the union of the constituent conformance classes is stated in the document without being written twice. External
+  constituents go in `depends_on`.
+- **Observed** (section 13): this compiles on the pinned image; the XML carries the empty class and the derived `inherit` list.
+  Metanorma adds two severity-2 messages of its own, `MODSPEC_1` on `/req/prof` ("has no corresponding Requirement") and on
+  `/conf/prof` ("has no corresponding Conformance test"). They are expected and are accepted only through the baseline.
+- `profile: true` is this project's design choice, not in the owner's list of decisions; it exists so the gate can tell a
+  deliberate profile from an unfinished class. M013 checks that a profile (a) lists no requirements, (b) has a conformance
+  class with no tests, (c) builds on at least one class. (b) is the reading of Req 19; (a) is **inferred**, because a
+  requirement without a test breaks M007 (Req 1), so a profile with no tests of its own can have no requirements of its own.
+  ATS 19 is "inspect the document": the gate checks structure only.
+- **Observed** (unit test): a profile that builds only on a non-core class (not on the core) is reported by M012 as reaching the
+  core only transitively, and passes with `core_dependency = "transitive"`. That is the Req 22 question (maintainer question 1)
+  again, not a profile problem.
+- A profile may in principle also fix options and parameters (the definition says so); this design covers only the union Req 19
+  asks for.
 
 ## 10. Layout: one record per file (convention)
 
-Chosen 2026-11-06, with the check opt-in: one record per file, with the path following the id, for example `records/req/core.yaml`
+Chosen 2026-11-06, with the check opt-in (`style = ["layout"]`, rule S005: the file path must be the id without its leading `/`
+plus `.yaml` or `.yml`, and a file holds one record): one record per file, with the path following the id, for example `records/req/core.yaml`
 for `/req/core` and `records/req/core/first.yaml` for `/req/core/first`. Reasons (**inferred**): a review diff is one record,
 ownership can follow the path, and a duplicate id is a visible collision. Observed (with numbered file names, not the path rule): splitting records into one file each changes nothing in the
 emitted text (v9, byte-identical to a single list file), and a duplicate id across files is caught (v10). Against: a large standard
@@ -167,19 +202,27 @@ opt-in style rule (`S`), because no ModSpec or Policy text asks for it.
 
 ## 11. Unknown fields: a prerequisite for the rest
 
-A misspelled or unsupported field is silently ignored today (v7). With only the fields in section 1 that is a nuisance; with
-record-only fields it becomes ambiguous, because a typo and a deliberate record-only field look the same. Step 3 should add
-a rule that reports any field outside a per-kind table (a new `G` rule, not an OGC-derived one), before or together with the
-fields in section 3. Decided 2026-11-06: report unknown fields; no reserved prefix for project-private fields.
+A misspelled or unsupported field was silently ignored before step 3 (v7). With only the fields in section 1 that is a nuisance; with
+record-only fields it becomes ambiguous, because a typo and a deliberate record-only field look the same. G002 now reports any
+field outside the per-kind table (not an OGC-derived rule), with a near-miss suggestion; G003 checks types and values. Decided
+2026-11-06: no reserved prefix for project-private fields. Keys starting with `_` are the loader's own and are skipped.
 
-## 12. What step 3 would change if this is accepted
+## 12. What step 3 changed
 
-1. Gate: a known-field table per kind and a rule for unknown fields (section 11); `depends_on` resolution and the
-   redundancy rule (section 4); optional rules for `uml_package` (section 6) and `status`/layout (sections 8, 10).
-2. Emitter: write `inherit::` on conformance classes from the derived and authored dependencies; stage 2 then compares it.
-3. Fixtures: the variants in section 7 as test cases, with `record-format-example.yaml` as the clean case.
-4. Profiles (section 9): test compile first, then design. Titles: test compile of a class title, then emit it (section 3).
-5. Nothing for Req 5 (section 5).
+1. Gate (`c885300`): G002/G003 (known fields and values), G004 and M014 (`depends_on`), M013 (profiles), S003/S004 (`uml`), S005
+   (`layout`); `conformance_inherit`; X003 now compares the derived `inherit` and `title`; the conformance-class title is read from
+   the XML. The new rules run on authored YAML only (`check(..., authored=True)`).
+2. Emitter (`a6e69d7`): block titles as literal text, `inherit::` on conformance classes, `--config` for the namespace.
+3. Tests: gate 96 run (3 skipped: the corpus tests), emitter 24 run including two Docker round trips; the worked example is the
+   clean case; the variants in section 7 are in `docs/design/record-format-experiment.py`.
+4. Nothing for Req 5 (section 5).
+
+**Corpus (partly verified, 2026-11-07).** `records_from_xml` and the rule table changed, which the corpus of real OGC documents
+exercises. I rebuilt four of its six documents from local clones at their pinned commits (copies; compiled offline on the pinned
+image, exit 0): ModSpec 08-131r7, Connected Systems Part 1 and Part 2 at v1.0, and the Part 3 draft. Record and rule counts equal
+the snapshot taken before these changes in every case (70, 244, 284 and 31 records), as does the agreement with Metanorma's own
+`MODSPEC_1` messages. **Not rebuilt:** Processes and Records (no local clone; they would be fetched from GitHub) and Features
+(the compile-fails case). The corpus unit test itself still skips here, because it needs all six.
 
 ## Decisions (owner, 2026-11-06)
 
@@ -193,3 +236,19 @@ fields in section 3. Decided 2026-11-06: report unknown fields; no reserved pref
 | 6 | Profiles | Design them in step 3, after a test compile. |
 | 7 | One record per file | Yes, path follows the id; the check is opt-in. |
 | 8 | Unknown fields | Report them. No reserved prefix for private fields. |
+
+## 13. Compile tests that settled titles and profiles (before implementation, tools at `b401284`)
+
+`docs/design/step3-compile-tests.py`, pinned image, offline, 2026-11-06. The emitted AsciiDoc was patched by hand to show what an
+emitter would write.
+
+| variant | what was written | observed |
+|---|---|---|
+| t1 | `.Core` block title between the style line and `====` | compiles; XML `<title>Core</title>` on the requirements class and on the conformance class; no new messages |
+| t2 | the same with markup in the title: `.Core *bold* _under_ {name} -- 'q' <<x>>` | compiles, but the markup is applied (bold and the cross-reference are lost) and Metanorma reports `STANDOC_38` and eight `STANDOC_7` XML-validation messages |
+| t3 | `.pass:c[Core *bold* _under_ {name} -- 'q' <<x>>]` | text kept literal; only the usual typography changes (`--` to an em dash, quotes curled), which the gate's `canon` normalises; no new messages |
+| p1 | a profile from existing kinds (section 9) | compiles; XML shows `/req/prof` with `inherit` of both classes and no requirements, `/conf/prof` with `inherit` of both conformance classes and no tests; two new messages, `MODSPEC_1` on each; no gate finding |
+
+So titles are emitted through the same literal form as prose. The round trip in `test_emit.py` (`Step3RoundTrip`) now covers a title
+with markup, a derived and an external dependency, `status`, `uml_package` and a profile pair on the implementation: no X000-X003
+finding, no G/M/P/S finding, the two expected `MODSPEC_1` messages, and no `STANDOC_7` or `STANDOC_38`.

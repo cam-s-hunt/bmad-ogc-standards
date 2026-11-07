@@ -9,10 +9,12 @@ Run these from the standard's repository. `{skill-scripts}` is `{project-root}/_
 the image is the digest the project pinned for its builds (`repo@sha256:...`); the project records it in its own pin file.
 
 1. **Emit** the AsciiDoc fragments from the records:
-   `uv run {skill-scripts}/emit.py --records <records_dir> --out <build dir>`
+   `uv run {skill-scripts}/emit.py --records <records_dir> --out <build dir> --config <gate config>`
    It writes `conformance-classes.adoc`, `requirements.adoc` and `abstract-tests.adoc`, which the
    project-owned document `include::`s. Same records give the same bytes. It refuses a record kind it does
-   not know instead of dropping it.
+   not know instead of dropping it. `--config` is read only for `namespace`; pass it, because the emitter derives each
+   conformance class's `inherit::` lines from its requirements class's `inherit` and must match identifiers the way the
+   gate does. Class titles are written as literal block titles. `status`, `uml_package` and `profile` are not written.
 2. **Compile**:
    `uv run {skill-scripts}/metanorma.py --image <repo@sha256:...> --adoc <doc.adoc> --formats xml > compile.json`
    If the document includes files from outside its own folder, add `--root <a directory containing them all>`;

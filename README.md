@@ -27,10 +27,14 @@ endorsed by OGC.**
   only with `--any-name`: without it BMAD rejects every skill name that is not `bmad` or `bmad-*`, so these
   skills are accepted as third-party names, not as BMAD-namespace skills.
 - Gate rules are ModSpec Part 1 requirements cited by number (M), two draft-Policy rules (P), opt-in house style (S)
-  and compiled-document checks (X). 72 gate tests pass with the corpus enabled, 69 without (3 skip). The gate fails
+  and compiled-document checks (X), plus record-structure rules (G) and, since plan step 3, rules for the added record
+  fields. 96 gate tests run on 2026-11-07 with 3 skipped (the corpus tests: `OGCSPEC_CORPUS` is not set). By hand, four of the six corpus
+  documents were rebuilt after the step-3 gate changes and gave the same record and rule counts as the 2026-11-06 snapshot;
+  Processes, Records and the Features compile-failure case were not rebuilt. Earlier, 72 passed with the corpus enabled. The gate fails
   closed on an aborted compile, a compile result that is not an explicit exit 0, and a document with no definitions.
 - Emitter round trip (records -> AsciiDoc -> pinned Metanorma, offline -> extractor) reproduces 10 records,
-  comparing subject, target, statement, purpose, steps, inherit, requirements and tests (not any other field),
+  comparing subject, target, statement, purpose, steps, inherit, requirements, tests and (since step 3) title and the derived
+  conformance-class dependencies,
   including prose with AsciiDoc markup characters. That test skips when the pinned image is absent; a skipped
   run proves nothing about the emitter. The emitter writes prose as literal text, so emphasis and
   cross-references cannot be expressed in a record yet.

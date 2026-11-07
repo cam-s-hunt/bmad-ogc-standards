@@ -21,7 +21,7 @@ a target standard repository, to be created later). Prototype; not registered wi
   versioned source text. `docs/research/`: the Req 22 report and the ModSpec Parts 2-3 digest.
 - Personas built 2026-11-06 from `docs/design/personas-and-workflow.md` (decisions in its "Decisions made" section):
   `ogcspec-agent-architect` (ModSpec Architect 📐), `ogcspec-agent-editor` (Metanorma Editor 📑) and `ogcspec-review`, plus
-  `skills/bmod-ogcspec/roster.toml`, a `decisions_dir` setup question, module version 0.2.0 and an updated `help.md`.
+  `skills/bmod-ogcspec/roster.toml`, a `decisions_dir` setup question, module version 0.2.0 (now 0.3.0, see the record-format paragraph) and an updated `help.md`.
   **Checked:** `init_skill.py --check --any-name`, `scan_paths.py`, `validate_manifests.py` pass; the agents' `[agent]` blocks and the
   `modules.ogcspec.*` config keys resolve through `_bmad/scripts`. **Not done:** no Smithy review lenses, no trigger or baseline eval,
   no run of either agent or of `ogcspec-review` on real records (none exist; the record format is a proposal, see below), no
@@ -29,14 +29,24 @@ a target standard repository, to be created later). Prototype; not registered wi
   value in it would be read). Everything is uncommitted. The ogcspec module is installed in `.claude/skills/` (copy) and set up
   (`bmad setup`, defaults accepted); after editing `skills/`, reinstall with the same `add ... --skill '*'` command and run `bmad setup`.
 
-- Plan step 2 (record format) written 2026-11-06 as a **proposal**: `skills/ogcspec-modspec/references/record-format-proposal.md`,
-  `record-format-example.yaml`, and `docs/design/record-format-experiment.py` (reproduces section 7: emit, pinned-image
-  compile, gate stage 2, 12 variants). **Observed:** the proposed record-only fields are ignored by the current tools; a
-  conformance-class `inherit` gives X003 unless emitter and gate change together; a new record kind is refused by the
-  emitter; a misspelled field is silently ignored. `gate.py`, `emit.py` and the SKILL.md kind table are unchanged. The owner
-  decided all eight points the same day (last section of the proposal); implementation is plan step 3. The installed copy in
-  `.claude/skills/` was reinstalled after the proposal (`skills@1.7.6 add ./skills --skill '*' --agent claude-code --copy -y`, offline
-  from the npx cache); `bmad setup --status` reports current with no problems.
+- Plan step 2 (record format) and step 3 (gate and emitter) done 2026-11-06/07, decided by the owner the same day:
+  `skills/ogcspec-modspec/references/record-format-proposal.md` (decisions at the end; before/after tables in sections 7 and 13),
+  `record-format-example.yaml`, and the scripts `docs/design/record-format-experiment.py` and `step3-compile-tests.py`
+  (reproduce the observations; both describe the tools at `b401284` and differ on later commits by design). **Implemented:**
+  G002/G003 (unknown fields, values), G004 and M014 (`depends_on`), M013 (profiles via `profile: true`), S003/S004 (`uml`),
+  S005 (`layout`), derived conformance-class `inherit::` (gate `conformance_inherit`, identical copy in `emit.py`, a test keeps
+  them equal, X003 compares them), class titles emitted as `.pass:c[...]`, `emit.py --config`. These run on authored YAML only.
+  Module version is now 0.3.0 (behaviour change: previously accepted unknown fields are G002). **Checked:** gate 96 tests, 3
+  skipped (corpus); metanorma 24 tests including two round trips on the pinned image; validators pass. **Corpus:** the unit
+  test skips (needs all six documents), but four of six (ModSpec, Connected Systems 1, 2 and the Part 3 draft) were rebuilt from
+  local clones and gave the snapshot's counts exactly; Processes, Records and Features were not rebuilt (no local clone).
+  **Not verified:** an empty profile gives two Metanorma `MODSPEC_1`
+  messages that need a baseline entry; nothing protects `accepted` from an agent; no agent or review lens was run on real records.
+  A bug found along the way: top-level TOML keys appended after a `[[normative_references]]` table land inside it; the new
+  tests and scripts put them first.
+- The installed copy in `.claude/skills/` is refreshed with `DISABLE_TELEMETRY=1 DO_NOT_TRACK=1 npx --offline skills@1.7.6 add ./skills --skill '*' --agent claude-code --copy -y`
+  (the package is in the npx cache); `python3 .claude/skills/bmad/scripts/setup.py --project-root . --skill .claude/skills/bmad --root .claude/skills --status`
+  should report `current: true`.
 
 ## Pins
 - BMAD: `BMAD-PIN` (main at `e734d3ac…`, v7 preview alpha, version string `6.13.0-next`). Not vendored; clone it by commit.

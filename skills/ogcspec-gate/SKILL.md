@@ -20,7 +20,13 @@ Rules (the table in `gate.py` gives each one's basis and source text):
   abstract tests, resolvable dependencies, no dependency cycles, the core class and its direct dependents.
 - `P001`-`P003` come from the ModSpec Policy (draft 25-001) and ISO/IEC Directives Part 2 clause 7: normative test
   annex; the preferred verbal form per kind; no `must` / `may not` in a provision.
+- `G002`/`G003` report fields outside the table for a record's kind and wrong types or values (`status`, `profile`,
+  `uml_package`, `title`, `depends_on`). `G004` is a `depends_on` entry naming a conformance class of the same document (it is
+  derived). `M013` checks a profile (Req 19: no requirements or tests of its own, builds on at least one class) and `M014` that
+  `depends_on` entries resolve (Req 12). These run on authored YAML records only, never on records rebuilt from compiled XML.
 - `S001`/`S002` are house style (identifier shape, prefix membership); they run only with `style = ["prefix"]`.
+  `S003`/`S004` (a UML package per requirements class, none shared) need `style = ["uml"]`, and `S005` (one record per file,
+  path follows the id) needs `style = ["layout"]`.
 - `X000`-`X004`, `X010` concern the compiled document: a failed compile, YAML/XML fidelity, a document that compiled
   to no definitions, and Metanorma's own log messages. Findings from the XML copy of the records have keys prefixed
   `xml:`.

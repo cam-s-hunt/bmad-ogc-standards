@@ -1,13 +1,15 @@
 # Worked example for references/record-format-proposal.md. Every identifier, name and URI here is a placeholder
 # for illustration; none is assigned, registered or proposed for a real standard.
 #
-# Uses every field the proposal adds: `status`, `uml_package`, `title`, and `depends_on` (external dependencies only).
-# With the tools as they are today the added fields are ignored (observed, see the proposal, section 7); this file
-# therefore passes the current gate and emitter without exercising the new fields.
+# Uses every field of the record format (record-format-proposal.md, section 3): `status`, `uml_package`, `title`,
+# `profile`, and `depends_on` (external dependencies only). The gate checks them (G002-G004, M013, M014, S003, S004)
+# and the emitter writes titles and dependencies into the document; this file passes the gate with the config below.
+# It is one list in one file for brevity; the recommended layout is one record per file (proposal, section 10).
 #
-# Gate config this example assumes (ogcspec.gate.toml):
+# Gate config this example assumes (ogcspec.gate.toml). Top-level keys must come before the first [[table]]:
 #   records_dir = "records"
 #   core = "/req/core"
+#   style = ["uml"]
 #   [[normative_references]]
 #   name = "Example dependency"
 #   uri_prefix = "https://example.org/spec/dep/1.0/"
@@ -55,6 +57,7 @@
   target: /req/core
   # Req 12: the other conformance class this one depends on. External only. The dependency on `/conf/core`
   # that /conf/ext has is NOT written here: it is derived from /req/ext's `inherit` (proposal, section 4).
+  # Writing an internal one here is G004.
   depends_on:
     - https://example.org/spec/dep/1.0/conf/base
   tests:
@@ -90,3 +93,26 @@
   target: /req/ext
   tests:
     - /conf/ext/third
+
+# A profile (Req 19) is two ordinary records: a requirements class that lists no requirements and builds on other classes
+# (profile: true), and its conformance class with no tests. The emitter derives the conformance class's dependencies, so
+# the union of /conf/core and /conf/ext is stated in the document without being written twice. Metanorma itself warns
+# (MODSPEC_1) that both classes are empty; accept those two messages in the baseline (proposal, section 9).
+- kind: requirements_class
+  id: /req/prof
+  title: Profile
+  status: proposed
+  uml_package: example::prof
+  profile: true
+  subject: Example document
+  inherit:
+    - /req/core
+    - /req/ext
+  requirements: []
+
+- kind: conformance_class
+  id: /conf/prof
+  title: Profile
+  status: proposed
+  target: /req/prof
+  tests: []

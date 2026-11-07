@@ -1,6 +1,6 @@
 [bmod]
 code = "ogcspec"
-version = "0.2.0"
+version = "0.3.0"
 # Published source. Every member skill's [skill] source must equal this value.
 update_source = "github:cam-s-hunt/bmad-ogc-standards/skills"
 skills = [

@@ -12,12 +12,25 @@ generated from them (`ogcspec-metanorma`) and is never edited by hand.
 
 | kind | id pattern | fields |
 |---|---|---|
-| `requirements_class` | `/req/<class>` (shape is a habit, see below) | `subject` (one string), `inherit[]`, `requirements[]` |
+| `requirements_class` | `/req/<class>` (shape is a habit, see below) | `subject` (one string), `inherit[]`, `requirements[]`; optional `title`, `uml_package`, `profile` |
 | `requirement` | `/req/<class>/<name>` | `statement` |
 | `abstract_test` | `/conf/<class>/<name>` | `target` (a requirement id), `purpose`, optional `steps[]` |
-| `conformance_class` | `/conf/<class>` | `target` (a requirements class id), `tests[]` |
+| `conformance_class` | `/conf/<class>` | `target` (a requirements class id), `tests[]`; optional `title`, `depends_on[]` |
 | `recommendation` | `/rec/<class>/<name>` | `statement` (never needs a test) |
 | `permission` | `/per/<class>/<name>` | `statement` (never needs a test) |
+
+Any kind may carry `status: proposed` or `accepted`. Any other field is G002. The fields are explained, with their ModSpec
+basis and what each rule checks, in `references/record-format-proposal.md`; `references/record-format-example.yaml` uses all of
+them. In short:
+
+- `title`: the class's name in the document. `uml_package`: the UML package of a requirements class (record-only, the
+  project's own convention). `status`: record-only workflow marker.
+- `depends_on`: conformance classes **outside** this document that a conformance class depends on (Req 12). Dependencies on
+  other classes of this document are derived from the requirements class's `inherit`; writing one is G004.
+- A **profile** (Req 19) is a requirements class with `profile: true`, no `requirements` and the classes it builds on in
+  `inherit`, plus its conformance class with no `tests`. Metanorma warns that both are empty (`MODSPEC_1`); that is expected and
+  goes in the baseline.
+- Recommended layout: one record per file, path = id without the leading `/` plus `.yaml` (`style = ["layout"]` checks it).
 
 A file holds one mapping or a list of them. Membership of a requirement in a class is the class's `requirements`
 list (ModSpec Req 28); the identifier shape above is a convention that `style = ["prefix"]` can check, not an OGC rule.
@@ -30,7 +43,7 @@ Identifiers may be relative (`/req/core`) or absolute under the document's `name
    every requirement is listed by its `requirements_class`. Write the test `steps` only from what the
    requirement text says. If a requirement cannot be turned into a step without guessing, say so and stop
    rather than inventing a step.
-3. Identifiers you write are proposals. A person mints and approves identifiers and any `opengis.net`
+3. Write `status: proposed` on every record you draft; never write `accepted`, which is a person's act. Identifiers you write are proposals. A person mints and approves identifiers and any `opengis.net`
    URI; never present one as assigned.
 4. External `inherit` targets must match a `[[normative_references]]` `uri_prefix` in the gate config. Add
    the reference to the config only when the user has named the dependency.
