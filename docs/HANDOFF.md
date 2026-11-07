@@ -67,8 +67,8 @@ a target standard repository, to be created later). Prototype; not registered wi
   questions drafted in `docs/maintainer-questions.md` for the owner to post (nothing sent); a first eval pass ran (`docs/eval-report-2026-11-07.md`,
   cases in `evals/`; quick look only, Architect and Editor not evaluated); ontology pins in `ONTOLOGY-PINS` and `docs/research/ontology-grounding.md`
   (no mapping written: it needs a target term list). Next phase chosen by the owner: ontology grounding, which is blocked on the target's terms.
-- **Owner decisions, second round, 2026-11-07:** pushed (CI passed); terms: the owner chose a new `term` record kind, proposal in
-  `skills/ogcspec-modspec/references/term-record-proposal.md` (design only, **no code**, awaiting approval of its section 8); maintainer questions: owner posts them;
+- **Owner decisions, second round, 2026-11-07:** pushed (CI passed); terms: the owner chose a new `term` record kind and approved its design;
+  built the same day (gate rules T001-T005, `terms.adoc` emitter, stage-2 read-back, Docker round trip): see `skills/ogcspec-modspec/references/term-record-proposal.md` sections 9-10. Mappings are informative by default (the owner reversed "normative" after seeing how the Connected Systems API does it); maintainer questions: owner posts them;
   the OGC IPR/contribution rules were read by a subagent (`docs/research/ogc-ipr-and-licensing.md`, not legal advice, two sources unopened);
   the GitHub install route was run in a throwaway folder: `npx skills@1.7.6 add cam-s-hunt/bmad-ogc-standards --skill '*' --agent claude-code --copy -y`
   installed all 7 skills, byte-identical to `skills/` (the `bmad setup ogcspec` step after it was not re-run from that install);

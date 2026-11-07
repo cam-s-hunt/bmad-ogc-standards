@@ -18,7 +18,7 @@ generated from them (`ogcspec-metanorma`) and is never edited by hand.
 | `conformance_class` | `/conf/<class>` | `target` (a requirements class id), `tests[]`; optional `title`, `depends_on[]` |
 | `recommendation` | `/rec/<class>/<name>` | `statement` (never needs a test) |
 | `permission` | `/per/<class>/<name>` | `statement` (never needs a test) |
-| `term` | `/term/<name>` | `term`, `definition`; optional `aliases[]`, `mappings[]` (each: `relation`, `ontology`, `iri`, optional `note`), `note` |
+| `term` | `/term/<name>` | `term`, `definition`; optional `aliases[]`, `mappings[]` (each: `relation`, `ontology`, `iri`, optional record-only `note`), `note`, `source` (a bibliography key), `modified` (true if the definition was changed from its source) |
 
 Any kind may carry `status: proposed` or `accepted`. Any other field is G002. The fields are explained, with their ModSpec
 basis and what each rule checks, in `references/record-format-proposal.md`; `references/record-format-example.yaml` uses all of
@@ -35,7 +35,9 @@ them. In short:
   links to ontology terms. `relation` is one of exact, close, broader, narrower, related. `ontology` must be a key declared in the gate
   config's `[[ontologies]]` and `iri` must start with that entry's `iri_prefix`. The owner chose the Connected Systems API pattern:
   mappings are **informative** by default (so T005, a term with no mapping, does not run unless `[terms] mappings = "normative"`). The gate
-  checks the form only, never whether a mapping is correct. Terms are checked but not yet emitted into the Metanorma document.
+  checks the form only, never whether a mapping is correct. Terms are emitted into the document (`terms.adoc`, see `ogcspec-metanorma`) and
+  read back by the gate's stage 2 (matched by `term`, X001/X003). `source` names a bibliography entry as the entry's `[SOURCE: ...]`, as the
+  Connected Systems API does; write it only when the owner names the reference.
 - Recommended layout: one record per file, path = id without the leading `/` plus `.yaml` (`style = ["layout"]` checks it).
 
 A file holds one mapping or a list of them. Membership of a requirement in a class is the class's `requirements`
@@ -54,7 +56,7 @@ Identifiers may be relative (`/req/core`) or absolute under the document's `name
    The owner's answer changes the requirement first and the steps second. (Review run 2026-11-07: every lens flagged this.)
 3. Write `status: proposed` on every record you draft; never write `accepted`, which is a person's act. Identifiers you write are proposals. A person mints and approves identifiers and any `opengis.net`
    URI; never present one as assigned.
-4. Draft a `term` only from a definition the owner supplies, in the owner's words. Write a `mappings` entry only from a source the owner
+4. Draft a `term` only from a definition the owner supplies, in the owner's words. Write a `mappings` entry (or a `source`) only from a source the owner
    names (an ontology the gate config declares, and the address they give); never pick an ontology term yourself, because the sources
    disagree on core words. Where a mapping is unresolved, leave `mappings` out and say so as an open question.
 5. External `inherit` targets must match a `[[normative_references]]` `uri_prefix` in the gate config. Add

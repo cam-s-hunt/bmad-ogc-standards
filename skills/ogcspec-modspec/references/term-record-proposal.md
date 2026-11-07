@@ -1,6 +1,6 @@
 # A `term` record kind: proposal (not implemented)
 
-**Status: decided by the owner on 2026-11-07 (see 'Decisions' at the end). Stage 1 (record kind, gate rules T001-T005, tests, worked example) implemented 2026-11-07; emitting terms into the document is NOT started and waits on two owner decisions (the carrier for a normative mapping; an `unresolved` marker).** The owner chose option A ("add a `term` record kind") on 2026-11-07. This file is the
+**Status: decided by the owner on 2026-11-07 (see 'Decisions' at the end). Implemented 2026-11-07: the record kind, gate rules T001-T005, the `source` and `modified` fields, emitting terms as `terms.adoc`, read-back and fidelity in stage 2 (X001/X003 by designation), tests, a real Docker round trip and a worked example (sections 9 and 10).** The owner chose option A ("add a `term` record kind") on 2026-11-07. This file is the
 design for approval. **No code has changed**: the gate and the emitter still reject a `term` record (G001 unknown kind; the emitter
 exits 2, see `record-format-proposal.md` section 1). Approving this file starts the work; it does not do it.
 
@@ -29,6 +29,8 @@ One YAML record per term, like the other kinds.
 | `aliases` | list of strings | no | admitted synonyms | **inferred** |
 | `mappings` | list of mapping entries | no | links to external ontology terms (section 3) | `ontology-grounding.md`, "what a target must supply" |
 | `note` | string | no | free text; where the mapping is unresolved (for example software or virtual systems) say so here | **inferred** |
+| `source` | bibliography key (string) | no | the entry's `[SOURCE: ...]`, as the Connected Systems API does; the key must be an entry of the document's references | owner decision B, 2026-11-07; Directives Part 2 16.5.10 |
+| `modified` | `true` or `false` | no | the definition was changed from its source; needs `source` | owner decision B |
 | `status` | `proposed` or `accepted` | no | same meaning and same protection as on every other kind | `record-format-proposal.md` section 8 |
 
 Not proposed: a `normative` flag. Whether a mapping is normative or informative is a **document-level** fact in the gate config
@@ -124,8 +126,11 @@ virtual systems are in scope, and whether definitions are normative (`ontology-g
 | 2 | Mapping relations | Five words: exact, close, broader, narrower, related. |
 | 3 | Mapping status | First answer: **normative** (against the research note's informative recommendation, after being told the SOSA/SSN-to-BFO sources contradict each other on Sensor, Property, Observation, Sample and System). **Reversed the same day, after the owner asked how OGC does it:** the Connected Systems API (OGC 23-001, read from the local HTML copy) treats term-to-SOSA links as informative (definitions cite `[SOURCE: SOSA/SSN]`, relationships are in notes and an informative annex; SOSA addresses are binding only as values in tables such as its Table 6). The owner chose "follow the CS API pattern": mappings are **informative** by default; `[terms] mappings = "normative"` is still available and turns T005 on. The carrier in the document is a note to entry (Directives Part 2 ed. 9.0, 16.5.9 allows provisions there; not needed if informative). |
 | 4 | Gate rules | T001-T004 plus a rule for a term with no mapping or an `unresolved` one (a finding the baseline may accept deliberately). T005 (defined but never used) and T006 (used but never defined) not built. |
-| 5 | Emit or record-only | Experiment first (a test compile on the pinned image), then propose emit or record-only with evidence. **Run 2026-11-07; results in section 9; the emit-or-not decision is still the owner's.** |
+| 5 | Emit or record-only (owner: **emit**, "build with emitting") | Experiment first (a test compile on the pinned image), then propose emit or record-only with evidence. **Run 2026-11-07; results in section 9; the emit-or-not decision is still the owner's.** |
 | 6 | Version | Keep 0.3.0. |
+| A | Where the mapping goes in the document | Follow the CS API pattern: a note on the entry (`Mapping (<relation>): <address>`), informative by default. |
+| B | `source` field | Add `source` and a `modified` flag. |
+| C | Marker for an unresolved mapping | None; an unresolved term has no `mappings` and a `note` saying why (under normative, T005 reports it and the baseline accepts it). |
 
 Consequence of 3: whichever status is chosen, the gate checks form only (known ontology, address prefix, relation word, and presence when
 normative); nothing here claims a mapping is correct. Still open from the CS API pattern: the term's `[SOURCE: ...]` citation is not a field
@@ -153,3 +158,25 @@ definition as a paragraph, the mapping as a fixed-form `NOTE:` (relation word pl
 a real OGC document's existing terms clause (the boilerplate), whether the extractor can read terms back the way it reads requirements
 (not written), and whether a real standard's terms clause (not my spike header) behaves the same. The round trip would need its own
 test, as for titles and profiles.
+
+## 10. What was built (2026-11-07) and what it does not show
+
+- **Record and gate:** `term` kind with `term`, `definition`, `aliases`, `mappings`, `note`, `source`, `modified`; G002/G003 incl. mapping entries
+  (`<id>#mappings[i].<key>`), `source` must look like a bibliography key, `modified` needs `source`, a term `note` may not start with "Mapping (",
+  an address may not contain whitespace or brackets; T001-T005 as in section 5 (T005 only with `[terms] mappings = "normative"`).
+- **Emitter:** `terms.adoc`, written only when there are term records, one entry per term (heading, `alt:` lines, definition, one note per mapping,
+  the term's note, `[.source]` with `<<key>>` and `, modified`). All prose is literal text. A closing bracket or backslash in a term, alias,
+  definition or note, an unusable address, or a note starting "Mapping (" is refused (exit 2) rather than emitted.
+- **Document:** the project's terms clause must be marked `[heading=terms and definitions]` and `include::terms.adoc[]` (see `ogcspec-metanorma`).
+  Hand-written terms beside the emitted ones are fine.
+- **Stage 2:** `terms_from_xml` (kept apart from `scan_xml`, so no corpus record count changes) and `term_fidelity`: each record term is matched to an XML
+  entry by designation (ignoring case and spacing); not found is X001 (`term:<id>`); a field difference is X003 (`<id>#definition`, `aliases`,
+  `mappings`, `note`, `source`, `modified`). A term in the XML that the records do not define is **never** reported. A mapping's own `note` is
+  record-only and not compared.
+- **Tests:** gate 116 (3 skipped), emitter and round trip 34, including a real compile on the pinned image of three terms (special characters,
+  two mappings, a modified source, a hand-written neighbour) that come back identical, a mutated record reported as X003, and a missing term as X001.
+  A real compiled document is kept as a gate fixture (`tests/fixtures/c8_terms`).
+- **Corpus:** the six real documents (rebuilt earlier the same day at their pinned SHAs) were re-checked after these changes: 116 gate tests ran with
+  none skipped and the per-rule counts equal the snapshot.
+- **Not shown:** a real standard's terms clause; the editions of the Directives after 9.0; whether a `[SOURCE: ...]` key that is not in the
+  document's references is caught by anything but Metanorma's own warning (STANDOC_32); that any mapping is correct.

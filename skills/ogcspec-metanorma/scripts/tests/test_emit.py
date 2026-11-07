@@ -312,6 +312,133 @@ class Step3RoundTrip(unittest.TestCase):
             self.assertFalse([m for m in messages if m.startswith(("STANDOC_7", "STANDOC_38"))], messages)
 
 
+class TermEmitUnitTests(unittest.TestCase):
+    TERM = {"kind": "term", "id": "/term/sensor", "term": "Sensor (physical)", "aliases": ["detector"],
+            "definition": "A device & its _probe_.", "note": "Out of scope: software.", "source": "dep", "modified": True,
+            "mappings": [{"relation": "close", "ontology": "o", "iri": "https://example.org/onto#Sensor", "note": "record-only"}]}
+
+    def test_a_term_becomes_one_literal_entry_in_terms_adoc(self):
+        text = emit.emit([self.TERM])["terms.adoc"]
+        self.assertEqual(text, "\n".join([
+            "=== pass:c[Sensor (physical)]", "alt:[pass:c[detector]]", "", "pass:c[A device & its _probe_.]", "",
+            "NOTE: Mapping (close): https://example.org/onto#Sensor", "", "NOTE: pass:c[Out of scope: software.]", "",
+            "[.source]", "<<dep>>, modified"]) + "\n")
+
+    def test_the_per_mapping_note_is_record_only(self):
+        self.assertNotIn("record-only", emit.emit([self.TERM])["terms.adoc"])
+
+    def test_terms_adoc_is_written_only_when_there_are_terms(self):
+        self.assertNotIn("terms.adoc", emit.emit(RECORDS))
+        self.assertIn("terms.adoc", emit.emit(RECORDS + [self.TERM]))
+
+    def test_other_files_are_unchanged_by_terms(self):
+        self.assertEqual({k: v for k, v in emit.emit(RECORDS + [self.TERM]).items() if k != "terms.adoc"}, emit.emit(RECORDS))
+
+    def test_terms_are_ordered_by_identifier_and_independent_of_input_order(self):
+        a = dict(self.TERM, id="/term/a", term="A")
+        b = dict(self.TERM, id="/term/b", term="B")
+        self.assertEqual(emit.emit([b, a])["terms.adoc"], emit.emit([a, b])["terms.adoc"])
+
+    def test_unsafe_text_is_refused(self):
+        for field, value in (("term", "Bad]"), ("definition", "x\\"), ("note", "n]"), ("aliases", ["ok", "a]"])):
+            with self.assertRaises(ValueError, msg=field):
+                emit.emit([dict(self.TERM, **{field: value})])
+        for iri in ("https://x/a b", "https://x/<a>", "https://x/[a]", ""):
+            with self.assertRaises(ValueError, msg=iri):
+                emit.emit([dict(self.TERM, mappings=[{"relation": "close", "ontology": "o", "iri": iri}])])
+        with self.assertRaises(ValueError):
+            emit.emit([dict(self.TERM, note="Mapping (close): https://example.org/x")])
+
+    def test_a_term_without_source_or_aliases_has_neither(self):
+        text = emit.emit([{"kind": "term", "id": "/term/p", "term": "Plain", "definition": "d"}])["terms.adoc"]
+        self.assertEqual(text, "=== pass:c[Plain]\n\npass:c[d]\n")
+
+
+TERM_RECORDS = [
+    {"kind": "term", "id": "/term/sensor", "term": "Sensor (physical)", "aliases": ["detector", "sensing *device* & co"],
+     "definition": "A device & its _probe_ that responds to a property of the world.",
+     "mappings": [{"relation": "close", "ontology": "example-onto", "iri": "https://example.org/onto#Sensor", "note": "record-only"},
+                  {"relation": "broader", "ontology": "example-onto", "iri": "https://example.org/onto#System"}],
+     "note": "Software sensors are out of scope.", "source": "dep", "modified": True},
+    {"kind": "term", "id": "/term/observation", "term": "Observation", "definition": "The act of estimating a value.",
+     "source": "dep"},
+    {"kind": "term", "id": "/term/plain", "term": "Plain term", "definition": "Nothing extra."},
+]
+TERM_CONFIG = '''records_dir = "records"
+
+[[ontologies]]
+key = "example-onto"
+iri_prefix = "https://example.org/onto#"
+'''
+# a hand-written term the records do not own: the gate must not report it
+HAND_WRITTEN_TERM = "=== hand written\n\npass:c[A term the records do not define.]\n"
+
+
+def terms_document(terms_adoc):
+    return HEADER.replace("== Terms and definitions\nNo terms.\n",
+                          "[heading=terms and definitions]\n== Terms and definitions\n\ninclude::terms.adoc[]\n\n" + HAND_WRITTEN_TERM)
+
+
+@unittest.skipUnless(image_available(), "SKIPPED: pinned Metanorma image not present locally; round trip not run")
+class TermsRoundTrip(unittest.TestCase):
+    def build(self, records):
+        """Emit, compile on the pinned image; returns the temporary project root (kept until the test ends)."""
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        root = Path(tmp.name)
+        (root / "records").mkdir()
+        (root / "records" / "all.yaml").write_text(yaml.safe_dump(RECORDS + records), encoding="utf-8")
+        (root / "ogcspec.gate.toml").write_text(TERM_CONFIG, encoding="utf-8")
+        self.assertEqual(emit.main(["--records", str(root / "records"), "--out", str(root / "build"),
+                                    "--config", str(root / "ogcspec.gate.toml")]), 0)
+        (root / "build" / "doc.adoc").write_text(terms_document(None), encoding="utf-8")
+        proc = subprocess.run([sys.executable, str(HERE.parent / "metanorma.py"), "--image", IMAGE,
+                               "--adoc", str(root / "build" / "doc.adoc"), "--formats", "xml"],
+                              capture_output=True, text=True)
+        (root / "build" / "compile.json").write_text(proc.stdout or "{}", encoding="utf-8")
+        self.assertEqual(proc.returncode, 0, proc.stdout[-2000:])
+        return root
+
+    def gate_findings(self, root):
+        _, summary = gate.run(root / "ogcspec.gate.toml", None, root / "build" / "doc.xml",
+                              root / "build" / "compile.json", root / "build" / "doc.err.html")
+        return summary
+
+    def test_terms_compile_and_come_back_identical(self):
+        root = self.build(TERM_RECORDS)
+        summary = self.gate_findings(root)
+        fidelity = [(f["rule"], f["key"]) for f in summary["findings"] if f["rule"] in ("X000", "X001", "X002", "X003")]
+        self.assertEqual(fidelity, [])  # includes: the hand-written term in the same clause is not an X002
+        self.assertEqual([f for f in summary["findings"] if f["rule"][0] in "GMPST"], [])
+        messages = {f["key"] for f in summary["findings"] if f["rule"] == "X010"}
+        self.assertFalse([m for m in messages if m.startswith(("STANDOC_7", "STANDOC_20", "STANDOC_25"))], messages)
+        xml_terms = {t["term"]: t for t in gate.terms_from_xml(root / "build" / "doc.xml")}
+        self.assertEqual(sorted(xml_terms), ["Observation", "Plain term", "Sensor (physical)", "hand written"])
+        sensor = xml_terms["Sensor (physical)"]
+        self.assertEqual(sensor["aliases"], ["detector", "sensing *device* & co"])
+        self.assertEqual([(m["relation"], m["iri"]) for m in sensor["mappings"]],
+                         [("close", "https://example.org/onto#Sensor"), ("broader", "https://example.org/onto#System")])
+        self.assertEqual((sensor["source"], sensor["modified"], sensor["note"]), ("dep", True, "Software sensors are out of scope."))
+        self.assertEqual((xml_terms["Observation"]["source"], xml_terms["Observation"]["modified"]), ("dep", False))
+
+    def test_a_changed_record_and_a_missing_term_are_reported(self):
+        root = self.build(TERM_RECORDS)
+        changed = yaml.safe_load((root / "records" / "all.yaml").read_text(encoding="utf-8"))
+        for r in changed:
+            if r.get("id") == "/term/sensor":
+                r["definition"] = "Changed after the document was built."
+                r["mappings"][0]["iri"] = "https://example.org/onto#Other"
+                r["source"] = "other"
+        changed.append({"kind": "term", "id": "/term/ghost", "term": "Ghost", "definition": "Not in the document."})
+        (root / "records" / "all.yaml").write_text(yaml.safe_dump(changed), encoding="utf-8")
+        found = {(f["rule"], f["key"]) for f in self.gate_findings(root)["findings"]}
+        self.assertIn(("X001", "term:/term/ghost"), found)
+        for field in ("definition", "mappings", "source"):
+            self.assertIn(("X003", f"/term/sensor#{field}"), found)
+        self.assertNotIn(("X003", "/term/observation#definition"), found)
+        self.assertFalse([k for r, k in found if r == "X002" and "term" in k])
+
+
 @unittest.skipUnless(image_available(), "SKIPPED: pinned Metanorma image not present locally; round trip not run")
 class WorkedExampleBaseline(unittest.TestCase):
     """The worked example in ogcspec-modspec/references passes the gate, stage 2 included, with exactly its baseline file.

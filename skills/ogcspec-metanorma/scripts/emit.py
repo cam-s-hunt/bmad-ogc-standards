@@ -30,13 +30,22 @@ Added by record-format-proposal.md (plan step 3):
   Record-only fields (`status`, `uml_package`, `profile`, `depends_on` as such) are not emitted as themselves.
   A profile is two ordinary blocks: a requirements_class with no requirements and a conformance_class with no tests.
 
+Terms (term-record-proposal.md): a `term` record becomes one terminological entry in terms.adoc, written to be
+`include::`d inside the project's own terms clause, which must be marked `[heading=terms and definitions]` (observed: without
+it Metanorma aborts, STANDOC_25) and which Metanorma's OGC flavour precedes with its own boilerplate. The entry is
+`=== pass:c[term]`, one `alt:[pass:c[alias]]` line per alias, the definition as literal text, one `NOTE: Mapping (<relation>): <iri>`
+per mapping, the term's own `note` as `NOTE:`, and `[.source]` with `<<source>>` (and `, modified` when `modified: true`). A mapping's
+own `note` is record-only (it does not round-trip). terms.adoc is written only when there are term records. A term, alias,
+definition or note containing a closing bracket is refused rather than risk a malformed entry.
+
 Usage:
   emit.py --records <dir> --out <dir> [--config <ogcspec.gate.toml>]
 
 --config is read only for `namespace`, so that identifiers written in absolute and in relative form compare equal
 when dependencies are derived, exactly as in the gate. Without it no namespace is applied.
 
-Writes conformance-classes.adoc, requirements.adoc and abstract-tests.adoc. Same input, same bytes.
+Writes conformance-classes.adoc, requirements.adoc and abstract-tests.adoc, and terms.adoc when there are term records.
+Same input, same bytes.
 Exit 0 written; 2 usage error or an unreadable record.
 """
 
@@ -49,7 +58,7 @@ from pathlib import Path
 
 import yaml
 
-ORDER = ("requirements_class", "requirement", "recommendation", "permission", "abstract_test", "conformance_class")
+ORDER = ("requirements_class", "requirement", "recommendation", "permission", "abstract_test", "conformance_class", "term")
 
 
 def load(directory: Path) -> list[dict]:
@@ -130,8 +139,38 @@ def block(style: str, fields: list[tuple[str, str]], extra: str = "", title: obj
     return "\n".join(lines) + "\n"
 
 
+def emit_term(r: dict) -> str:
+    """One terminological entry. Mirrors the gate's `terms_from_xml`, which reads it back."""
+    def bracket_safe(label: str, value: object) -> str:
+        text = one_line(value)
+        if "]" in text or "\\" in text:
+            raise ValueError(f"term {r['id']}: {label} may not contain ']' or a backslash: {text[:60]!r}")
+        return text
+
+    name = bracket_safe("term", r.get("term", ""))
+    lines = [f"=== pass:c[{name}]"]
+    lines += [f"alt:[pass:c[{bracket_safe('alias', a)}]]" for a in r.get("aliases") or []]
+    lines += ["", f"pass:c[{bracket_safe('definition', r.get('definition', ''))}]"]
+    for m in r.get("mappings") or []:
+        if not isinstance(m, dict):
+            raise ValueError(f"term {r['id']}: a mapping entry is not a mapping")
+        iri = one_line(m.get("iri", ""))
+        if not iri or any(c in iri for c in " <>[]"):
+            raise ValueError(f"term {r['id']}: cannot emit mapping address {iri!r}")
+        lines += ["", f"NOTE: Mapping ({one_line(m.get('relation', ''))}): {iri}"]
+    if r.get("note"):
+        if one_line(r["note"]).startswith("Mapping ("):
+            raise ValueError(f"term {r['id']}: a note may not start with 'Mapping (' (it would read back as a mapping)")
+        lines += ["", f"NOTE: pass:c[{bracket_safe('note', r['note'])}]"]
+    if r.get("source"):
+        lines += ["", "[.source]", f"<<{one_line(r['source'])}>>" + (", modified" if r.get("modified") else "")]
+    return "\n".join(lines) + "\n"
+
+
 def emit_record(r: dict, dependencies: dict[str, list[str]] | None = None) -> str:
     kind, ident = r["kind"], r["id"]
+    if kind == "term":
+        return emit_term(r)
     if kind == "requirements_class":
         fields = [("identifier", ident)]
         if r.get("subject"):
@@ -169,11 +208,14 @@ def emit(records: list[dict], namespace: str = "") -> dict[str, str]:
         chosen = sorted((r for r in records if r.get("kind") in kinds), key=lambda r: (ORDER.index(r["kind"]), r["id"]))
         return "\n".join(emit_record(r, dependencies) for r in chosen)
 
-    return {
+    files = {
         "conformance-classes.adoc": part(("conformance_class",)),
         "requirements.adoc": part(("requirements_class", "requirement", "recommendation", "permission")),
         "abstract-tests.adoc": part(("abstract_test",)),
     }
+    if any(r.get("kind") == "term" for r in records):
+        files["terms.adoc"] = part(("term",))
+    return files
 
 
 def main(argv: list[str]) -> int:

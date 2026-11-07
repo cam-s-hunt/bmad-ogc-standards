@@ -15,6 +15,11 @@ the image is the digest the project pinned for its builds (`repo@sha256:...`); t
    not know instead of dropping it. `--config` is read only for `namespace`; pass it, because the emitter derives each
    conformance class's `inherit::` lines from its requirements class's `inherit` and must match identifiers the way the
    gate does. Class titles are written as literal block titles. `status`, `uml_package` and `profile` are not written.
+   With `term` records it also writes `terms.adoc` (only then). The document must `include::terms.adoc[]` **inside its own terms
+   clause, and that clause must be marked `[heading=terms and definitions]` above its title**: without it Metanorma does not
+   recognise the clause and the compile aborts (STANDOC_25). Metanorma's OGC flavour adds its own boilerplate paragraphs at the top
+   of that clause; hand-written terms may sit beside the emitted ones, and the gate ignores terms the records do not define. A
+   mapping becomes a note "Mapping (<relation>): <address>"; a mapping's own `note` is not emitted.
 2. **Compile**:
    `uv run {skill-scripts}/metanorma.py --image <repo@sha256:...> --adoc <doc.adoc> --formats xml > compile.json`
    If the document includes files from outside its own folder, add `--root <a directory containing them all>`;

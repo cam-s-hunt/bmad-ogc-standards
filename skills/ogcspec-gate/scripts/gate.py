@@ -30,8 +30,10 @@ Record files: YAML under `records_dir`, each file one mapping or a list of mappi
   recommendation      id  statement   (never needs a test)
   permission          id  statement   (never needs a test)
   term                id  term, definition, aliases[] (optional), mappings[] (optional: relation, ontology, iri, note),
-                      note (optional). A defined word and its links to ontology terms; see
-                      ogcspec-modspec/references/term-record-proposal.md. Rules T001-T005, authored records only.
+                      note (optional), source (optional: a bibliography key, emitted as the entry's [SOURCE: ...]),
+                      modified (optional boolean: the definition was changed from its source). A defined word and
+                      its links to ontology terms; see ogcspec-modspec/references/term-record-proposal.md. Rules
+                      T001-T005, authored records only.
 Any kind may carry `status` (proposed or accepted, record-only). A field outside this table is G002. The rules for
 these fields (G002-G004, M013, M014, S003-S005) run on authored YAML records only, never on records rebuilt from
 compiled XML, so they cannot fire on an approved OGC document. See ogcspec-modspec/references/record-format-proposal.md.
@@ -105,9 +107,11 @@ KNOWN_FIELDS = {
     "permission": frozenset({"statement"}),
     "abstract_test": frozenset({"target", "purpose", "steps"}),
     "conformance_class": frozenset({"target", "tests", "title", "depends_on"}),
-    "term": frozenset({"term", "definition", "aliases", "mappings", "note"}),
+    "term": frozenset({"term", "definition", "aliases", "mappings", "note", "source", "modified"}),
 }
 MAPPING_FIELDS = frozenset({"relation", "ontology", "iri", "note"})
+SOURCE_REF = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.:-]*$")  # a bibliography anchor the emitter can cross-reference
+MAPPING_NOTE_PREFIX = "Mapping ("  # the emitter writes each mapping as the note "Mapping (<relation>): <iri>"
 MAPPING_RELATIONS = ("exact", "close", "broader", "narrower", "related")  # SKOS-style closeness words (owner, 2026-11-07)
 FIELD_HINTS = {
     ("conformance_class", "inherit"): "a conformance class's dependencies inside this document are derived from its "
@@ -125,7 +129,7 @@ RULES = {
     "G001": ("record has a known kind", "structure", "record structure"),
     "G002": ("a record carries only fields known for its kind", "structure",
              "record-format-proposal.md section 11: an unknown or misspelled field is otherwise ignored silently"),
-    "G003": ("field values have the expected type and value (status, profile, uml_package, title, depends_on)", "structure",
+    "G003": ("field values have the expected type and value (status, profile, uml_package, title, depends_on, term fields)", "structure",
              "record-format-proposal.md section 3"),
     "G004": ("depends_on names only conformance classes outside this document", "structure",
              "record-format-proposal.md section 4: dependencies inside the document are derived from `inherit`, "
@@ -282,6 +286,15 @@ def term_field_findings(r: dict, ident: str) -> list[Finding]:
             out.append(Finding("G003", f"{ident}#{field}", f"a term needs a non-empty string {field}, not {r.get(field)!r}"))
     if "note" in r and not (isinstance(r["note"], str) and r["note"].strip()):
         out.append(Finding("G003", f"{ident}#note", f"note must be a non-empty string, not {r['note']!r}"))
+    elif isinstance(r.get("note"), str) and r["note"].lstrip().startswith(MAPPING_NOTE_PREFIX):
+        out.append(Finding("G003", f"{ident}#note", f"a term note may not start with {MAPPING_NOTE_PREFIX!r}: the emitter writes "
+                           "mappings in that form, so the note could not be told apart from one on read-back"))
+    if "source" in r and not (isinstance(r["source"], str) and SOURCE_REF.match(r["source"])):
+        out.append(Finding("G003", f"{ident}#source", f"source must name a bibliography entry (letters, digits, _ . : -), not {r['source']!r}"))
+    if "modified" in r and not isinstance(r["modified"], bool):
+        out.append(Finding("G003", f"{ident}#modified", f"modified must be true or false, not {r['modified']!r}"))
+    elif r.get("modified") is True and "source" not in r:
+        out.append(Finding("G003", f"{ident}#modified", "modified: true needs a source (what the definition was modified from)"))
     if "aliases" in r and not (isinstance(r["aliases"], list) and all(isinstance(a, str) and a.strip() for a in r["aliases"])):
         out.append(Finding("G003", f"{ident}#aliases", "aliases must be a list of non-empty strings"))
     if "mappings" in r:
@@ -300,6 +313,8 @@ def term_field_findings(r: dict, ident: str) -> list[Finding]:
             for key in ("relation", "ontology", "iri"):
                 if not (isinstance(m.get(key), str) and m[key].strip()):
                     out.append(Finding("G003", f"{where}.{key}", f"a mapping needs a non-empty string {key}, not {m.get(key)!r}"))
+            if isinstance(m.get("iri"), str) and re.search(r"[\s<>\]\[]", m["iri"]):
+                out.append(Finding("G003", f"{where}.iri", f"iri may not contain whitespace, '<', '>' or brackets: {m['iri']!r}"))
             if "note" in m and not (isinstance(m["note"], str) and m["note"].strip()):
                 out.append(Finding("G003", f"{where}.note", f"note must be a non-empty string, not {m['note']!r}"))
     return out
@@ -827,6 +842,71 @@ def scan_xml(path: Path) -> tuple[list[dict], dict]:
     return out, notes
 
 
+def terms_from_xml(path: Path) -> list[dict]:
+    """The terminological entries of a compiled document, as dicts shaped like term records (without an id: Metanorma
+    anchors a term by its heading, not by our identifier, so entries are matched by designation).
+
+    Kept apart from `scan_xml` on purpose: a real OGC document has hand-written terms, and counting them as records would
+    change every document's record count and make X002 fire on each. `check_xml` uses this only for terms the YAML has.
+    A mapping is read from a note written as "Mapping (<relation>): <iri>" (the form `emit.py` writes); any other
+    note is the term's own `note`. A mapping's per-entry `note` is record-only and does not round-trip."""
+    root = ET.parse(path).getroot()
+    out: list[dict] = []
+    for term in (e for e in root.iter() if _local(e.tag) == "term"):
+        kids = list(term)
+        preferred = next((k for k in kids if _local(k.tag) == "preferred"), None)
+        if preferred is None:
+            continue
+        name = " ".join(_text(n) for n in preferred.iter() if _local(n.tag) == "name")
+        aliases = [" ".join(_text(n) for n in k.iter() if _local(n.tag) == "name") for k in kids if _local(k.tag) == "admitted"]
+        definition = next((_text(k) for k in kids if _local(k.tag) == "definition"), "")
+        mappings, notes = [], []
+        for k in (k for k in kids if _local(k.tag) == "termnote"):
+            text = _text(k)
+            m = re.match(r"^Mapping \((\w+)\):\s*(\S+)$", text)
+            if m:
+                mappings.append({"relation": m.group(1), "iri": m.group(2)})
+            else:
+                notes.append(text)
+        source = next((k for k in kids if _local(k.tag) == "source"), None)
+        origin = next((o for o in source.iter() if _local(o.tag) == "origin"), None) if source is not None else None
+        out.append({"term": name, "aliases": aliases, "definition": definition, "mappings": mappings,
+                    "note": " ".join(notes) or None,
+                    "source": origin.get("bibitemid") if origin is not None else None,
+                    "modified": source is not None and source.get("status") == "modified"})
+    return out
+
+
+def designation(value: object) -> str:
+    return " ".join(canon(value).lower().split())
+
+
+def term_fidelity(yaml_terms: list[dict], xml_terms: list[dict]) -> list[Finding]:
+    """X001/X003 for the terms the YAML has, matched by designation. The other direction (a term in the XML that the YAML
+    lacks) is deliberately not reported: a document's terms clause may hold hand-written terms the records do not own."""
+    out: list[Finding] = []
+    by_name = {designation(t["term"]): t for t in xml_terms}
+    for r in yaml_terms:
+        rid = r.get("id")
+        x = by_name.get(designation(r.get("term")))
+        if x is None:
+            out.append(Finding("X001", f"term:{rid}", "in the YAML records but not in the compiled XML (matched by term)"))
+            continue
+        pairs = {
+            "definition": (canon(r.get("definition")), canon(x["definition"])),
+            "aliases": (sorted(canon(a) for a in r.get("aliases") or []), sorted(canon(a) for a in x["aliases"])),
+            "mappings": (sorted((m.get("relation"), m.get("iri")) for m in r.get("mappings") or [] if isinstance(m, dict)),
+                         sorted((m["relation"], m["iri"]) for m in x["mappings"])),
+            "note": (canon(r.get("note")), canon(x["note"])),
+            "source": (r.get("source") or "", x["source"] or ""),
+            "modified": (bool(r.get("modified")), bool(x["modified"])),
+        }
+        for field, (a, b) in pairs.items():
+            if a != b:
+                out.append(Finding("X003", f"{rid}#{field}", f"YAML {a!r} vs XML {b!r}"))
+    return out
+
+
 def records_from_xml(path: Path) -> list[dict]:
     return scan_xml(path)[0]
 
@@ -910,12 +990,14 @@ def check_xml(xml_path: Path, yaml_records: list[dict], config: dict,
     out += [Finding(f.rule, f"xml:{f.key}", f.message) for f in found]
     out += [Finding(f.rule, f"xml:{f.key}", f.message) for f in annex_findings(xml_path)]
 
-    # Terms are not read back from the compiled XML yet (no extractor), so they are left out of the YAML-to-XML
-    # comparison; otherwise X001 would report every term. Term fidelity is a later stage.
+    # Terms are matched by designation in `term_fidelity`, not by identifier, so they are left out of this comparison.
     by_yaml = {(r.get("kind"), r.get("id")): r for r in yaml_records if r.get("kind") != "term"}
     for ident, deps in conformance_inherit(yaml_records, config).items():  # what the emitter writes as inherit::
         if ("conformance_class", ident) in by_yaml:
             by_yaml[("conformance_class", ident)] = {**by_yaml[("conformance_class", ident)], "inherit": deps}
+    yaml_terms = [r for r in yaml_records if r.get("kind") == "term"]
+    if yaml_terms:
+        out += term_fidelity(yaml_terms, terms_from_xml(xml_path))
     by_xml = {(r["kind"], r["id"]): r for r in xml_records}
     for key in sorted(set(by_yaml) - set(by_xml), key=str):
         out.append(Finding("X001", f"{key[0]}:{key[1]}", "in the YAML records but not in the compiled XML"))

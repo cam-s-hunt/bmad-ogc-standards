@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metanorma xmlns="https://www.metanorma.org/ns/standoc" type="semantic" version="2.10.2" schema-version="v2.3.0" flavor="ogc">
+<bibdata type="standard">
+<title language="en" type="main">Example Round Trip Standard</title>
+<docidentifier type="ogc-internal" primary="true">99-998</docidentifier><docidentifier type="ogc-external">http://www.opengis.net/doc/IS/roundtrip/1.0</docidentifier><docnumber>99-998</docnumber><date type="published"><on>2026-11-06</on></date><date type="issued"><on>2026-11-06</on></date><date type="received"><on>2026-11-06</on></date><contributor><role type="author"/><organization>
+<name>Example Org</name>
+</organization></contributor><contributor><role type="editor"/><person>
+<name><completename>Round Trip Author</completename></name>
+</person></contributor><contributor><role type="author"><description>committee</description></role><organization>
+<name>Open Geospatial Consortium</name>
+<subdivision type="Committee">
+<name>technical</name>
+</subdivision><abbreviation>OGC</abbreviation></organization></contributor><contributor><role type="publisher"/><organization>
+<name>Open Geospatial Consortium</name>
+<abbreviation>OGC</abbreviation></organization></contributor><edition>1.0.0</edition><language>en</language><script>Latn</script><abstract><p>Round trip document.</p>
+</abstract><status><stage>swg-draft</stage></status><copyright><from>2026</from><owner><organization>
+<name>Open Geospatial Consortium</name>
+<abbreviation>OGC</abbreviation></organization></owner></copyright><keyword><vocab>ogcdoc</vocab></keyword><keyword><vocab>OGC document</vocab></keyword><keyword><vocab>roundtrip</vocab></keyword><ext><doctype>standard</doctype><subdoctype>implementation</subdoctype><flavor>ogc</flavor><stage>swg-draft</stage></ext></bibdata><metanorma-extension><semantic-metadata><stage-published>false</stage-published></semantic-metadata>
+<presentation-metadata><document-scheme>2026</document-scheme><output-extensions>xml</output-extensions><color-admonition-caution>rgb(79, 129, 189)</color-admonition-caution><color-admonition-editor>rgb(79, 129, 189)</color-admonition-editor><color-admonition-important>rgb(79, 129, 189)</color-admonition-important><color-admonition-note>rgb(79, 129, 189)</color-admonition-note><color-admonition-safety-precaution>rgb(79, 129, 189)</color-admonition-safety-precaution><color-admonition-tip>rgb(79, 129, 189)</color-admonition-tip><color-admonition-todo>rgb(79, 129, 189)</color-admonition-todo><color-admonition-warning>rgb(79, 129, 189)</color-admonition-warning><color-background-definition-description>rgb(242, 251, 255)</color-background-definition-description><color-background-definition-term>rgb(215, 243, 255)</color-background-definition-term><color-background-page>rgb(33, 55, 92)</color-background-page><color-background-table-header>rgb(33, 55, 92)</color-background-table-header><color-background-table-row-even>rgb(252, 246, 222)</color-background-table-row-even><color-background-table-row-odd>rgb(254, 252, 245)</color-background-table-row-odd><color-background-term-admitted-label>rgb(223, 236, 249)</color-background-term-admitted-label><color-background-term-deprecated-label>rgb(237, 237, 238)</color-background-term-deprecated-label><color-background-term-preferred-label>rgb(249, 235, 187)</color-background-term-preferred-label><color-background-text-label-legacy>rgb(33, 60, 107)</color-background-text-label-legacy><color-secondary-shade-1>rgb(0, 177, 255)</color-secondary-shade-1><color-secondary-shade-2>rgb(0, 177, 255)</color-secondary-shade-2><color-text>rgb(88, 89, 91)</color-text><color-text-title>rgb(33, 55, 92)</color-text-title><toc-heading-levels>2</toc-heading-levels><html-toc-heading-levels>2</html-toc-heading-levels><doc-toc-heading-levels>2</doc-toc-heading-levels><pdf-toc-heading-levels>2</pdf-toc-heading-levels></presentation-metadata><table anchor="_misccontainer_anchor_aliases" id="_059e3154-1f04-172c-d993-8c71d2782d24"><tbody><tr><th>/conf/core</th><td>/conf/core</td><td>_conf_core</td></tr><tr><th>/req/core</th><td>/req/core</td><td>_req_core</td></tr><tr><th>/req/core/special-chars</th><td>/req/core/special-chars</td><td>_req_core_special-chars</td></tr><tr><th>/req/core/stable-ids-listed</th><td>/req/core/stable-ids-listed</td><td>_req_core_stable-ids-listed</td></tr><tr><th>/req/core/valid-document</th><td>/req/core/valid-document</td><td>_req_core_valid-document</td></tr><tr><th>/rec/core/stable-ids</th><td>/rec/core/stable-ids</td><td>_rec_core_stable-ids</td></tr><tr><th>/per/core/extra-fields</th><td>/per/core/extra-fields</td><td>_per_core_extra-fields</td></tr><tr><th>/conf/core/special-chars</th><td>/conf/core/special-chars</td><td>_conf_core_special-chars</td></tr><tr><th>/conf/core/stable-ids-listed</th><td>/conf/core/stable-ids-listed</td><td>_conf_core_stable-ids-listed</td></tr><tr><th>/conf/core/valid-document</th><td>/conf/core/valid-document</td><td>_conf_core_valid-document</td></tr></tbody></table></metanorma-extension>
+<boilerplate><copyright-statement>
+
+<clause id="_2cd773fc-8495-2dfa-91a1-d57da3fc5833" obligation="normative">
+<title id="_19604a82-a482-3c87-1356-705ef7b11f09">Copyright notice</title>
+<p id="_f3c4258f-6b29-424c-cd01-337c0e916a04" align="center">Copyright © 2026 Open Geospatial Consortium<br/> To obtain additional rights of use, visit <link target="https://www.ogc.org/legal"/></p>
+</clause>
+
+<clause id="_6908548e-204b-56e7-9062-6924cccf2315" obligation="normative">
+<title id="_db83e2f6-5841-eaeb-0d35-1277ee9d3f6a">Note</title>
+<p id="_e1d5d5c4-54c3-2761-be2c-22547f01c057" align="left">Attention is drawn to the possibility that some of the elements of this document may be the subject of patent rights. The Open Geospatial Consortium shall not be held responsible for identifying any or all such patent rights.</p>
+
+<p id="_02892e94-7b43-630a-129c-d2e0f75ff92b" align="left">Recipients of this document are requested to submit, with their comments, notification of any relevant patent claims or other intellectual property rights of which they may be aware that might be infringed by any implementation of the standard set forth in this document, and to provide supporting documentation.</p>
+</clause>
+</copyright-statement>
+
+<license-statement>
+
+<clause id="_45f6bdf5-80f3-f775-9740-2adafc90b1f7" obligation="normative">
+<title id="_3788828e-41fb-3895-6acc-52071643abed">License Agreement</title>
+<p id="_772872dd-928c-666f-92c5-676f7f5d3071">Use of this document is subject to the license agreement at <link target="https://www.ogc.org/license"/></p>
+</clause>
+</license-statement>
+
+<legal-statement>
+
+<clause id="_d969cbc1-a2ce-fc29-9ca8-2b6bf8626cdf" obligation="normative">
+<title id="_58a63032-6943-6f37-087e-470a8982dad8">Notice for Drafts</title>
+<p id="_da556f2c-cb53-8902-19fe-a5f8a6222f48">This document is not an OGC Standard. This document is distributed for review and comment. This document is subject to change without notice and may not be referred to as an OGC Standard.</p>
+
+<p id="_e8629e34-594d-6076-a18a-23d7b5df19ba">Recipients of this document are invited to submit, with their comments, notification of any relevant patent rights of which they are aware and to provide supporting documentation.</p>
+</clause>
+</legal-statement>
+
+<feedback-statement>
+
+<clause id="_4b48acd6-973f-402f-97b5-d1794d313105" anchor="boilerplate-standard-feedback" obligation="normative"><p id="_cb0581b2-acf2-995c-21c5-080c40d2dfd0">Suggested additions, changes and comments on this document are welcome and encouraged. Such suggestions may be submitted using the online change request form on OGC web site: <link target="http://ogc.standardstracker.org/"/></p>
+</clause>
+</feedback-statement>
+</boilerplate><preface><abstract id="_f539856c-0b8f-2d79-0c79-35fcee2183d2"><title id="_37c298bf-5619-a5c6-817b-d777b5ead0b1">Abstract</title><p id="_a37bdf91-056a-da35-dfbc-6e7286a08987">Round trip document.</p>
+</abstract><foreword id="_22706370-6f89-8661-be9a-89746306af61" obligation="informative">
+<title id="_67001cd2-f272-ceff-f849-7a43bc65e67d">Preface</title>
+<p id="_38293f3e-7265-8326-75ed-534592f6cb93">Preface.</p>
+</foreword><clause type="security" id="_11f014e9-c98a-c81d-eeb6-de3baa47ebea" obligation="informative">
+  <title id="_4d477b3a-b165-d2d5-db7e-e8925fda06e7">Security considerations</title>
+  <p id="_87632f48-a936-3f14-4cc0-36d21a86a8b8">No security considerations have been made for this document.</p></clause>
+</preface><sections>
+
+<clause id="_518f07ca-e040-523f-dd94-ac3463f37092" type="scope" obligation="normative">
+<title id="_f70b6ff6-6131-0e24-81e1-850dbe94b63d">Scope</title>
+<p id="_8fd3cacc-7522-a0af-6dc4-0a78e66b26f3">Scope.</p>
+</clause>
+
+<clause id="_cfa37ce1-897e-f412-1b2c-5e6e3797bc79" type="conformance" obligation="normative">
+<title id="_e246d3c1-cf3f-232c-cb69-d9b3793ef60f">Conformance</title>
+<p id="_aba806d7-305f-7f2c-044e-de78eda75978">This standard defines one conformance class.</p>
+
+<requirement id="_73044879-3aaa-db97-5835-b3e189881f60" model="ogc" type="conformanceclass" anchor="/conf/core"><identifier>/conf/core</identifier><classification><tag>target</tag><value>/req/core</value></classification> <requirement id="_8bdac8ee-9774-5996-fb18-09c97460c613" model="ogc" type="verification"> <identifier>/conf/core/valid-document</identifier></requirement><requirement id="_61c75ae9-450e-59a9-4424-e532035089e2" model="ogc" type="verification"> <identifier>/conf/core/stable-ids-listed</identifier></requirement><requirement id="_4029253f-428a-b395-2132-7521cdc1c19e" model="ogc" type="verification"> <identifier>/conf/core/special-chars</identifier></requirement>
+</requirement>
+</clause>
+
+
+
+<terms id="_85027dc7-c751-5242-c494-29e924e06c80" obligation="normative">
+<title id="_dfb2eab2-f980-6365-3c47-81d0eb272962">Terms and definitions</title><p id="_8c49041f-8363-1e0b-0484-6e1046987489">This document uses the terms defined in <link target="https://portal.ogc.org/public_ogc/directives/directives.php">OGC Policy Directive 49</link>, which is based on the ISO/IEC Directives, Part 2, Rules for the structure and drafting of International Standards. In particular, the word “shall” (not “must”) is the verb form used to indicate a requirement to be strictly followed to conform to this document and OGC documents do not use the equivalent phrases in the ISO/IEC Directives, Part 2.</p>
+
+<p id="_7bbae1f8-9cf5-3d71-b33b-b85f9ba4c251">This document also uses terms defined in the OGC Standard for Modular specifications (<link target="https://portal.opengeospatial.org/files/?artifact_id=34762">OGC 08-131r3</link>), also known as the ‘ModSpec’. The definitions of terms such as standard, specification, requirement, and conformance test are provided in the ModSpec.</p>
+
+<p id="_548e409e-2890-5c36-8c0d-528166f290d6">For the purposes of this document, the following additional terms and definitions apply.</p>
+<term id="_097256a3-8888-47b9-b1d2-7c4ebfab1dfe" anchor="term-Observation"><preferred><expression>
+<name>Observation</name>
+</expression>
+</preferred>
+<definition id="_b9c57de8-6c24-2c65-1069-c3441d0fa0ee"><verbal-definition id="_c3839d5e-a3f7-92b9-0d2d-43390f5ea759"><p id="_6a06c1e4-1bd4-9490-2c4a-5f10d69b8bf1">The act of estimating a value.</p></verbal-definition></definition>
+
+
+ <source status="identical" type="authoritative"><origin bibitemid="dep" type="inline" citeas="OGC 99-000"/></source></term>
+
+<term id="_9d71983a-e454-e503-2b1c-1e97cb110c29" anchor="term-Plain-term"><preferred><expression>
+<name>Plain term</name>
+</expression>
+</preferred>
+<definition id="_6a06cb69-e03f-5861-40a8-df632a598f2c"><verbal-definition id="_834965d4-e0df-dad2-a952-96c624301240"><p id="_1babe76c-d2f4-4b83-df6e-ffdf9aa8483a">Nothing extra.</p></verbal-definition></definition>
+ </term>
+
+<term id="_e6bb3448-236c-4834-ad85-4ae7ed8691e4" anchor="term-Sensor-_physical_"><preferred><expression>
+<name>Sensor (physical)</name>
+</expression>
+</preferred><admitted><expression>
+<name>detector</name>
+</expression>
+</admitted><admitted><expression>
+<name>sensing *device* &amp; co</name>
+</expression>
+</admitted>
+
+
+
+
+
+<definition id="_b90be324-acff-91d6-751b-029a749bd67d"><verbal-definition id="_ff425462-a70e-9be9-312c-0b932598570a"><p id="_cc25444e-f65b-36be-5a72-79e526fbaa06">A device &amp; its _probe_ that responds to a property of the world.</p></verbal-definition></definition>
+
+
+
+
+
+
+
+
+ <termnote id="_a04788f1-c341-2f40-d112-280b04f59833"><p id="_19c63669-f8ca-c78a-53a8-f6525fd9302b">Mapping (close): <link target="https://example.org/onto#Sensor"/></p>
+</termnote><termnote id="_bd8f45c0-e8f1-b6a6-ad9f-528eaf2b51a4"><p id="_fd356113-1c26-7a38-df6d-75bbaf7d7a86">Mapping (broader): <link target="https://example.org/onto#System"/></p>
+</termnote><termnote id="_506b0c78-97f9-a5b9-77a9-59d8c5297c27"><p id="_9de34ae2-e1ea-2a11-d003-26a3bdf280ae">Software sensors are out of scope.</p>
+</termnote><source status="modified" type="authoritative"><origin bibitemid="dep" type="inline" citeas="OGC 99-000"/><modification><p id="_5f9bb980-77d5-aca0-ff73-0d697845ffb6">modified</p>
+</modification>
+</source></term>
+
+<term id="_c42689a3-b0b7-ee27-268f-93ffeb162cd5" anchor="term-hand-written"><preferred><expression>
+<name>hand written</name>
+</expression>
+</preferred>
+<definition id="_a27d08b7-6183-96fd-7596-23d6424e0e25"><verbal-definition id="_cd650252-ffbb-1a77-8e16-3c4cb3f42f23"><p id="_0a35d2bf-cb18-4cb0-6e0e-c0ef044f8788">A term the records do not define.</p></verbal-definition></definition>
+ </term>
+</terms>
+
+<clause id="_4300ded6-c893-808d-3891-d6c6f84934ed" obligation="normative">
+<title id="_00a3a9d1-9a92-33e3-1c7d-488ac67ed73b">Core requirements class</title>
+<requirement id="_edb2ee68-e125-7e8a-992d-0b56590d89b7" model="ogc" type="class" anchor="/req/core"><identifier>/req/core</identifier><subject>Example document</subject><inherit>http://www.opengis.net/spec/example-dep/1.0/conf/core</inherit><inherit>http://www.opengis.net/spec/example-dep/1.0/conf/extra</inherit> <requirement id="_136c9a96-1480-928f-52b6-9420e25a2b26" model="ogc" type="general"> <identifier>/req/core/valid-document</identifier></requirement><requirement id="_0c5caa96-88c1-e904-1b55-4f88e8db9b15" model="ogc" type="general"> <identifier>/req/core/stable-ids-listed</identifier></requirement><requirement id="_2c5ee932-6926-58eb-03f3-8adc7e011320" model="ogc" type="general"> <identifier>/req/core/special-chars</identifier></requirement>
+</requirement>
+
+<requirement id="_91e7c2e5-25e1-7247-137d-2a92e9752976" model="ogc" anchor="/req/core/special-chars"> <identifier>/req/core/special-chars</identifier><component id="_3e871c3b-1870-5d07-5527-d13932d4ddbe" class="part"><p id="_16fb548b-7d56-f112-d0a2-aaacc88c9bb0">A key:: value SHALL be {name} escaped, *bold*, _under_, `code`, ^2^, #mark#, &lt;&lt;xref&gt;&gt;, [[anchor]], [text], a|b, a&lt;b &amp; c&gt;d, a + b +, back\slash, ‘quoted’ — dashed… see http://example.org/x_y.</p>
+</component>
+</requirement>
+
+<requirement id="_34f363ad-0649-439a-1053-3a7c27896682" model="ogc" anchor="/req/core/stable-ids-listed"> <identifier>/req/core/stable-ids-listed</identifier><component id="_b9c95fd5-c878-dad4-6896-d9d37fd68419" class="part"><p id="_29267630-b239-9182-0536-8281934ef788">A document SHALL list its identifiers.</p>
+</component>
+</requirement>
+
+<requirement id="_030e2754-16e4-11c4-d56a-45dac1c4945f" model="ogc" anchor="/req/core/valid-document"> <identifier>/req/core/valid-document</identifier><component id="_feb710e1-1ab2-bdcd-0335-366a21ff7ed6" class="part"><p id="_5248ee97-5277-85b8-ed05-100b86e42592">A document SHALL validate against the schema.</p>
+</component>
+</requirement>
+
+<recommendation id="_f829f772-3596-6823-30be-79698606504b" model="ogc" anchor="/rec/core/stable-ids"> <identifier>/rec/core/stable-ids</identifier><component id="_81652058-f752-a7af-f063-fdfde50c3159" class="part"><p id="_56afcbd1-f14c-a1b8-cef1-915257d6a862">A document SHOULD keep ids stable.</p>
+</component>
+</recommendation>
+
+<permission id="_92f8ca16-b517-b845-176e-75bb33e3ccf0" model="ogc" anchor="/per/core/extra-fields"> <identifier>/per/core/extra-fields</identifier><component id="_87782ee0-98f0-8514-a6e1-160c0f7a463b" class="part"><p id="_364174eb-0a18-6f23-664b-2be2e102008f">A document MAY carry extra fields.</p>
+</component>
+</permission>
+</clause>
+
+
+</sections><annex id="_342b0043-50ec-baf3-9631-26bfb3dff3af" obligation="normative">
+<title id="_a35624d2-6c9c-8346-4edb-b16c9c991b18">Abstract test suite</title>
+<requirement id="_6f054ae1-7a33-90ee-fa8a-98781fa8b47e" model="ogc" type="abstracttest" anchor="/conf/core/special-chars"><identifier>/conf/core/special-chars</identifier><classification><tag>target</tag><value>/req/core/special-chars</value></classification> <component id="_036a9070-ffa6-89e7-37e5-e7c8276ec00b" class="test-purpose"><p id="_cea298b8-3a3e-2429-f463-7c9c919965d6">Verify *escaping* of {name}.</p>
+</component><component id="_d725d8e7-57eb-4a46-6e54-b9fdfaba6019" class="test-method"><component id="_577061f7-cd3f-12dc-1e55-d513457eac42" class="step"><p id="_e42c4211-1adf-364f-4636-86fa98efb40d">Check key:: value, then a|b.</p>
+</component>
+</component>
+</requirement>
+
+<requirement id="_d75581d3-e2a6-1e4c-5cf6-4bbb0d0d0e62" model="ogc" type="abstracttest" anchor="/conf/core/stable-ids-listed"><identifier>/conf/core/stable-ids-listed</identifier><classification><tag>target</tag><value>/req/core/stable-ids-listed</value></classification> <component id="_2059e422-e171-f646-565b-a92ae9211b21" class="test-purpose"><p id="_c0ff1a82-2817-f053-91b2-c1dbddaae866">Verify listing.</p>
+</component>
+</requirement>
+
+<requirement id="_66fef012-7beb-4aef-00c8-477d136c7809" model="ogc" type="abstracttest" anchor="/conf/core/valid-document"><identifier>/conf/core/valid-document</identifier><classification><tag>target</tag><value>/req/core/valid-document</value></classification> <component id="_d437f6e4-0e9b-793f-5d93-b69b652642fa" class="test-purpose"><p id="_783df25f-dd2f-a9ee-2010-2144168c9ee6">Verify validity.</p>
+</component><component id="_6fa8f7b6-fe0f-faf0-306b-408a298355c8" class="test-method"><component id="_8b07e887-9d28-047f-94aa-c24e5fe34e57" class="step"><p id="_decfe585-4346-d662-0894-5798fc8e1e99">Validate the document against the schema.</p>
+</component>
+</component>
+</requirement>
+</annex><bibliography><references id="_de6eb2f8-5c39-999d-ef77-e6c2b64cf93b" normative="true" obligation="informative">
+<title id="_461cd77a-5cfe-f57e-70ab-04e5c4142c2b">Normative references</title><p id="_02b1c060-f2f9-4bc4-035d-e49887f749e3">The following documents are referred to in the text in such a way that some or all of their content constitutes requirements of this document. For dated references, only the edition cited applies. For undated references, the latest edition of the referenced document (including any amendments) applies.</p>
+<bibitem anchor="dep" id="_1677d191-77ca-b12c-8748-6152d9a9253e"><formattedref format="application/x-isodoc+xml">Example dependency</formattedref><docidentifier type="OGC">OGC 99-000</docidentifier><docnumber>99-000</docnumber><language>en</language><script>Latn</script></bibitem>
+</references></bibliography>
+</metanorma>

@@ -173,11 +173,13 @@ class ShapeTests(unittest.TestCase):
 
 
 class Stage2Tests(unittest.TestCase):
-    def test_a_term_record_is_left_out_of_the_yaml_to_xml_comparison(self):
-        # no extractor reads terms back from the XML yet, so a term must not appear as X001 ("in the YAML, not in the XML")
+    def test_a_term_record_the_document_lacks_is_x001_by_designation_and_never_a_kind_mismatch(self):
+        # terms are matched by designation (term_fidelity), not by identifier: Metanorma does not carry our ids
         term = {"kind": "term", "id": "/term/sensor", "term": "Sensor", "definition": "d"}
         _, summary = stage2("c1_clean", SPIKE + [term])
-        self.assertNotIn("X001", {f["rule"] for f in summary["findings"]}, idents(summary))
+        found = {(f["rule"], f["key"]) for f in summary["findings"]}
+        self.assertIn(("X001", "term:/term/sensor"), found)
+        self.assertFalse([k for r, k in found if r == "X002"], found)
         self.assertEqual(summary["records"], len(SPIKE) + 1)
 
     def test_clean_document_has_only_metanorma_messages(self):
