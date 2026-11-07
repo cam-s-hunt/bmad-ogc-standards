@@ -75,7 +75,7 @@ a target standard repository, to be created later). Prototype; not registered wi
   the eval harness is saved in the git-ignored `_bmad/custom/bmad-eval.user.toml` (permissions off, so deliberately not a team setting);
   persona evals use a generated fixture project (`evals/build_persona_fixture.py`, cases in `evals/ogcspec-agent-*/cases.json`; **built, not yet run**: the owner is to look at it first).
   Evals re-run with 3 runs and three arms (skill 69/72, plain model with the schema 63/72, plain model 32/72): see the second-pass sections of
-  `docs/eval-report-2026-11-07.md`. The `ogcspec-review` description was tightened and re-tested; the React pull-request misfire remains.
+  `docs/eval-report-2026-11-07.md`. The `ogcspec-review` description was tightened and re-tested; the React pull-request misfire seen with the skill staged alone did not occur with two competing review skills staged (36 sessions).
 - The installed copy in `.claude/skills/` is refreshed with `DISABLE_TELEMETRY=1 DO_NOT_TRACK=1 npx --offline skills@1.7.6 add ./skills --skill '*' --agent claude-code --copy -y`
   (the package is in the npx cache); `python3 .claude/skills/bmad/scripts/setup.py --project-root . --skill .claude/skills/bmad --root .claude/skills --status`
   should report `current: true`.

@@ -234,3 +234,22 @@ What did differ, from the transcripts (graders' notes, not rubric items):
   (they listed the questions): the main cause of that failure was probably that the persona was bypassed, not the principle's wording.
 - Weak items to fix before the next pass: add "no abstract_test whose steps only restate the requirement"; require an explicit "a person
   mints or approves identifiers" for the URI item (five of six runs passed on "your identifier"; one substituted a relative id).
+
+## `ogcspec-review` description with competing skills staged (`..165632-ogcspec-review-triggers`), 3 runs per query
+
+Owner's decision "test with a competitor skill". The trigger runner stages one skill only, so I ran a patched **copy** of `run_triggers.py`
+(kept in the session scratchpad, not in the repository; the BMAD tool is untouched) that also copies two real installed skills into the
+clean room: `bmad-review` and `bmad-code-review`. Same 12 queries, current (tightened) description of `ogcspec-review`.
+
+| query group | fired (of 3 runs each) |
+|---|---|
+| 4 queries about reviewing the standard's records or tests (should fire) | 3, 3, 3, 3 |
+| React pull-request review | **0** |
+| Django code review, git-diff review, design-document review, cover-letter proofreading | 0, 0, 0, 0 |
+| write the records / run the gate / emit the AsciiDoc (sibling skills, absent here) | 3, 3, 3: not judgeable, same as before |
+
+**Conclusion: the earlier React pull-request hit was an artefact of testing the skill alone.** With a general review skill and a code-review
+skill available, `ogcspec-review` did not fire on any unrelated review query and still fired on all four in-scope ones. The wording change
+is not shown to be necessary or sufficient by this run (the old wording was not run with competitors), so I leave the tightened wording in
+place and do not claim it was the fix. Limits: 36 sessions, one model family, two competitors, and the in-scope queries did not have a
+competitor that also claims "review requirements" (a project that installs a general requirements-review skill could change that).
