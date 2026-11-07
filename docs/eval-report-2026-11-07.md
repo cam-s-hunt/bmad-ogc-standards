@@ -69,3 +69,84 @@ skills behave when several are installed together; the revised rubrics; the verb
 `bmad-eval` with the harness JSON (the `claude` command with `--dangerously-skip-permissions`, `skill_dir` `.claude/skills`, `home_files`
 `.claude/.credentials.json`) is not recorded in the project's BMAD customization, so each run passes `--harness`. Use `--runs 3` for a result
 that counts as settled.
+
+
+# Second pass, 2026-11-07: three runs, three arms, revised rubrics
+
+Run after the owner's go-ahead. Same five invented "widget" cases, with the **revised** rubrics in `evals/ogcspec-modspec/cases.json`;
+**3 runs per case per arm** (45 sessions, none failed); graders were sonnet-class subagents, one per case, writing `grading.json` into
+each run folder under `_bmad-output/eval-reports/` (git-ignored: `20261107-160748-modspec-baseline-r3` for the skill and the bare model,
+`20261107-161250-modspec-schemaonly-r3` for the third arm). Three runs meets BMAD's bar for "settled" as a *count*, but the cases are
+invented, I wrote the rubrics, and it is one model family; read it as "reasonably repeatable on these cases", not as proof.
+
+Arms: **skill** (the whole `ogcspec-modspec` skill), **bare** (nothing staged), **schema-only** (the skill with its "How to work" and "Limits"
+sections removed: only the record-kind table, the field notes and the worked example). Schema-only answers the question the first pass could
+not: how much of the gap is just knowing the record format?
+
+| case | skill | bare | schema-only |
+|---|---|---|---|
+| draft-widget-1 | 21 / 21 | 9 / 21 | 21 / 21 |
+| identifier-uri-2 | 12 / 12 | 8 / 12 | 9 / 12 |
+| external-dependency-3 | 12 / 12 | 3 / 12 | 9 / 12 |
+| profile-4 | 12 / 12 | 6 / 12 | 12 / 12 |
+| vague-requirement-5 | 12 / 15 | 6 / 15 | 12 / 15 |
+| total (rubric items passed) | 69 / 72 | 32 / 72 | 63 / 72 |
+
+## What it shows
+
+- **Most of the gap is the record format.** Giving a plain model only the format closes 31 of the 37 points the skill earns over nothing
+  (bare 32, schema-only 63, skill 69, of 72). The working rules (the "How to work" section) account for at most 6 points, and those six are not
+  clean evidence either (next two bullets).
+- **The six points are two judgment calls in the rubric.** In `external-dependency-3` all three schema-only runs failed one compound item
+  ("states it did not touch the gate config"): they said the config "will need" the external reference, never that they had not added it; the skill
+  runs said so outright. In `identifier-uri-2` all three schema-only runs wrote only the records the prompt literally asked for and omitted
+  the test and conformance class; the skill runs wrote the full set. Whether those are skill advantages or rubric artefacts is not settled.
+- **The verbal-form fix held.** In `vague-requirement-5` all nine skill/schema-only runs kept SHOULD (no upgrade to SHALL), no run invented a
+  completeness list or a test, and the bare runs invented one every time (a 20-word minimum, five or six criteria, a test with steps). The
+  case's remaining failure is the same in both non-bare arms: item 3 asks that the model name **both** what "complete" means **and who
+  judges it**; every run asked the first and none the second. That is a rubric that bundles two checks, and also a small gap in the skill's
+  open-questions instruction, which lists "what counts as the thing" but not "who decides". Not changed.
+- **Bare is graded against a schema it was never shown.** It invents `type`, `identifier`, `dependencies`, `imports` and `status: draft`,
+  which is why it loses. The comparison that does not depend on the schema is the vague-requirement one above.
+
+## Caveats and things no item caught (from the graders)
+
+- The schema-only arm's SKILL.md still pointed at `references/record-format-proposal.md`, which that arm did not contain; all three
+  `draft-widget-1` schema-only runs said so. It did not change their scores, but the arm is not perfectly clean.
+- In `draft-widget-1` every skill and schema-only run rewrote "must" as "SHALL" (the skill's rule says shall/must becomes a requirement);
+  only the skill runs told the user. Every run also added tests and a conformance class nobody asked for (needed to satisfy the
+  one-test-per-requirement rule); only some said so. No item checks either.
+- Items that every run passed (`draft-widget-1` items 5-7, the no-scripts item) discriminate nothing. Item 2 of `vague-requirement-5` passed even
+  for bare runs that said "can't be tested" and then invented a test anyway. Several items are compound. These rubrics should be tightened before
+  the next pass; I did not change them after seeing this run.
+- A skill run (profile case) ran a stray `grep -rl "req/core" /` over the whole filesystem and then `pkill -f "grep -rl"`: not a script,
+  but not tidy either, and the harness has no sandbox.
+- Run folders are not committed. One earlier schema-only attempt that exited 3 (the runner could not find the harness settings because the
+  skill sat outside the project) was an empty failed folder and was removed; no completed run was deleted.
+
+## Second pass: `ogcspec-review` description, 3 runs per query
+
+12 queries (the 9 from the first pass plus 3 unrelated "review" queries I added: a code review of a Django module, a design-document review, a
+git-diff review), 3 runs each, with the skill staged alone in a clean room. Results per query (fired in N of 3 runs):
+
+| query | should fire | old wording | new wording |
+|---|---|---|---|
+| 4 queries about reviewing the standard's records or tests | yes | 3, 3, 3, 3 | 3, 3, 3, 3 |
+| write the requirement records / run the gate / emit the AsciiDoc (sibling skills) | no (not judgeable) | 3, 3, 3 | 3, 3, 3 |
+| review this pull request for bugs in my React app | no | **3** | **3** |
+| review the changes in this git diff before I merge | no | **3** | 0 |
+| review my design document for clarity and structure | no | 1 | 0 |
+| do a code review of the authentication module (Django) | no | 0 | 0 |
+| proofread my cover letter | no | 0 | 0 |
+
+The new wording (applied to `skills/ogcspec-review/SKILL.md`, owner's decision "tighten and re-test"): "Reviews OGC ModSpec requirement records
+(the YAML files under records_dir: requirements, abstract tests, conformance classes) through independent readers. Use when the user asks to
+review the standard's requirements or records, or for a second pair of eyes on them. Not for code, pull requests or other documents."
+
+What this shows: the first pass's React hit was **not noise** (3 of 3 with the old wording). The new wording removes the git-diff and
+design-document misfires and keeps all four should-fire queries at 3 of 3, but **does not stop the React pull-request query, even though the
+description now says "Not for ... pull requests"**. I do not know why; in this test the skill is the only one staged, so the model may load
+whatever is nearest to "review". The sibling-skill queries still cannot be judged (no better skill is staged). To tell whether the misfire
+happens in a real install, run the same queries with the other skills staged alongside; `run_triggers.py` stages one skill only, so that needs
+a fixture like the persona one. Two attempts were skipped by the runner (exit 3, no harness found) before `--project-root` was passed; they
+left folders marked skipped, which were kept.

@@ -1,38 +1,50 @@
 [
-  {
-    "query": "review the requirements records in records/ with independent readers",
-    "should_trigger": true
-  },
-  {
-    "query": "second pair of eyes on the standard before I send it to the SWG",
-    "should_trigger": true
-  },
-  {
-    "query": "can you review these ModSpec records and tell me what a tester couldn't test?",
-    "should_trigger": true
-  },
-  {
-    "query": "review my abstract tests for fidelity to the requirements",
-    "should_trigger": true
-  },
-  {
-    "query": "write the requirement records for a new requirements class",
-    "should_trigger": false
-  },
-  {
-    "query": "run the gate on the records and report findings",
-    "should_trigger": false
-  },
-  {
-    "query": "review this pull request for bugs in my React app",
-    "should_trigger": false
-  },
-  {
-    "query": "proofread my cover letter",
-    "should_trigger": false
-  },
-  {
-    "query": "emit the AsciiDoc from the records and compile it",
-    "should_trigger": false
-  }
+ {
+  "query": "review the requirements records in records/ with independent readers",
+  "should_trigger": true
+ },
+ {
+  "query": "second pair of eyes on the standard before I send it to the SWG",
+  "should_trigger": true
+ },
+ {
+  "query": "can you review these ModSpec records and tell me what a tester couldn't test?",
+  "should_trigger": true
+ },
+ {
+  "query": "review my abstract tests for fidelity to the requirements",
+  "should_trigger": true
+ },
+ {
+  "query": "write the requirement records for a new requirements class",
+  "should_trigger": false
+ },
+ {
+  "query": "run the gate on the records and report findings",
+  "should_trigger": false
+ },
+ {
+  "query": "review this pull request for bugs in my React app",
+  "should_trigger": false
+ },
+ {
+  "query": "proofread my cover letter",
+  "should_trigger": false
+ },
+ {
+  "query": "emit the AsciiDoc from the records and compile it",
+  "should_trigger": false
+ },
+ {
+  "query": "do a code review of the authentication module in my Django project",
+  "should_trigger": false
+ },
+ {
+  "query": "review my design document for clarity and structure",
+  "should_trigger": false
+ },
+ {
+  "query": "review the changes in this git diff before I merge",
+  "should_trigger": false
+ }
 ]

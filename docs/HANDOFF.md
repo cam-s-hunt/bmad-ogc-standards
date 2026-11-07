@@ -4,7 +4,7 @@ For a fresh session started in this repository. Read `CLAUDE.md` first, then `do
 
 ## What this is
 A BMAD module (`ogcspec`) for agentic, spec-anchored development of a standard intended for OGC submission (built for
-a target standard repository, to be created later). Prototype; not registered with or endorsed by OGC; MIT licensed (owner's decision 2026-11-07; OGC's own rules on contributed material not checked).
+a target standard repository, to be created later). Prototype; not registered with or endorsed by OGC; MIT licensed (owner's decision 2026-11-07; OGC's rules on contributed material were read, not resolved: `docs/research/ogc-ipr-and-licensing.md`).
 
 ## What exists (all tested; see README for what is and is not verified)
 - `skills/ogcspec-gate/scripts/gate.py`: the canonical rule engine. Rules M (ModSpec Part 1 requirement numbers),
@@ -67,6 +67,15 @@ a target standard repository, to be created later). Prototype; not registered wi
   questions drafted in `docs/maintainer-questions.md` for the owner to post (nothing sent); a first eval pass ran (`docs/eval-report-2026-11-07.md`,
   cases in `evals/`; quick look only, Architect and Editor not evaluated); ontology pins in `ONTOLOGY-PINS` and `docs/research/ontology-grounding.md`
   (no mapping written: it needs a target term list). Next phase chosen by the owner: ontology grounding, which is blocked on the target's terms.
+- **Owner decisions, second round, 2026-11-07:** pushed (CI passed); terms: the owner chose a new `term` record kind, proposal in
+  `skills/ogcspec-modspec/references/term-record-proposal.md` (design only, **no code**, awaiting approval of its section 8); maintainer questions: owner posts them;
+  the OGC IPR/contribution rules were read by a subagent (`docs/research/ogc-ipr-and-licensing.md`, not legal advice, two sources unopened);
+  the GitHub install route was run in a throwaway folder: `npx skills@1.7.6 add cam-s-hunt/bmad-ogc-standards --skill '*' --agent claude-code --copy -y`
+  installed all 7 skills, byte-identical to `skills/` (the `bmad setup ogcspec` step after it was not re-run from that install);
+  the eval harness is saved in the git-ignored `_bmad/custom/bmad-eval.user.toml` (permissions off, so deliberately not a team setting);
+  persona evals use a generated fixture project (`evals/build_persona_fixture.py`, cases in `evals/ogcspec-agent-*/cases.json`; **built, not yet run**: the owner is to look at it first).
+  Evals re-run with 3 runs and three arms (skill 69/72, plain model with the schema 63/72, plain model 32/72): see the second-pass sections of
+  `docs/eval-report-2026-11-07.md`. The `ogcspec-review` description was tightened and re-tested; the React pull-request misfire remains.
 - The installed copy in `.claude/skills/` is refreshed with `DISABLE_TELEMETRY=1 DO_NOT_TRACK=1 npx --offline skills@1.7.6 add ./skills --skill '*' --agent claude-code --copy -y`
   (the package is in the npx cache); `python3 .claude/skills/bmad/scripts/setup.py --project-root . --skill .claude/skills/bmad --root .claude/skills --status`
   should report `current: true`.

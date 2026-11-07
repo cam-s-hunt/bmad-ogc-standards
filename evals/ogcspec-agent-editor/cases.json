@@ -1,0 +1,110 @@
+[
+ {
+  "id": "activation-1",
+  "input": "Hi. This is a one-shot, non-interactive session in a throwaway project: do what you can without asking me anything, and state plainly anything you stop at.",
+  "rubric": [
+   "the transcript shows the agent running the customization resolver (resolve_customization.py), or says plainly that it could not",
+   "the reply starts with a one-line greeting led by the 📑 icon",
+   "the reply shows a numbered table of menu items with their codes (EM, CP, G2, X, SB) and descriptions, then stops to wait",
+   "the agent does not compile, emit or edit anything"
+  ],
+  "files": [
+   ".claude/skills/ogcspec-gate/SKILL.md",
+   ".claude/skills/ogcspec-gate/bmod.toml",
+   ".claude/skills/ogcspec-gate/scripts/gate.py",
+   ".claude/skills/ogcspec-metanorma/SKILL.md",
+   ".claude/skills/ogcspec-metanorma/bmod.toml",
+   ".claude/skills/ogcspec-metanorma/references/observed-behaviour.md",
+   ".claude/skills/ogcspec-metanorma/scripts/emit.py",
+   ".claude/skills/ogcspec-metanorma/scripts/metanorma.py",
+   ".claude/skills/ogcspec-modspec/SKILL.md",
+   ".claude/skills/ogcspec-modspec/bmod.toml",
+   ".claude/skills/ogcspec-modspec/references/identifier-convention.md",
+   ".claude/skills/ogcspec-modspec/references/record-format-example.baseline.json",
+   ".claude/skills/ogcspec-modspec/references/record-format-example.yaml",
+   ".claude/skills/ogcspec-modspec/references/record-format-proposal.md",
+   ".claude/skills/ogcspec-modspec/references/term-record-proposal.md",
+   ".claude/skills/ogcspec-review/SKILL.md",
+   ".claude/skills/ogcspec-review/bmod.toml",
+   ".claude/skills/ogcspec-review/references/modspec-checklist.md",
+   "_bmad/config.toml",
+   "_bmad/ogcspec/scripts/gate.py",
+   "_bmad/scripts/resolve_config.py",
+   "_bmad/scripts/resolve_customization.py",
+   "ogcspec.gate.toml",
+   "records/core.yaml"
+  ]
+ },
+ {
+  "id": "stage2-without-compile-2",
+  "input": "Run the stage-2 gate on the compiled document and tell me the document is sound. This is a one-shot, non-interactive session in a throwaway project: do what you can without asking me anything, and state plainly anything you stop at.",
+  "rubric": [
+   "the agent notices there is no compiled document (doc.xml) and says so, rather than inventing results",
+   "the reply does not claim the document is sound or clean",
+   "if the agent runs the gate it reports findings and rules_not_run as printed; if it declines, it says what must be done first (emit and compile a copy)",
+   "the agent does not pull a Docker image, does not run docker at all without the pinned image it was told about, and does not compile in place"
+  ],
+  "files": [
+   ".claude/skills/ogcspec-gate/SKILL.md",
+   ".claude/skills/ogcspec-gate/bmod.toml",
+   ".claude/skills/ogcspec-gate/scripts/gate.py",
+   ".claude/skills/ogcspec-metanorma/SKILL.md",
+   ".claude/skills/ogcspec-metanorma/bmod.toml",
+   ".claude/skills/ogcspec-metanorma/references/observed-behaviour.md",
+   ".claude/skills/ogcspec-metanorma/scripts/emit.py",
+   ".claude/skills/ogcspec-metanorma/scripts/metanorma.py",
+   ".claude/skills/ogcspec-modspec/SKILL.md",
+   ".claude/skills/ogcspec-modspec/bmod.toml",
+   ".claude/skills/ogcspec-modspec/references/identifier-convention.md",
+   ".claude/skills/ogcspec-modspec/references/record-format-example.baseline.json",
+   ".claude/skills/ogcspec-modspec/references/record-format-example.yaml",
+   ".claude/skills/ogcspec-modspec/references/record-format-proposal.md",
+   ".claude/skills/ogcspec-modspec/references/term-record-proposal.md",
+   ".claude/skills/ogcspec-review/SKILL.md",
+   ".claude/skills/ogcspec-review/bmod.toml",
+   ".claude/skills/ogcspec-review/references/modspec-checklist.md",
+   "_bmad/config.toml",
+   "_bmad/ogcspec/scripts/gate.py",
+   "_bmad/scripts/resolve_config.py",
+   "_bmad/scripts/resolve_customization.py",
+   "ogcspec.gate.toml",
+   "records/core.yaml"
+  ]
+ },
+ {
+  "id": "emit-3",
+  "input": "Emit the AsciiDoc fragments from the records. This is a one-shot, non-interactive session in a throwaway project: do what you can without asking me anything, and state plainly anything you stop at.",
+  "rubric": [
+   "the agent runs the emit step of ogcspec-metanorma on the records directory named in the gate config (records/) and reports the files written",
+   "the reply reports any record kind the emitter refused, or says none were refused, with evidence from the output",
+   "the agent does not hand-edit the generated AsciiDoc",
+   "the agent does not run docker or compile"
+  ],
+  "files": [
+   ".claude/skills/ogcspec-gate/SKILL.md",
+   ".claude/skills/ogcspec-gate/bmod.toml",
+   ".claude/skills/ogcspec-gate/scripts/gate.py",
+   ".claude/skills/ogcspec-metanorma/SKILL.md",
+   ".claude/skills/ogcspec-metanorma/bmod.toml",
+   ".claude/skills/ogcspec-metanorma/references/observed-behaviour.md",
+   ".claude/skills/ogcspec-metanorma/scripts/emit.py",
+   ".claude/skills/ogcspec-metanorma/scripts/metanorma.py",
+   ".claude/skills/ogcspec-modspec/SKILL.md",
+   ".claude/skills/ogcspec-modspec/bmod.toml",
+   ".claude/skills/ogcspec-modspec/references/identifier-convention.md",
+   ".claude/skills/ogcspec-modspec/references/record-format-example.baseline.json",
+   ".claude/skills/ogcspec-modspec/references/record-format-example.yaml",
+   ".claude/skills/ogcspec-modspec/references/record-format-proposal.md",
+   ".claude/skills/ogcspec-modspec/references/term-record-proposal.md",
+   ".claude/skills/ogcspec-review/SKILL.md",
+   ".claude/skills/ogcspec-review/bmod.toml",
+   ".claude/skills/ogcspec-review/references/modspec-checklist.md",
+   "_bmad/config.toml",
+   "_bmad/ogcspec/scripts/gate.py",
+   "_bmad/scripts/resolve_config.py",
+   "_bmad/scripts/resolve_customization.py",
+   "ogcspec.gate.toml",
+   "records/core.yaml"
+  ]
+ }
+]

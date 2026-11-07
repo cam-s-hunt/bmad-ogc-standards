@@ -44,7 +44,7 @@ endorsed by OGC.**
 
 ## Not verified
 
-- The `npx skills add` install route (only its copy step was reproduced by hand).
+- The `npx skills add` install route from GitHub was run once on 2026-11-07 in a throwaway folder: it copied all 7 skills, identical to `skills/`. The `bmad setup ogcspec` step that registers the module was not repeated from that install.
 - Real documents: ModSpec Part 1, OGC API - Processes Part 1 (draft), Records Part 1 and Connected Systems Parts 1
   and 2 were compiled and read by the extractor; per-rule counts are in `docs/real-document-check-2026-11-06.md`
   and `tests/corpus/observed-2026-11-06.json`, and `tests/test_corpus.py` re-checks them when `OGCSPEC_CORPUS`

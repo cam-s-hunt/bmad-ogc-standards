@@ -1,6 +1,6 @@
 ---
 name: ogcspec-review
-description: 'Reviews ModSpec requirement records through independent readers. Use when the user says ''review the requirements'', ''review these records'' or ''second pair of eyes on the standard''.'
+description: 'Reviews OGC ModSpec requirement records (the YAML files under records_dir: requirements, abstract tests, conformance classes) through independent readers. Use when the user asks to review the standard''s requirements or records, or for a second pair of eyes on them. Not for code, pull requests or other documents.'
 ---
 # Review requirement records
 
