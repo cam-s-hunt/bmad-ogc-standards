@@ -312,5 +312,40 @@ class Step3RoundTrip(unittest.TestCase):
             self.assertFalse([m for m in messages if m.startswith(("STANDOC_7", "STANDOC_38"))], messages)
 
 
+@unittest.skipUnless(image_available(), "SKIPPED: pinned Metanorma image not present locally; round trip not run")
+class WorkedExampleBaseline(unittest.TestCase):
+    """The worked example in ogcspec-modspec/references passes the gate, stage 2 included, with exactly its baseline file.
+    The baseline holds the example's two empty-profile messages and external-dependency messages, plus two that come from
+    the test document's header and offline bibliography (OGC_14, STANDOC_40)."""
+
+    def test_example_and_its_baseline_exit_zero(self):
+        refs = SKILLS / "ogcspec-modspec" / "references"
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t)
+            (root / "records").mkdir()
+            shutil.copy(refs / "record-format-example.yaml", root / "records" / "all.yaml")
+            (root / "ogcspec.gate.toml").write_text(
+                'records_dir = "records"\ncore = "/req/core"\nstyle = ["uml"]\n[[normative_references]]\n'
+                'name = "Example dependency"\nuri_prefix = "https://example.org/spec/dep/1.0/"\n', encoding="utf-8")
+            self.assertEqual(emit.main(["--records", str(root / "records"), "--out", str(root / "build"),
+                                        "--config", str(root / "ogcspec.gate.toml")]), 0)
+            (root / "build" / "doc.adoc").write_text(
+                HEADER.replace("http://www.opengis.net/spec/example-dep/1.0/", "https://example.org/spec/dep/1.0/"),
+                encoding="utf-8")
+            proc = subprocess.run([sys.executable, str(HERE.parent / "metanorma.py"), "--image", IMAGE,
+                                   "--adoc", str(root / "build" / "doc.adoc"), "--formats", "xml"],
+                                  capture_output=True, text=True)
+            (root / "build" / "compile.json").write_text(proc.stdout or "{}", encoding="utf-8")
+            self.assertEqual(proc.returncode, 0, proc.stdout[-2000:])
+            args = (root / "ogcspec.gate.toml", refs / "record-format-example.baseline.json", root / "build" / "doc.xml",
+                    root / "build" / "compile.json", root / "build" / "doc.err.html")
+            code, summary = gate.run(*args)
+            self.assertEqual(summary["baseline"], {"unexpected": [], "missing": []})
+            self.assertEqual(code, 0)
+            # and the baseline is load-bearing: without it the same run fails
+            code, _ = gate.run(args[0], None, *args[2:])
+            self.assertEqual(code, 1)
+
+
 if __name__ == "__main__":
     unittest.main()

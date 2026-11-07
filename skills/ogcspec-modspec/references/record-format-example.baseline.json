@@ -1,0 +1,10 @@
+{
+  "expected": [
+    "X010:MODSPEC_1:/conf/prof",
+    "X010:MODSPEC_1:/req/prof",
+    "X010:MODSPEC_2:/conf/core",
+    "X010:MODSPEC_2:/req/core",
+    "X010:OGC_14:Submitters is missing!",
+    "X010:STANDOC_40:Could not retrieve OGC 99-000: no access to online site"
+  ]
+}

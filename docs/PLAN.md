@@ -43,9 +43,9 @@ tools), **inferred**, or **open**.
    requirements class's `inherit` with `depends_on` for external ones (G004, M014, X003), profiles (M013, `profile: true`),
    class titles emitted, opt-in `uml` and `layout` style groups (S003-S005). Req 5 needs no rule or field: it follows from
    Reqs 4, 8, 11, 15 (M004-M006). The Req 12 completeness rule was deliberately not written, because it would encode the
-   contested reading (question 6) and fire on approved documents. **Still open:** a baseline for the two `MODSPEC_1` messages
-   Metanorma gives an empty profile; the other three corpus documents (Processes, Records, Features: no local clone; four of six match the snapshot); protecting `accepted` records from an agent that can edit
-   them. Leave the rest as HUMAN review steps in the BMAD workflow. ATS 12 and ATS 19 are "inspect the document" tests, so the
+   contested reading (question 6) and fire on approved documents. **Closed 2026-11-07:** a baseline for the two `MODSPEC_1` messages
+   Metanorma gives an empty profile (`record-format-example.baseline.json`, with a test); all six corpus documents rebuilt at their
+   pinned SHAs and matching the snapshot; `accepted` protected by branch protection in the target repository (owner decision, no gate rule). Leave the rest as HUMAN review steps in the BMAD workflow. ATS 12 and ATS 19 are "inspect the document" tests, so the
    gate checks structure only.
 4. **Put the questions to OGC** (list below) before encoding any contested reading as a blocking rule.
 5. **Ground the vocabulary** in BFO/CCO and SOSA/SSN. Working references (inference, caveats in

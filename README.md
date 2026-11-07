@@ -28,9 +28,9 @@ endorsed by OGC.**
   skills are accepted as third-party names, not as BMAD-namespace skills.
 - Gate rules are ModSpec Part 1 requirements cited by number (M), two draft-Policy rules (P), opt-in house style (S)
   and compiled-document checks (X), plus record-structure rules (G) and, since plan step 3, rules for the added record
-  fields. 96 gate tests run on 2026-11-07 with 3 skipped (the corpus tests: `OGCSPEC_CORPUS` is not set). By hand, four of the six corpus
-  documents were rebuilt after the step-3 gate changes and gave the same record and rule counts as the 2026-11-06 snapshot;
-  Processes, Records and the Features compile-failure case were not rebuilt. Earlier, 72 passed with the corpus enabled. The gate fails
+  fields. 96 gate tests ran on 2026-11-07 with none skipped, the corpus tests included (`OGCSPEC_CORPUS` set to
+  rebuilt copies of all six real documents at their pinned SHAs, compiled on the pinned image): record and rule counts equal the
+  2026-11-06 snapshot after the step-3 changes, and Features still fails closed (X000). The gate fails
   closed on an aborted compile, a compile result that is not an explicit exit 0, and a document with no definitions.
 - Emitter round trip (records -> AsciiDoc -> pinned Metanorma, offline -> extractor) reproduces 10 records,
   comparing subject, target, statement, purpose, steps, inherit, requirements, tests and (since step 3) title and the derived

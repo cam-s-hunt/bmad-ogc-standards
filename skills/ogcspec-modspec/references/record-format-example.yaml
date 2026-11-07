@@ -6,6 +6,8 @@
 # and the emitter writes titles and dependencies into the document; this file passes the gate with the config below.
 # It is one list in one file for brevity; the recommended layout is one record per file (proposal, section 10).
 #
+# Baseline for the Metanorma messages this example produces: record-format-example.baseline.json (see proposal, section 9).
+#
 # Gate config this example assumes (ogcspec.gate.toml). Top-level keys must come before the first [[table]]:
 #   records_dir = "records"
 #   core = "/req/core"
@@ -97,7 +99,7 @@
 # A profile (Req 19) is two ordinary records: a requirements class that lists no requirements and builds on other classes
 # (profile: true), and its conformance class with no tests. The emitter derives the conformance class's dependencies, so
 # the union of /conf/core and /conf/ext is stated in the document without being written twice. Metanorma itself warns
-# (MODSPEC_1) that both classes are empty; accept those two messages in the baseline (proposal, section 9).
+# (MODSPEC_1) that both classes are empty; accept those two messages in the baseline (record-format-example.baseline.json; proposal, section 9).
 - kind: requirements_class
   id: /req/prof
   title: Profile

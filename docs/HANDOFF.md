@@ -38,12 +38,30 @@ a target standard repository, to be created later). Prototype; not registered wi
   them equal, X003 compares them), class titles emitted as `.pass:c[...]`, `emit.py --config`. These run on authored YAML only.
   Module version is now 0.3.0 (behaviour change: previously accepted unknown fields are G002). **Checked:** gate 96 tests, 3
   skipped (corpus); metanorma 24 tests including two round trips on the pinned image; validators pass. **Corpus:** the unit
-  test skips (needs all six documents), but four of six (ModSpec, Connected Systems 1, 2 and the Part 3 draft) were rebuilt from
-  local clones and gave the snapshot's counts exactly; Processes, Records and Features were not rebuilt (no local clone).
-  **Not verified:** an empty profile gives two Metanorma `MODSPEC_1`
-  messages that need a baseline entry; nothing protects `accepted` from an agent; no agent or review lens was run on real records.
+  test needs all six documents. On 2026-11-07 it was run with all six rebuilt (Processes, Records and Features fetched with
+  `git init; git fetch --depth 1 <url> <sha>; git checkout FETCH_HEAD`, exact SHAs checked, then compiled on the pinned image;
+  Features does not compile, as recorded): the corpus tests pass and the gate run reports 96 tests, none skipped.
+  **Baseline for the empty profile:** `record-format-example.baseline.json` (written with `--write-baseline` from a real run; keys
+  carry no line numbers or paths); test `WorkedExampleBaseline` (metanorma tests: 25, none skipped). **`accepted`:** owner chose
+  branch protection (code-owner review in the target repository, proposal section 8); no gate rule. Owner also kept
+  `profile: true` and version 0.3.0. **Persona and review run (2026-11-07, scratch project, placeholder records):** see the next paragraph.
+  **Not verified:** no agent or review lens was run on a real standard's records.
   A bug found along the way: top-level TOML keys appended after a `[[normative_references]]` table land inside it; the new
   tests and scripts put them first.
+- **Persona and review run, 2026-11-07, on made-up placeholder records (a "widget description" class with two requirements; not a
+  real standard).** Architect (installed skill, run by me in this session): drafted 7 files, every record `status: proposed`;
+  gate stage 1 clean (S005 layout ran; `rules_not_run` printed); BUILD chain emitted, compiled on the pinned image, stage 2 gave
+  only the two harness messages (`OGC_14`, `STANDOC_40`), so exit 1 without a baseline, as designed. Review (`ogcspec-review`
+  -> `bmad-review`, four lenses as separate subagents that saw only the records, the one-line description and the checklist,
+  so no "NOT INDEPENDENT" banner; I chose the sonnet model for them): adversarial 13, edge-case 9, structure 3 questions and no
+  cuts, prose 1 optional. **What it showed:** (1) every lens flagged that each test step restates its requirement and gives no
+  pass/fail criterion; the Architect's principle "write a step only from the requirement's own text" produces exactly that, so the
+  principle and the review disagree and which wins is the owner's decision. (2) The Architect draft did not report gaps the
+  lenses found (cardinality of a name, an empty parts list, undefined terms "widget" and "part"); the persona says a gap
+  reported is worth more than one invented, so that is a miss in this run, not evidence the reviewers were wrong. (3) Padding,
+  by my reading: adversarial 12 ("not a defect") and 13 (its own caveat), and parts of 9 to 11 (for example a "title" on
+  abstract tests, which the record format does not have). One run, one model family, tiny records: it shows the chain works end
+  to end, not that the personas or lenses are good.
 - The installed copy in `.claude/skills/` is refreshed with `DISABLE_TELEMETRY=1 DO_NOT_TRACK=1 npx --offline skills@1.7.6 add ./skills --skill '*' --agent claude-code --copy -y`
   (the package is in the npx cache); `python3 .claude/skills/bmad/scripts/setup.py --project-root . --skill .claude/skills/bmad --root .claude/skills --status`
   should report `current: true`.

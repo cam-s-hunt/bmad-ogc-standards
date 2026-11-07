@@ -163,8 +163,12 @@ corpus of approved OGC documents (see the status of the corpus test in `docs/HAN
 - A record without `status` stays valid and means "no workflow state recorded". The agents treat it as `proposed`.
 - It is record-only: not emitted (the published document must not carry draft markers). The gate checks only that the value is one of the two (G003).
 - It is a marker, **not a control**: an agent with write access can edit the field. Mechanical enforcement needs a control
-  outside the record, such as the "approved identifiers" file or code-owner review that the design doc sketches. **Open**
-  (owner), as is whether one field per record is enough when identifiers (H1) and normative wording (H2) are approved separately.
+  outside the record. **Decided (owner, 2026-11-07): branch protection in the target standard's repository, no gate rule.** Put
+  the records directory under `CODEOWNERS` (for example `/records/ @<the-people-who-approve>`) and turn on "Require review from
+  Code Owners" for the default branch, so nothing reaches it without a named person's review. This is coarse: it guards the
+  directory, not the `status` field, so a reviewer must read the diff for a changed `status`. The template cannot configure a
+  repository's settings and this repository holds no records, so nothing is set here. **Open:** whether one field per record is
+  enough when identifiers (H1) and normative wording (H2) are approved separately.
 
 ## 9. Profiles (Req 19)
 
@@ -178,7 +182,10 @@ defined) of the base standards". A new record kind would break both tools (v6), 
   constituents go in `depends_on`.
 - **Observed** (section 13): this compiles on the pinned image; the XML carries the empty class and the derived `inherit` list.
   Metanorma adds two severity-2 messages of its own, `MODSPEC_1` on `/req/prof` ("has no corresponding Requirement") and on
-  `/conf/prof` ("has no corresponding Conformance test"). They are expected and are accepted only through the baseline.
+  `/conf/prof` ("has no corresponding Conformance test"). They are expected and are accepted only through the baseline. `record-format-example.baseline.json` is that baseline for the worked example, written with `--write-baseline`
+  from a real run on the pinned image (two runs gave identical bytes; the keys carry no line numbers, paths or timestamps). A test
+  (`WorkedExampleBaseline`) checks that the example plus this file exits 0 and that it exits 1 without it. The gate does not
+  suppress `MODSPEC_1` for profiles: a finding is accepted only through an explicit baseline, a human decision.
 - `profile: true` is this project's design choice, not in the owner's list of decisions; it exists so the gate can tell a
   deliberate profile from an unfinished class. M013 checks that a profile (a) lists no requirements, (b) has a conformance
   class with no tests, (c) builds on at least one class. (b) is the reading of Req 19; (a) is **inferred**, because a
@@ -231,7 +238,7 @@ the snapshot taken before these changes in every case (70, 244, 284 and 31 recor
 | 1 | Conformance-class dependencies | Option B: derive dependencies inside the standard from `inherit`, author external ones in `depends_on`. |
 | 2 | Does Req 12 cover a dependency that exists only through a requirements class's `inherit`? | Not the owner's to decide: added to the questions for the ModSpec maintainers (PLAN, question 6). |
 | 3 | `uml_package` | Add as an optional field; its rules are opt-in. |
-| 4 | `status` (proposed or accepted) | Add the label. Protecting `accepted` records against an agent that can edit them is a separate control and is not decided. |
+| 4 | `status` (proposed or accepted) | Add the label. Protecting `accepted` records against an agent that can edit them: branch protection with code-owner review in the target repository (section 8); no gate rule. |
 | 5 | `title` | Emit it in the document, after a test compile shows how Metanorma carries it. |
 | 6 | Profiles | Design them in step 3, after a test compile. |
 | 7 | One record per file | Yes, path follows the id; the check is opt-in. |
