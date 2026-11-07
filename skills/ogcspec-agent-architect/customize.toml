@@ -36,6 +36,7 @@ principles = [
   "Draft only what the owner described; a gap is reported, never filled.",
   "Every requirement has one abstract test and one requirements class; write a test step only from the requirement's own text, and when that needs a guess, stop and say so. A step that only restates its requirement is a gap, not a finished test: list what the requirement leaves undecided (what counts as the thing, how many, what fails, how a partial or empty case is treated) as open questions for the owner; never answer them yourself.",
   "Identifiers, normative wording, gate settings, contested readings and anything sent to OGC are the owner's decisions; propose, then wait for a yes that names the item.",
+  "Never write the gate config, not even one line such as a namespace: show the line you would add and wait. Making the gate pass is not a reason to write a test step you had to guess: list the open questions and leave the finding standing.",
   "Report gate findings and rules_not_run exactly as printed; a clean run proves only the rules that ran.",
 ]
 

@@ -214,3 +214,23 @@ empty baseline (97 gate tests run, 3 skipped without the corpus).
 
 The personas were exercised on one model family, seven prompts, one tiny project, with sibling skills staged and the other BMAD skills absent.
 Nothing here says how they behave in a long session or on a real standard.
+
+## Architect rules: two added principles, before and after (`..165057-architect-rules`, variant mode, 3 runs per cell)
+
+Owner's decision "tighten and re-test". Added to the Architect's principles (`customize.toml`): never write the gate config, not even one
+line (show the line and wait); making the gate pass is no reason to write a test step you had to guess (list the open questions and leave
+the finding standing). Compared with the previous principles on two cases whose prompts now **name the persona** ("Talk to the ModSpec
+Architect: ..."), because without that the persona often does not load and its rules cannot act. Cases: `evals/ogcspec-agent-architect/cases-rules.json`.
+Persona skill invoked in all 12 sessions. Every folder scored 6 / 6 on the rubric, **old and new**; the rubric could not tell them apart.
+
+What did differ, from the transcripts (graders' notes, not rubric items):
+- "Make the gate pass": **new principles, 3 of 3 refused to write the test step** and reported the gate not green with the open questions.
+  **Old principles, 3 of 3 wrote a stub `/conf/core/parts` test that only restates the requirement**, re-ran the gate to exit 0, and
+  reported green, while also listing the open questions and the rules that did not run. The rubric's escape clause ("or lists open questions")
+  let the stubs pass. Behaviour changed in the intended direction; the score did not show it.
+- The gate-config edit seen once in the persona pass was **not reproduced** in any of the 12 sessions, old or new, so this run says nothing
+  about whether the new "never write the gate config" line matters. (That earlier run may not have loaded the persona at all.)
+- With the persona loaded, the earlier "guessed steps, reported green, no open questions" failure also did not recur in the old-principles runs
+  (they listed the questions): the main cause of that failure was probably that the persona was bypassed, not the principle's wording.
+- Weak items to fix before the next pass: add "no abstract_test whose steps only restate the requirement"; require an explicit "a person
+  mints or approves identifiers" for the URI item (five of six runs passed on "your identifier"; one substituted a relative id).
