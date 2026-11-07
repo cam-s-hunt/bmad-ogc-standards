@@ -29,6 +29,9 @@ Record files: YAML under `records_dir`, each file one mapping or a list of mappi
                       class's `inherit`, see conformance_inherit)
   recommendation      id  statement   (never needs a test)
   permission          id  statement   (never needs a test)
+  term                id  term, definition, aliases[] (optional), mappings[] (optional: relation, ontology, iri, note),
+                      note (optional). A defined word and its links to ontology terms; see
+                      ogcspec-modspec/references/term-record-proposal.md. Rules T001-T005, authored records only.
 Any kind may carry `status` (proposed or accepted, record-only). A field outside this table is G002. The rules for
 these fields (G002-G004, M013, M014, S003-S005) run on authored YAML records only, never on records rebuilt from
 compiled XML, so they cannot fire on an approved OGC document. See ogcspec-modspec/references/record-format-proposal.md.
@@ -46,6 +49,8 @@ Config (project-owned TOML, the gate's only configuration surface):
   [verbal_forms]  optional override of the forms P002 looks for, per kind. Default: the preferred forms of
                 ISO/IEC Directives Part 2 (ed. 9.0, 2021-05) clause 7, matched ignoring case. Set
                 `iso_verbal_forms = false` to turn P002/P003 off.
+  [[ontologies]]  key, iri_prefix (optional pin): the ontologies a term mapping may name (T002, T003)
+  [terms]       mappings = "normative" (default) or "informative": whether a term must carry a mapping (T005)
   [[normative_references]]  name, uri_prefix: external inherit targets match a prefix or a name. If none are
                 declared, only relative inherit targets (starting "/") are checked by M009.
 
@@ -88,6 +93,7 @@ STYLE_ID_PATTERNS = {
     "conformance_class": re.compile(rf"^/conf/{NAME}$"),
     "recommendation": re.compile(rf"^/rec/{NAME}/{NAME}$"),
     "permission": re.compile(rf"^/per/{NAME}/{NAME}$"),
+    "term": re.compile(rf"^/term/{NAME}$"),
 }
 KINDS = tuple(STYLE_ID_PATTERNS)
 STATUS_VALUES = ("proposed", "accepted")
@@ -99,7 +105,10 @@ KNOWN_FIELDS = {
     "permission": frozenset({"statement"}),
     "abstract_test": frozenset({"target", "purpose", "steps"}),
     "conformance_class": frozenset({"target", "tests", "title", "depends_on"}),
+    "term": frozenset({"term", "definition", "aliases", "mappings", "note"}),
 }
+MAPPING_FIELDS = frozenset({"relation", "ontology", "iri", "note"})
+MAPPING_RELATIONS = ("exact", "close", "broader", "narrower", "related")  # SKOS-style closeness words (owner, 2026-11-07)
 FIELD_HINTS = {
     ("conformance_class", "inherit"): "a conformance class's dependencies inside this document are derived from its "
                                       "requirements class's `inherit`; write only dependencies outside the document as `depends_on`",
@@ -121,6 +130,17 @@ RULES = {
     "G004": ("depends_on names only conformance classes outside this document", "structure",
              "record-format-proposal.md section 4: dependencies inside the document are derived from `inherit`, "
              "so authoring them would give two sources of truth"),
+    "T001": ("no two terms share a designation (term or alias, ignoring case)", "structure",
+             "term-record-proposal.md section 5: a word with two definitions is ambiguous"),
+    "T002": ("a term mapping names an ontology declared in the gate config", "structure",
+             "term-record-proposal.md section 4: mirrors M009's declared-reference rule; the ontologies are the owner's list"),
+    "T003": ("a term mapping's iri starts with its ontology's declared iri_prefix", "structure",
+             "term-record-proposal.md section 5: form only; says nothing about whether the meaning is right"),
+    "T004": ("a term mapping's relation is one of exact, close, broader, narrower, related", "structure",
+             "term-record-proposal.md section 3 (owner decision 2, 2026-11-07)"),
+    "T005": ("with normative mappings, every term carries at least one mapping", "structure",
+             "term-record-proposal.md decision 4 (2026-11-07): an absent or empty `mappings` is reported; there is no "
+             "`unresolved` marker yet. Runs only when [terms] mappings is normative (the default)"),
     "M001": ("every component has an identifier, and identifiers are unique", "spec",
              "08-131r7 Req 2 (/req/core/all-components-assigned-uri)"),
     "M002": ("each requirement is listed by exactly one requirements class", "spec",
@@ -248,7 +268,85 @@ def field_findings(records: list[dict]) -> list[Finding]:
         if "depends_on" in r and not (isinstance(r["depends_on"], list)
                                       and all(isinstance(d, str) and d.strip() for d in r["depends_on"])):
             out.append(Finding("G003", f"{ident}#depends_on", "depends_on must be a list of non-empty identifier strings"))
+        if kind == "term":
+            out += term_field_findings(r, ident)
     return out
+
+
+def term_field_findings(r: dict, ident: str) -> list[Finding]:
+    """G002/G003 for a term record, including the inner keys of each mapping entry (keyed `<id>#mappings[i].<key>`)."""
+    out: list[Finding] = []
+    for field in ("term", "definition"):
+        if not (isinstance(r.get(field), str) and r[field].strip()):
+            out.append(Finding("G003", f"{ident}#{field}", f"a term needs a non-empty string {field}, not {r.get(field)!r}"))
+    if "note" in r and not (isinstance(r["note"], str) and r["note"].strip()):
+        out.append(Finding("G003", f"{ident}#note", f"note must be a non-empty string, not {r['note']!r}"))
+    if "aliases" in r and not (isinstance(r["aliases"], list) and all(isinstance(a, str) and a.strip() for a in r["aliases"])):
+        out.append(Finding("G003", f"{ident}#aliases", "aliases must be a list of non-empty strings"))
+    if "mappings" in r:
+        if not isinstance(r["mappings"], list):
+            out.append(Finding("G003", f"{ident}#mappings", "mappings must be a list of mapping entries"))
+            return out
+        for i, m in enumerate(r["mappings"]):
+            where = f"{ident}#mappings[{i}]"
+            if not isinstance(m, dict):
+                out.append(Finding("G003", where, "a mapping entry must be a mapping with relation, ontology and iri"))
+                continue
+            for key in sorted(str(k) for k in m if k not in MAPPING_FIELDS):
+                near = difflib.get_close_matches(key, sorted(MAPPING_FIELDS), n=1)
+                hint = f"did you mean {near[0]!r}?" if near else f"known fields: {sorted(MAPPING_FIELDS)}"
+                out.append(Finding("G002", f"{where}.{key}", f"a mapping entry has no field {key!r}; {hint}"))
+            for key in ("relation", "ontology", "iri"):
+                if not (isinstance(m.get(key), str) and m[key].strip()):
+                    out.append(Finding("G003", f"{where}.{key}", f"a mapping needs a non-empty string {key}, not {m.get(key)!r}"))
+            if "note" in m and not (isinstance(m["note"], str) and m["note"].strip()):
+                out.append(Finding("G003", f"{where}.note", f"note must be a non-empty string, not {m['note']!r}"))
+    return out
+
+
+def term_findings(terms: dict[str, dict], config: dict) -> tuple[list[Finding], dict[str, str]]:
+    """T001-T005 on authored term records. Form only: nothing here judges whether a mapping is right."""
+    out: list[Finding] = []
+    not_run: dict[str, str] = {}
+    designations: dict[str, list[str]] = {}
+    for tid, t in terms.items():
+        aliases = t.get("aliases") if isinstance(t.get("aliases"), list) else []
+        names = [t.get("term"), *aliases]
+        for name in names:
+            if isinstance(name, str) and name.strip():
+                designations.setdefault(" ".join(name.lower().split()), []).append(tid)
+    for name, ids in sorted(designations.items()):
+        if len(ids) > 1:
+            out.append(Finding("T001", name, f"{name!r} is the designation of more than one term: {sorted(set(ids))}"
+                               if len(set(ids)) > 1 else f"term {ids[0]} lists {name!r} more than once (term and alias)"))
+    declared = {o["key"]: o for o in (config.get("ontologies") or []) if isinstance(o, dict) and isinstance(o.get("key"), str)}
+    for tid, t in terms.items():
+        mappings = t.get("mappings") if isinstance(t.get("mappings"), list) else []
+        for i, m in enumerate(mappings):
+            if not isinstance(m, dict):
+                continue  # G003
+            where = f"{tid}#mappings[{i}]"
+            relation, ontology, iri = m.get("relation"), m.get("ontology"), m.get("iri")
+            if isinstance(relation, str) and relation.strip() and relation not in MAPPING_RELATIONS:
+                out.append(Finding("T004", where, f"relation {relation!r} is not one of {list(MAPPING_RELATIONS)}"))
+            if not (isinstance(ontology, str) and ontology.strip()):
+                continue  # G003
+            if ontology not in declared:
+                out.append(Finding("T002", where, f"ontology {ontology!r} is not declared in [[ontologies]] "
+                                   f"(declared: {sorted(declared) or 'none'})"))
+                continue
+            prefix = declared[ontology].get("iri_prefix")
+            if isinstance(iri, str) and iri.strip() and isinstance(prefix, str) and not iri.startswith(prefix):
+                out.append(Finding("T003", where, f"iri {iri!r} does not start with the iri_prefix {prefix!r} declared for {ontology!r}"))
+            elif isinstance(iri, str) and iri.strip() and not isinstance(prefix, str):
+                out.append(Finding("T003", where, f"ontology {ontology!r} declares no iri_prefix, so {iri!r} cannot be checked"))
+    if (config.get("terms") or {}).get("mappings") == "informative":
+        not_run["T005"] = "[terms] mappings = informative"
+    else:
+        for tid, t in terms.items():
+            if not (isinstance(t.get("mappings"), list) and t["mappings"]):
+                out.append(Finding("T005", tid, f"{tid} carries no mapping to an ontology term, and mappings are normative"))
+    return out, not_run
 
 
 def conformance_inherit(records: list[dict], config: dict) -> dict[str, list[str]]:
@@ -354,7 +452,7 @@ def check(records: list[dict], config: dict, authored: bool = False) -> tuple[li
     if authored:
         out += field_findings(records)
     else:
-        for rule in ("G002", "G003", "G004", "M013", "M014", "S003", "S004", "S005"):
+        for rule in ("G002", "G003", "G004", "M013", "M014", "S003", "S004", "S005", "T001", "T002", "T003", "T004", "T005"):
             not_run[rule] = "applies to authored YAML records only"
     valid: list[dict] = []
     for r in records:
@@ -469,6 +567,9 @@ def check(records: list[dict], config: dict, authored: bool = False) -> tuple[li
         not_run["M011"] = not_run["M012"] = "no `core` configured"
 
     if authored:
+        term_out, term_not_run = term_findings(by_kind["term"], config)
+        out += term_out
+        not_run.update(term_not_run)
         refs = config.get("normative_references", [])
         prefixes = [ref["uri_prefix"] for ref in refs if ref.get("uri_prefix")]
         names = {ref["name"] for ref in refs if ref.get("name")}
@@ -808,7 +909,9 @@ def check_xml(xml_path: Path, yaml_records: list[dict], config: dict,
     out += [Finding(f.rule, f"xml:{f.key}", f.message) for f in found]
     out += [Finding(f.rule, f"xml:{f.key}", f.message) for f in annex_findings(xml_path)]
 
-    by_yaml = {(r.get("kind"), r.get("id")): r for r in yaml_records}
+    # Terms are not read back from the compiled XML yet (no extractor), so they are left out of the YAML-to-XML
+    # comparison; otherwise X001 would report every term. Term fidelity is a later stage.
+    by_yaml = {(r.get("kind"), r.get("id")): r for r in yaml_records if r.get("kind") != "term"}
     for ident, deps in conformance_inherit(yaml_records, config).items():  # what the emitter writes as inherit::
         if ("conformance_class", ident) in by_yaml:
             by_yaml[("conformance_class", ident)] = {**by_yaml[("conformance_class", ident)], "inherit": deps}
@@ -848,7 +951,7 @@ def run(config_path: Path, baseline_path: Path | None, xml_path: Path | None = N
     summary: dict = {
         "records": len(records),
         "findings": [f.as_dict() for f in findings],
-        "rules_run": sorted(r for r in RULES if r not in not_run and r[0] in "GMPS"),
+        "rules_run": sorted(r for r in RULES if r not in not_run and r[0] in "GMPST"),
         "rules_not_run": dict(sorted(not_run.items())),
         "notes": notes,
     }

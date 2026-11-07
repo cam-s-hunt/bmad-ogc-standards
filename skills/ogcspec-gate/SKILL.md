@@ -24,6 +24,9 @@ Rules (the table in `gate.py` gives each one's basis and source text):
   `uml_package`, `title`, `depends_on`). `G004` is a `depends_on` entry naming a conformance class of the same document (it is
   derived). `M013` checks a profile (Req 19: no requirements or tests of its own, builds on at least one class) and `M014` that
   `depends_on` entries resolve (Req 12). These run on authored YAML records only, never on records rebuilt from compiled XML.
+- `T001`-`T005` check term records (authored YAML only): a word is not defined twice, a mapping names a declared ontology
+  (`[[ontologies]]`), its address starts with that ontology's prefix, its relation is one of the five words, and (with the default
+  `[terms] mappings = "normative"`) every term has a mapping. They check form only, never whether a mapping is right.
 - `S001`/`S002` are house style (identifier shape, prefix membership); they run only with `style = ["prefix"]`.
   `S003`/`S004` (a UML package per requirements class, none shared) need `style = ["uml"]`, and `S005` (one record per file,
   path follows the id) needs `style = ["layout"]`.

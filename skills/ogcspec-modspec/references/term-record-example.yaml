@@ -1,0 +1,38 @@
+# Worked example for references/term-record-proposal.md. Every identifier, name, definition and address here is a
+# placeholder for illustration: none is assigned, registered or proposed for a real standard, and the "ontology" is
+# invented (example.org). The mappings are NOT claims about BFO, CCO, SOSA or SSN.
+#
+# Gate config this example assumes (ogcspec.gate.toml). Top-level keys must come before the first [[table]]:
+#   records_dir = "records"
+#   [[ontologies]]
+#   key = "example-onto"
+#   iri_prefix = "https://example.org/onto#"
+#   [terms]
+#   mappings = "normative"      # the default; "informative" turns T005 off
+#
+# The gate checks the form only (T001-T005, G002, G003): a known ontology, an address that starts with its prefix, one of
+# the five relation words, no duplicate word. It cannot tell whether a mapping is right; with normative mappings that is
+# the owner's and the reviewers' job. Terms are not emitted into the Metanorma document yet (see the proposal, section 9).
+
+- kind: term
+  id: /term/sensor
+  status: proposed
+  term: Sensor
+  definition: A device that responds to a property of the world.
+  aliases:
+    - detector
+  mappings:
+    - relation: close
+      ontology: example-onto
+      iri: https://example.org/onto#Sensor
+      note: The example ontology also covers software sensors; this standard does not.
+
+- kind: term
+  id: /term/observation
+  status: proposed
+  term: Observation
+  definition: The act of estimating the value of a property.
+  mappings:
+    - relation: exact
+      ontology: example-onto
+      iri: https://example.org/onto#Observation

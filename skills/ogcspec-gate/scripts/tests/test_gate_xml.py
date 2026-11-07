@@ -173,6 +173,13 @@ class ShapeTests(unittest.TestCase):
 
 
 class Stage2Tests(unittest.TestCase):
+    def test_a_term_record_is_left_out_of_the_yaml_to_xml_comparison(self):
+        # no extractor reads terms back from the XML yet, so a term must not appear as X001 ("in the YAML, not in the XML")
+        term = {"kind": "term", "id": "/term/sensor", "term": "Sensor", "definition": "d"}
+        _, summary = stage2("c1_clean", SPIKE + [term])
+        self.assertNotIn("X001", {f["rule"] for f in summary["findings"]}, idents(summary))
+        self.assertEqual(summary["records"], len(SPIKE) + 1)
+
     def test_clean_document_has_only_metanorma_messages(self):
         code, summary = stage2("c1_clean")
         rules = {f["rule"] for f in summary["findings"]}

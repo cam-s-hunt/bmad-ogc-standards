@@ -18,6 +18,7 @@ generated from them (`ogcspec-metanorma`) and is never edited by hand.
 | `conformance_class` | `/conf/<class>` | `target` (a requirements class id), `tests[]`; optional `title`, `depends_on[]` |
 | `recommendation` | `/rec/<class>/<name>` | `statement` (never needs a test) |
 | `permission` | `/per/<class>/<name>` | `statement` (never needs a test) |
+| `term` | `/term/<name>` | `term`, `definition`; optional `aliases[]`, `mappings[]` (each: `relation`, `ontology`, `iri`, optional `note`), `note` |
 
 Any kind may carry `status: proposed` or `accepted`. Any other field is G002. The fields are explained, with their ModSpec
 basis and what each rule checks, in `references/record-format-proposal.md`; `references/record-format-example.yaml` uses all of
@@ -30,6 +31,11 @@ them. In short:
 - A **profile** (Req 19) is a requirements class with `profile: true`, no `requirements` and the classes it builds on in
   `inherit`, plus its conformance class with no `tests`. Metanorma warns that both are empty (`MODSPEC_1`); that is expected and
   goes in the baseline.
+- A **term** (`references/term-record-proposal.md`, `references/term-record-example.yaml`) is a word the standard defines, with optional
+  links to ontology terms. `relation` is one of exact, close, broader, narrower, related. `ontology` must be a key declared in the gate
+  config's `[[ontologies]]` and `iri` must start with that entry's `iri_prefix`. The owner chose **normative** mappings, so the gate
+  reports a term with no mapping (T005). The gate checks the form only, never whether a mapping is correct. Terms are checked but not yet
+  emitted into the Metanorma document.
 - Recommended layout: one record per file, path = id without the leading `/` plus `.yaml` (`style = ["layout"]` checks it).
 
 A file holds one mapping or a list of them. Membership of a requirement in a class is the class's `requirements`
@@ -48,9 +54,12 @@ Identifiers may be relative (`/req/core`) or absolute under the document's `name
    The owner's answer changes the requirement first and the steps second. (Review run 2026-11-07: every lens flagged this.)
 3. Write `status: proposed` on every record you draft; never write `accepted`, which is a person's act. Identifiers you write are proposals. A person mints and approves identifiers and any `opengis.net`
    URI; never present one as assigned.
-4. External `inherit` targets must match a `[[normative_references]]` `uri_prefix` in the gate config. Add
+4. Draft a `term` only from a definition the owner supplies, in the owner's words. Write a `mappings` entry only from a source the owner
+   names (an ontology the gate config declares, and the address they give); never pick an ontology term yourself, because the sources
+   disagree on core words. Where a mapping is unresolved, leave `mappings` out and say so as an open question.
+5. External `inherit` targets must match a `[[normative_references]]` `uri_prefix` in the gate config. Add
    the reference to the config only when the user has named the dependency.
-5. After editing, run `ogcspec-gate` and report its findings as they are. Never edit the baseline file to
+6. After editing, run `ogcspec-gate` and report its findings as they are. Never edit the baseline file to
    make a finding disappear; that is a human decision.
 
 ## Limits to state when relevant

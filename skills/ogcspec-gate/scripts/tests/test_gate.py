@@ -68,6 +68,117 @@ def add_class(records, name, inherit, target_type="Capability specification docu
     ]
 
 
+ONTOLOGY_CONFIG = CONFIG + '''
+[[ontologies]]
+key = "example-onto"
+iri_prefix = "https://example.org/onto#"
+'''
+TERM = {"kind": "term", "id": "/term/sensor", "term": "Sensor", "definition": "A device that responds to a property.",
+        "mappings": [{"relation": "close", "ontology": "example-onto", "iri": "https://example.org/onto#Sensor"}]}
+
+
+def with_terms(*terms):
+    records = copy.deepcopy(GOOD)
+    records += [copy.deepcopy(t) for t in terms]
+    return records
+
+
+def findings_of(records, config=ONTOLOGY_CONFIG):
+    _, _, summary = rules(records, config)
+    return {(f["rule"], f["key"]) for f in summary["findings"]}
+
+
+class TermRuleTests(unittest.TestCase):
+    def test_a_well_formed_term_is_clean_and_the_t_rules_run(self):
+        code, found, summary = rules(with_terms(TERM), ONTOLOGY_CONFIG)
+        self.assertEqual((code, found), (0, []))
+        for rule in ("T001", "T002", "T003", "T004", "T005"):
+            self.assertIn(rule, summary["rules_run"])
+
+    def test_terms_are_not_style_or_verbal_form_subjects(self):
+        t = copy.deepcopy(TERM)
+        t["definition"] = "A device that must respond and may not fail."  # P002/P003 read statements only
+        self.assertEqual(rules(with_terms(t), ONTOLOGY_CONFIG)[1], [])
+
+    def test_unknown_and_mistyped_fields(self):
+        t = copy.deepcopy(TERM)
+        t["defintion"] = "x"
+        t["aliases"] = "detector"
+        t["mappings"][0]["reletion"] = "close"
+        found = findings_of(with_terms(t))
+        self.assertIn(("G002", "/term/sensor#defintion"), found)
+        self.assertIn(("G003", "/term/sensor#aliases"), found)
+        self.assertIn(("G002", "/term/sensor#mappings[0].reletion"), found)
+
+    def test_missing_required_fields_and_malformed_mapping_entries(self):
+        found = findings_of(with_terms(
+            {"kind": "term", "id": "/term/a", "mappings": [{"relation": "exact"}, "oops"]}))
+        self.assertIn(("G003", "/term/a#term"), found)
+        self.assertIn(("G003", "/term/a#definition"), found)
+        self.assertIn(("G003", "/term/a#mappings[0].ontology"), found)
+        self.assertIn(("G003", "/term/a#mappings[0].iri"), found)
+        self.assertIn(("G003", "/term/a#mappings[1]"), found)
+
+    def test_t001_duplicate_designations_across_terms_and_within_one(self):
+        other = {"kind": "term", "id": "/term/detector", "term": "detector", "definition": "d", "aliases": ["SENSOR"],
+                 "mappings": TERM["mappings"]}
+        self.assertIn(("T001", "sensor"), findings_of(with_terms(TERM, other)))
+        same = copy.deepcopy(TERM)
+        same["aliases"] = ["sensor"]
+        self.assertIn(("T001", "sensor"), findings_of(with_terms(same)))
+
+    def test_t002_unknown_ontology_and_no_ontologies_declared(self):
+        t = copy.deepcopy(TERM)
+        t["mappings"][0]["ontology"] = "nope"
+        self.assertIn(("T002", "/term/sensor#mappings[0]"), findings_of(with_terms(t)))
+        self.assertIn(("T002", "/term/sensor#mappings[0]"), findings_of(with_terms(TERM), CONFIG))
+
+    def test_t003_iri_outside_the_declared_prefix(self):
+        t = copy.deepcopy(TERM)
+        t["mappings"][0]["iri"] = "https://other.example/onto#Sensor"
+        self.assertIn(("T003", "/term/sensor#mappings[0]"), findings_of(with_terms(t)))
+
+    def test_t004_relation_outside_the_five_words(self):
+        t = copy.deepcopy(TERM)
+        t["mappings"][0]["relation"] = "equivalent"
+        found = findings_of(with_terms(t))
+        self.assertIn(("T004", "/term/sensor#mappings[0]"), found)
+        self.assertNotIn("G003", {r for r, _ in found})
+
+    def test_t005_runs_only_for_normative_mappings(self):
+        bare = {"kind": "term", "id": "/term/plain", "term": "Plain", "definition": "d"}
+        empty = {"kind": "term", "id": "/term/empty", "term": "Empty", "definition": "d", "mappings": []}
+        found = findings_of(with_terms(bare, empty))
+        self.assertIn(("T005", "/term/plain"), found)
+        self.assertIn(("T005", "/term/empty"), found)
+        informative = ONTOLOGY_CONFIG + '\n[terms]\nmappings = "informative"\n'
+        _, _, summary = rules(with_terms(bare), informative)
+        self.assertEqual([f for f in summary["findings"] if f["rule"] == "T005"], [])
+        self.assertIn("T005", summary["rules_not_run"])
+
+    def test_t_rules_do_not_run_on_records_rebuilt_from_xml(self):
+        _, not_run = gate.check([dict(TERM)], {}, authored=False)
+        for rule in ("T001", "T002", "T003", "T004", "T005"):
+            self.assertIn(rule, not_run)
+
+    def test_term_ids_follow_the_prefix_style_only_when_enabled(self):
+        t = copy.deepcopy(TERM)
+        t["id"] = "/terms/sensor"
+        self.assertNotIn(("S001", "/terms/sensor"), findings_of(with_terms(t)))
+        styled = ONTOLOGY_CONFIG.replace('core = "/req/core"', 'core = "/req/core"\nstyle = ["prefix"]')
+        self.assertIn(("S001", "/terms/sensor"), findings_of(with_terms(t), styled))
+
+
+class TermExampleTests(unittest.TestCase):
+    def test_the_worked_term_example_passes_with_the_config_in_its_header(self):
+        example = Path(__file__).resolve().parents[3] / "ogcspec-modspec" / "references" / "term-record-example.yaml"
+        records = yaml.safe_load(example.read_text(encoding="utf-8"))
+        config = ('records_dir = "records"\n\n[[ontologies]]\nkey = "example-onto"\n'
+                  'iri_prefix = "https://example.org/onto#"\n\n[terms]\nmappings = "normative"\n')
+        code, found, summary = rules(records, config)
+        self.assertEqual((code, found), (0, []), summary["findings"])
+
+
 class SpecRuleTests(unittest.TestCase):
     def test_good_set_is_clean(self):
         code, found, summary = rules(GOOD)

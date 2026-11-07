@@ -1,6 +1,6 @@
 # A `term` record kind: proposal (not implemented)
 
-**Status: decided by the owner on 2026-11-07 (see 'Decisions' at the end); not yet implemented.** The owner chose option A ("add a `term` record kind") on 2026-11-07. This file is the
+**Status: decided by the owner on 2026-11-07 (see 'Decisions' at the end). Stage 1 (record kind, gate rules T001-T005, tests, worked example) implemented 2026-11-07; emitting terms into the document is NOT started and waits on two owner decisions (the carrier for a normative mapping; an `unresolved` marker).** The owner chose option A ("add a `term` record kind") on 2026-11-07. This file is the
 design for approval. **No code has changed**: the gate and the emitter still reject a `term` record (G001 unknown kind; the emitter
 exits 2, see `record-format-proposal.md` section 1). Approving this file starts the work; it does not do it.
 
@@ -73,12 +73,13 @@ Adding an ontology to the config is a gate-config change, so it stays the owner'
 
 | rule | check | notes |
 |---|---|---|
-| T001 | two terms share a `term` or alias (case-insensitive) | cheap, no false-positive risk |
-| T002 | a mapping `ontology` key is not declared in `[[ontologies]]` | mirrors the `inherit` prefix rule |
-| T003 | a mapping `iri` does not start with its ontology's `iri_prefix` | catches typos and wrong-ontology IRIs only; says nothing about meaning |
-| T004 | `relation` outside the five words | same shape as G003 |
-| T005 (opt-in, off by default) | a defined term never appears in any `statement` | substring match, **inferred** to give false hits on plurals and inflections; informational only |
-| T006 (opt-in, off by default) | a capitalised term that has a record appears in prose undefined | not proposed: needs a definition of "use" the owner has not given |
+| T001 | two terms share a `term` or alias (ignoring case), or a term repeats its own word as an alias | built; no false-positive risk |
+| T002 | a mapping's `ontology` key is not declared in `[[ontologies]]` | built; mirrors the `inherit` prefix rule |
+| T003 | a mapping's `iri` does not start with its ontology's `iri_prefix` | built; form only |
+| T004 | `relation` outside the five words | built |
+| T005 | with `[terms] mappings = "normative"` (the default), a term has no mapping (absent or empty `mappings`) | built 2026-11-07; there is **no `unresolved` marker** yet, so this reports only absent or empty `mappings` (owner decision pending); with `"informative"` the rule goes to `rules_not_run` |
+| (not built) | a defined term never appears in a `statement` | substring matching misfires on plurals; not built (decision 4) |
+| (not built) | a capitalised word that has a record appears in prose undefined | needs a definition of "use" nobody has given; not built |
 
 G002/G003 would extend to the new kind's fields as they do for the others. The new rules would run on authored YAML only, like
 G002-G004. **Not proposed:** any rule claiming a mapping is *correct*.
