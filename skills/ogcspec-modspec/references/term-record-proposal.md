@@ -77,7 +77,7 @@ Adding an ontology to the config is a gate-config change, so it stays the owner'
 | T002 | a mapping's `ontology` key is not declared in `[[ontologies]]` | built; mirrors the `inherit` prefix rule |
 | T003 | a mapping's `iri` does not start with its ontology's `iri_prefix` | built; form only |
 | T004 | `relation` outside the five words | built |
-| T005 | with `[terms] mappings = "normative"` (the default), a term has no mapping (absent or empty `mappings`) | built 2026-11-07; there is **no `unresolved` marker** yet, so this reports only absent or empty `mappings` (owner decision pending); with `"informative"` the rule goes to `rules_not_run` |
+| T005 | with `[terms] mappings = "normative"` (not the default), a term has no mapping (absent or empty `mappings`) | built 2026-11-07; there is **no `unresolved` marker** yet, so this reports only absent or empty `mappings` (owner decision pending); with the default `"informative"` the rule goes to `rules_not_run` |
 | (not built) | a defined term never appears in a `statement` | substring matching misfires on plurals; not built (decision 4) |
 | (not built) | a capitalised word that has a record appears in prose undefined | needs a definition of "use" nobody has given; not built |
 
@@ -122,13 +122,14 @@ virtual systems are in scope, and whether definitions are normative (`ontology-g
 |---|---|---|
 | 1 | Shape of the record | Approved as proposed: `/term/<slug>` ids, `aliases` kept. |
 | 2 | Mapping relations | Five words: exact, close, broader, narrower, related. |
-| 3 | Mapping status | **Normative** (the owner chose this against the research note's informative recommendation, after being told that the SOSA/SSN-to-BFO sources contradict each other on Sensor, Property, Observation, Sample and System). The document-level setting `[terms] mappings` defaults to the owner's choice, `"normative"`. |
+| 3 | Mapping status | First answer: **normative** (against the research note's informative recommendation, after being told the SOSA/SSN-to-BFO sources contradict each other on Sensor, Property, Observation, Sample and System). **Reversed the same day, after the owner asked how OGC does it:** the Connected Systems API (OGC 23-001, read from the local HTML copy) treats term-to-SOSA links as informative (definitions cite `[SOURCE: SOSA/SSN]`, relationships are in notes and an informative annex; SOSA addresses are binding only as values in tables such as its Table 6). The owner chose "follow the CS API pattern": mappings are **informative** by default; `[terms] mappings = "normative"` is still available and turns T005 on. The carrier in the document is a note to entry (Directives Part 2 ed. 9.0, 16.5.9 allows provisions there; not needed if informative). |
 | 4 | Gate rules | T001-T004 plus a rule for a term with no mapping or an `unresolved` one (a finding the baseline may accept deliberately). T005 (defined but never used) and T006 (used but never defined) not built. |
 | 5 | Emit or record-only | Experiment first (a test compile on the pinned image), then propose emit or record-only with evidence. **Run 2026-11-07; results in section 9; the emit-or-not decision is still the owner's.** |
 | 6 | Version | Keep 0.3.0. |
 
-Consequence of 3: with normative mappings the owner and reviewers carry the correctness of each link, and the gate checks only form (known
-ontology, address prefix, relation word, presence). The skill and docs must say so; nothing here claims a mapping is correct.
+Consequence of 3: whichever status is chosen, the gate checks form only (known ontology, address prefix, relation word, and presence when
+normative); nothing here claims a mapping is correct. Still open from the CS API pattern: the term's `[SOURCE: ...]` citation is not a field
+yet (it would need a bibliography key; a record-format change for the owner), and the `unresolved` marker for T005 is not defined.
 
 ## 9. Experiment: how Metanorma carries terms (observed 2026-11-07, pinned image `daa12cf0...`, metanorma 2.5.16, offline)
 

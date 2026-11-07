@@ -73,6 +73,10 @@ ONTOLOGY_CONFIG = CONFIG + '''
 key = "example-onto"
 iri_prefix = "https://example.org/onto#"
 '''
+NORMATIVE_CONFIG = ONTOLOGY_CONFIG + '''
+[terms]
+mappings = "normative"
+'''
 TERM = {"kind": "term", "id": "/term/sensor", "term": "Sensor", "definition": "A device that responds to a property.",
         "mappings": [{"relation": "close", "ontology": "example-onto", "iri": "https://example.org/onto#Sensor"}]}
 
@@ -90,10 +94,13 @@ def findings_of(records, config=ONTOLOGY_CONFIG):
 
 class TermRuleTests(unittest.TestCase):
     def test_a_well_formed_term_is_clean_and_the_t_rules_run(self):
-        code, found, summary = rules(with_terms(TERM), ONTOLOGY_CONFIG)
+        code, found, summary = rules(with_terms(TERM), NORMATIVE_CONFIG)
         self.assertEqual((code, found), (0, []))
         for rule in ("T001", "T002", "T003", "T004", "T005"):
             self.assertIn(rule, summary["rules_run"])
+        code, found, summary = rules(with_terms(TERM), ONTOLOGY_CONFIG)  # the default is informative: T005 does not run
+        self.assertEqual((code, found), (0, []))
+        self.assertNotIn("T005", summary["rules_run"])
 
     def test_terms_are_not_style_or_verbal_form_subjects(self):
         t = copy.deepcopy(TERM)
@@ -145,16 +152,16 @@ class TermRuleTests(unittest.TestCase):
         self.assertIn(("T004", "/term/sensor#mappings[0]"), found)
         self.assertNotIn("G003", {r for r, _ in found})
 
-    def test_t005_runs_only_for_normative_mappings(self):
+    def test_t005_runs_only_when_mappings_are_set_to_normative(self):
         bare = {"kind": "term", "id": "/term/plain", "term": "Plain", "definition": "d"}
         empty = {"kind": "term", "id": "/term/empty", "term": "Empty", "definition": "d", "mappings": []}
-        found = findings_of(with_terms(bare, empty))
+        found = findings_of(with_terms(bare, empty), NORMATIVE_CONFIG)
         self.assertIn(("T005", "/term/plain"), found)
         self.assertIn(("T005", "/term/empty"), found)
-        informative = ONTOLOGY_CONFIG + '\n[terms]\nmappings = "informative"\n'
-        _, _, summary = rules(with_terms(bare), informative)
-        self.assertEqual([f for f in summary["findings"] if f["rule"] == "T005"], [])
-        self.assertIn("T005", summary["rules_not_run"])
+        for config in (ONTOLOGY_CONFIG, ONTOLOGY_CONFIG + '\n[terms]\nmappings = "informative"\n'):
+            _, _, summary = rules(with_terms(bare), config)
+            self.assertEqual([f for f in summary["findings"] if f["rule"] == "T005"], [])
+            self.assertIn("T005", summary["rules_not_run"])
 
     def test_t_rules_do_not_run_on_records_rebuilt_from_xml(self):
         _, not_run = gate.check([dict(TERM)], {}, authored=False)

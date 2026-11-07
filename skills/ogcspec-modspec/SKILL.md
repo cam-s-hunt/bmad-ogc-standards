@@ -33,9 +33,9 @@ them. In short:
   goes in the baseline.
 - A **term** (`references/term-record-proposal.md`, `references/term-record-example.yaml`) is a word the standard defines, with optional
   links to ontology terms. `relation` is one of exact, close, broader, narrower, related. `ontology` must be a key declared in the gate
-  config's `[[ontologies]]` and `iri` must start with that entry's `iri_prefix`. The owner chose **normative** mappings, so the gate
-  reports a term with no mapping (T005). The gate checks the form only, never whether a mapping is correct. Terms are checked but not yet
-  emitted into the Metanorma document.
+  config's `[[ontologies]]` and `iri` must start with that entry's `iri_prefix`. The owner chose the Connected Systems API pattern:
+  mappings are **informative** by default (so T005, a term with no mapping, does not run unless `[terms] mappings = "normative"`). The gate
+  checks the form only, never whether a mapping is correct. Terms are checked but not yet emitted into the Metanorma document.
 - Recommended layout: one record per file, path = id without the leading `/` plus `.yaml` (`style = ["layout"]` checks it).
 
 A file holds one mapping or a list of them. Membership of a requirement in a class is the class's `requirements`

@@ -8,7 +8,7 @@
 #   key = "example-onto"
 #   iri_prefix = "https://example.org/onto#"
 #   [terms]
-#   mappings = "normative"      # the default; "informative" turns T005 off
+#   mappings = "normative"      # optional; the default is "informative", which leaves T005 off. "normative" requires a mapping on every term
 #
 # The gate checks the form only (T001-T005, G002, G003): a known ontology, an address that starts with its prefix, one of
 # the five relation words, no duplicate word. It cannot tell whether a mapping is right; with normative mappings that is

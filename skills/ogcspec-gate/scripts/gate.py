@@ -50,7 +50,7 @@ Config (project-owned TOML, the gate's only configuration surface):
                 ISO/IEC Directives Part 2 (ed. 9.0, 2021-05) clause 7, matched ignoring case. Set
                 `iso_verbal_forms = false` to turn P002/P003 off.
   [[ontologies]]  key, iri_prefix (optional pin): the ontologies a term mapping may name (T002, T003)
-  [terms]       mappings = "normative" (default) or "informative": whether a term must carry a mapping (T005)
+  [terms]       mappings = "informative" (default) or "normative": with "normative" every term must carry a mapping (T005)
   [[normative_references]]  name, uri_prefix: external inherit targets match a prefix or a name. If none are
                 declared, only relative inherit targets (starting "/") are checked by M009.
 
@@ -139,8 +139,9 @@ RULES = {
     "T004": ("a term mapping's relation is one of exact, close, broader, narrower, related", "structure",
              "term-record-proposal.md section 3 (owner decision 2, 2026-11-07)"),
     "T005": ("with normative mappings, every term carries at least one mapping", "structure",
-             "term-record-proposal.md decision 4 (2026-11-07): an absent or empty `mappings` is reported; there is no "
-             "`unresolved` marker yet. Runs only when [terms] mappings is normative (the default)"),
+             "term-record-proposal.md decisions 3 and 4 (2026-11-07): an absent or empty `mappings` is reported; there is no "
+             "`unresolved` marker yet. Runs only when [terms] mappings = \"normative\"; the default is informative, as in the "
+             "Connected Systems API (OGC 23-001)"),
     "M001": ("every component has an identifier, and identifiers are unique", "spec",
              "08-131r7 Req 2 (/req/core/all-components-assigned-uri)"),
     "M002": ("each requirement is listed by exactly one requirements class", "spec",
@@ -340,8 +341,8 @@ def term_findings(terms: dict[str, dict], config: dict) -> tuple[list[Finding], 
                 out.append(Finding("T003", where, f"iri {iri!r} does not start with the iri_prefix {prefix!r} declared for {ontology!r}"))
             elif isinstance(iri, str) and iri.strip() and not isinstance(prefix, str):
                 out.append(Finding("T003", where, f"ontology {ontology!r} declares no iri_prefix, so {iri!r} cannot be checked"))
-    if (config.get("terms") or {}).get("mappings") == "informative":
-        not_run["T005"] = "[terms] mappings = informative"
+    if (config.get("terms") or {}).get("mappings") != "normative":
+        not_run["T005"] = "[terms] mappings is informative (the default); set it to \"normative\" to require a mapping on every term"
     else:
         for tid, t in terms.items():
             if not (isinstance(t.get("mappings"), list) and t["mappings"]):
