@@ -175,5 +175,142 @@ class RoundTrip(unittest.TestCase):
                   file=sys.stderr)
 
 
+# --- plan step 3: titles, derived conformance-class dependencies, profile, record-only fields.
+# A separate fixture: RECORDS, CONFIG and HEADER above are imported by docs/design/*.py and must not change.
+DEP_EXT = "https://example.org/spec/dep/1.0/conf/base"
+STEP3_RECORDS = [
+    {"kind": "requirements_class", "id": "/req/core", "title": "Core *bold* -- 'q' {name}", "status": "proposed",
+     "uml_package": "example::core", "subject": "Example document", "requirements": ["/req/core/first"]},
+    {"kind": "requirement", "id": "/req/core/first", "status": "proposed", "statement": "A document SHALL do the first thing."},
+    {"kind": "abstract_test", "id": "/conf/core/first", "target": "/req/core/first", "purpose": "Verify the first thing."},
+    {"kind": "conformance_class", "id": "/conf/core", "title": "Core conformance", "status": "proposed",
+     "target": "/req/core", "tests": ["/conf/core/first"]},
+    {"kind": "requirements_class", "id": "/req/ext", "title": "Extension", "uml_package": "example::ext",
+     "subject": "Example document", "inherit": ["/req/core"], "requirements": ["/req/ext/second"]},
+    {"kind": "requirement", "id": "/req/ext/second", "statement": "A document SHALL do the second thing."},
+    {"kind": "abstract_test", "id": "/conf/ext/second", "target": "/req/ext/second", "purpose": "Verify the second thing."},
+    {"kind": "conformance_class", "id": "/conf/ext", "target": "/req/ext", "depends_on": [DEP_EXT],
+     "tests": ["/conf/ext/second"]},
+    {"kind": "requirements_class", "id": "/req/prof", "title": "Profile", "uml_package": "example::prof", "profile": True,
+     "subject": "Example document", "inherit": ["/req/core", "/req/ext"], "requirements": []},
+    {"kind": "conformance_class", "id": "/conf/prof", "target": "/req/prof", "tests": []},
+]
+# top-level keys must come before the first [[normative_references]] table or TOML puts them inside it
+STEP3_CONFIG = 'core = "/req/core"\nstyle = ["uml"]\n' + CONFIG + \
+    '[[normative_references]]\nname = "Example base"\nuri_prefix = "https://example.org/spec/dep/1.0/"\n'
+
+
+class Step3EmitUnitTests(unittest.TestCase):
+    def emitted(self, records=STEP3_RECORDS, namespace=""):
+        return emit.emit(copy_records(records), namespace)
+
+    def test_title_is_a_literal_block_title_between_style_and_delimiter(self):
+        text = self.emitted()["requirements.adoc"]
+        self.assertIn("[requirements_class]\n.pass:c[Core *bold* -- 'q' {name}]\n====\n[%metadata]\nidentifier:: /req/core\n", text)
+
+    def test_no_title_no_block_title_line(self):
+        records = [dict(r) for r in STEP3_RECORDS]
+        for r in records:
+            r.pop("title", None)
+        self.assertNotIn("\n.", self.emitted(records)["requirements.adoc"])
+
+    def test_conformance_classes_carry_derived_then_authored_dependencies(self):
+        text = self.emitted()["conformance-classes.adoc"]
+        self.assertIn("identifier:: /conf/ext\ninherit:: /conf/core\ninherit:: " + DEP_EXT + "\ntarget:: /req/ext\n", text)
+        self.assertIn("identifier:: /conf/prof\ninherit:: /conf/core\ninherit:: /conf/ext\ntarget:: /req/prof\n", text)
+        core = text.split("identifier:: /conf/core\n", 1)[1].split("====", 1)[0]
+        self.assertNotIn("inherit::", core)
+
+    def test_record_only_fields_are_not_emitted(self):
+        joined = "\n".join(self.emitted().values())
+        for word in ("status", "uml_package", "example::", "profile", "depends_on", "proposed"):
+            self.assertNotIn(word, joined)
+
+    def test_a_profile_is_two_ordinary_blocks_with_no_requirements_or_tests(self):
+        out = self.emitted()
+        prof = out["requirements.adoc"].split("identifier:: /req/prof\n", 1)[1].split("====", 1)[0]
+        self.assertNotIn("requirement::", prof)
+        conf = out["conformance-classes.adoc"].split("identifier:: /conf/prof\n", 1)[1].split("====", 1)[0]
+        self.assertNotIn("conformance-test::", conf)
+
+    def test_a_backslash_before_a_closing_bracket_in_a_title_is_refused(self):
+        records = [dict(r) for r in STEP3_RECORDS]
+        records[0]["title"] = "bad\\] title"
+        with self.assertRaises(ValueError):
+            emit.emit(records)
+
+    def test_emitter_and_gate_derive_the_same_dependencies(self):
+        ns = "https://www.opengis.net/spec/x-1/1.0"
+        absolute = [dict(r) for r in STEP3_RECORDS]
+        for r in absolute:
+            r["id"] = ns + r["id"]
+            for field in ("target", "inherit", "requirements", "tests"):
+                if field in r:
+                    r[field] = [ns + v for v in r[field]] if isinstance(r[field], list) else ns + r[field]
+        absolute[8]["inherit"] = [ns + "/req/core", "Extension"]  # one entry by identifier, one by title
+        ambiguous = [dict(r) for r in STEP3_RECORDS] + [
+            {"kind": "conformance_class", "id": "/conf/core-again", "target": "/req/core", "tests": []}]
+        duplicated = [dict(r) for r in STEP3_RECORDS]
+        duplicated[7] = dict(duplicated[7], depends_on=[DEP_EXT, DEP_EXT, "/conf/ext"])
+        for name, records, namespace in (("plain", STEP3_RECORDS, ""), ("namespace and title", absolute, ns),
+                                         ("ambiguous", ambiguous, ""), ("duplicates", duplicated, ""),
+                                         ("namespace not configured", absolute, "")):
+            self.assertEqual(emit.conformance_inherit(records, namespace),
+                             gate.conformance_inherit(records, {"namespace": namespace} if namespace else {}), name)
+
+    def test_config_supplies_the_namespace_on_the_command_line(self):
+        ns = "https://www.opengis.net/spec/x-1/1.0"
+        records = [
+            {"kind": "requirements_class", "id": f"{ns}/req/core", "subject": "S", "requirements": []},
+            {"kind": "conformance_class", "id": f"{ns}/conf/core", "target": "/req/core", "tests": []},
+            {"kind": "requirements_class", "id": "/req/a", "subject": "S", "inherit": [f"{ns}/req/core"], "requirements": []},
+            {"kind": "conformance_class", "id": "/conf/a", "target": "/req/a", "tests": []},
+        ]
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t)
+            (root / "records").mkdir()
+            (root / "records" / "all.yaml").write_text(yaml.safe_dump(records), encoding="utf-8")
+            (root / "cfg.toml").write_text(f'namespace = "{ns}"\n', encoding="utf-8")
+            self.assertEqual(emit.main(["--records", str(root / "records"), "--out", str(root / "o"), "--config", str(root / "cfg.toml")]), 0)
+            text = (root / "o" / "conformance-classes.adoc").read_text(encoding="utf-8")
+            self.assertIn(f"identifier:: /conf/a\ninherit:: {ns}/conf/core\n", text)
+            self.assertEqual(emit.main(["--records", str(root / "records"), "--out", str(root / "o2")]), 0)
+            self.assertNotIn("inherit::", (root / "o2" / "conformance-classes.adoc").read_text(encoding="utf-8"))
+            self.assertEqual(emit.main(["--records", str(root / "records"), "--out", str(root / "o3"), "--config", str(root / "missing.toml")]), 2)
+
+
+def copy_records(records):
+    return [dict(r) for r in records]
+
+
+@unittest.skipUnless(image_available(), "SKIPPED: pinned Metanorma image not present locally; round trip not run")
+class Step3RoundTrip(unittest.TestCase):
+    def test_titles_derived_dependencies_and_a_profile_survive_compile_and_gate(self):
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t)
+            (root / "records").mkdir()
+            (root / "records" / "all.yaml").write_text(yaml.safe_dump(STEP3_RECORDS), encoding="utf-8")
+            (root / "ogcspec.gate.toml").write_text(STEP3_CONFIG, encoding="utf-8")
+            self.assertEqual(emit.main(["--records", str(root / "records"), "--out", str(root / "build"),
+                                        "--config", str(root / "ogcspec.gate.toml")]), 0)
+            (root / "build" / "doc.adoc").write_text(HEADER, encoding="utf-8")
+            proc = subprocess.run([sys.executable, str(HERE.parent / "metanorma.py"), "--image", IMAGE,
+                                   "--adoc", str(root / "build" / "doc.adoc"), "--formats", "xml"],
+                                  capture_output=True, text=True)
+            (root / "build" / "compile.json").write_text(proc.stdout or "{}", encoding="utf-8")
+            self.assertEqual(proc.returncode, 0, proc.stdout[-2000:])
+            code, summary = gate.run(root / "ogcspec.gate.toml", None, root / "build" / "doc.xml",
+                                     root / "build" / "compile.json", root / "build" / "doc.err.html")
+            fidelity = [f for f in summary["findings"] if f["rule"] in ("X000", "X001", "X002", "X003")]
+            self.assertEqual(fidelity, [])
+            rules = [f for f in summary["findings"] if f["rule"][0] in "GMPS"]
+            self.assertEqual(rules, [])
+            messages = {f["key"] for f in summary["findings"] if f["rule"] == "X010"}
+            # Metanorma's own linkage check warns about the empty profile classes: accepted only through a baseline
+            self.assertIn("MODSPEC_1:/req/prof", messages)
+            self.assertIn("MODSPEC_1:/conf/prof", messages)
+            self.assertFalse([m for m in messages if m.startswith(("STANDOC_7", "STANDOC_38"))], messages)
+
+
 if __name__ == "__main__":
     unittest.main()
