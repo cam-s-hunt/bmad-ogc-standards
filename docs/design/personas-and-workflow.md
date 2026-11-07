@@ -147,7 +147,7 @@ Existing tools are named; **new** marks something that does not exist yet.
 | 7 | Stage-2 gate | script | `gate.py … --xml … --compile-result …` |
 | 8 | Human walk-through of the diff | human | `bmad-walkthrough` (description only; **not read**) |
 | — | **H5** commit | human | git |
-| 9 | Authoritative check | CI | the standard's repository CI (**never run**; this repository's workflow has not executed) |
+| 9 | Authoritative check | CI | the standard's repository CI (this repository's workflow first ran 2026-11-07; see README) |
 | — | **H6** anything sent to OGC | human | outside this module |
 
 Steps 5–7 compile in a copy because compiling in place rewrote tracked files (the compiled XML and `relaton/cache`) in the ModSpec clone; this is recorded in `skills/ogcspec-metanorma/SKILL.md`, and I did not reproduce it.

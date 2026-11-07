@@ -84,9 +84,9 @@ def main(argv: list[str]) -> int:
         return 0
     names = [r["name"] for r in results]
     print("rule   " + "".join(f"{n:>14}" for n in names))
-    print("records" + "".join(f"{r.get("records", "-"):>14}" for r in results))
+    print("records" + "".join(f"{r.get('records', '-'):>14}" for r in results))
     for rule in rules:
-        print(f"{rule:<7}" + "".join(f"{r["rules"].get(rule, 0):>14}" for r in results))
+        print(f"{rule:<7}" + "".join(f"{r['rules'].get(rule, 0):>14}" for r in results))
     for r in results:
         print(f"\n{r['name']}: {r.get('error', '')} notes={r.get('notes')} not_run={r.get('not_run')}")
         if "agreement" in r:

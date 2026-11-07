@@ -57,8 +57,8 @@ tools), **inferred**, or **open**.
 6. **BMAD side:** design the standards-authoring personas and workflow (what a ModSpec Architect, a Metanorma editor and
    a reviewer each do, and where a human must approve: identifiers, normative wording, anything sent to OGC).
    Proposal written 2026-11-06, awaiting the owner: `docs/design/personas-and-workflow.md`.
-7. **Housekeeping:** a license (owner's decision); a remote and CI (the workflow in `.github/` has never run and its
-   action versions are unverified); re-run the install trial after each skill change; refresh the corpus snapshot
+7. **Housekeeping:** a license (owner's decision); a remote and CI (the workflow in `.github/` first ran 2026-11-07: validators passed, unit tests failed on a 3.12-only f-string
+   under the runner's Python 3.11, fixed; action versions still unverified); re-run the install trial after each skill change; refresh the corpus snapshot
    when the pinned image or the pinned standards change.
 
 ## Questions for the ModSpec maintainers / OGC (not yet asked)

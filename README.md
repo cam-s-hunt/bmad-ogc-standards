@@ -57,6 +57,6 @@ endorsed by OGC.**
   has two readings the rule implements the literal one (see `docs/real-document-check-2026-11-06.md`).
 - Verbal forms follow ISO/IEC Directives Part 2 clause 7 as read from a local edition 9.0 (2021-05) *redline* PDF; the
   Policy links the current edition and a newer one was not checked.
-- CI workflow has never run.
+- CI (`module-quality`, first runs 2026-11-07): manifest validation and the per-skill checks pass on the runner; the unit-test step failed twice on a Python 3.12-only f-string in `tests/corpus/run_corpus.py` (the runner has 3.11), fixed afterwards. The CI run that follows the fix is not yet checked. The CI never runs the Metanorma round trips or the corpus tests (no pinned image, no corpus), so those skip there.
 
 No LICENSE is included yet; choosing one is the owner's decision.
