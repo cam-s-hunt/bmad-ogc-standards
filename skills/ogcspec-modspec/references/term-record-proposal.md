@@ -124,7 +124,7 @@ virtual systems are in scope, and whether definitions are normative (`ontology-g
 |---|---|---|
 | 1 | Shape of the record | Approved as proposed: `/term/<slug>` ids, `aliases` kept. |
 | 2 | Mapping relations | Five words: exact, close, broader, narrower, related. |
-| 3 | Mapping status | First answer: **normative** (against the research note's informative recommendation, after being told the SOSA/SSN-to-BFO sources contradict each other on Sensor, Property, Observation, Sample and System). **Reversed the same day, after the owner asked how OGC does it:** the Connected Systems API (OGC 23-001, read from the local HTML copy) treats term-to-SOSA links as informative (definitions cite `[SOURCE: SOSA/SSN]`, relationships are in notes and an informative annex; SOSA addresses are binding only as values in tables such as its Table 6). The owner chose "follow the CS API pattern": mappings are **informative** by default; `[terms] mappings = "normative"` is still available and turns T005 on. The carrier in the document is a note to entry (Directives Part 2 ed. 9.0, 16.5.9 allows provisions there; not needed if informative). |
+| 3 | Mapping status | First answer: **normative** (against the research note's informative recommendation, after being told the SOSA/SSN-to-BFO sources contradict each other on Sensor, Property, Observation, Sample and System). **Reversed the same day, after the owner asked how OGC does it:** the Connected Systems API (OGC 23-001, read from the local HTML copy) treats term-to-SOSA links as informative (definitions cite a source, relationships are in notes and an informative annex; SOSA addresses are binding only as values in tables such as its Table 6). **Correction, same day:** the first version of this row, and what the owner was told when deciding, said the source line was a citation to the whole ontology with no address per term. That was wrong. It came from reading the HTML copy with its tags stripped, which drops link targets. The AsciiDoc source (`api/part1/standard/sections/clause_4_terms_and_definitions.adoc`) puts a per-term address in the source citation of 10 of its 17 terms, e.g. `[.source]` `<<SOSA-SSN, SOSA/SSN, http://www.w3.org/ns/sosa/Observation[Observation Class]>>`, and the compiled XML keeps it as `<source status="identical"><origin bibitemid="SOSA-SSN"><display-text>SOSA/SSN, <link target="http://www.w3.org/ns/sosa/Observation">Observation Class</link>`. So the existing OGC practice IS a per-term machine-readable address, carried in the source citation (informative, Directives 16.5.10), not in a note to entry. The owner chose "follow the CS API pattern": mappings are **informative** by default; `[terms] mappings = "normative"` is still available and turns T005 on. The carrier in the document is a note to entry (Directives Part 2 ed. 9.0, 16.5.9 allows provisions there; not needed if informative). |
 | 4 | Gate rules | T001-T004 plus a rule for a term with no mapping or an `unresolved` one (a finding the baseline may accept deliberately). T005 (defined but never used) and T006 (used but never defined) not built. |
 | 5 | Emit or record-only (owner: **emit**, "build with emitting") | Experiment first (a test compile on the pinned image), then propose emit or record-only with evidence. **Run 2026-11-07; results in section 9; the emit-or-not decision is still the owner's.** |
 | 6 | Version | Keep 0.3.0. |
@@ -180,3 +180,21 @@ test, as for titles and profiles.
   none skipped and the per-rule counts equal the snapshot.
 - **Not shown:** a real standard's terms clause; the editions of the Directives after 9.0; whether a `[SOURCE: ...]` key that is not in the
   document's references is caught by anything but Metanorma's own warning (STANDOC_32); that any mapping is correct.
+
+## 11. Dry run on a real terms clause (CS API Part 1, 2026-11-07; a throwaway copy, nothing committed)
+
+Method: the 17 terms of `clause_4_terms_and_definitions.adoc` (corpus copy at the pinned SHA `8e03b236`) were turned into term records by a small
+parsing script (mine, scratch only), emitted with `emit.py`, spliced into a copy of the document (the clause marked `[heading=terms and definitions]`,
+its one hand-written sentence kept, the entries `include::`d), and compiled on the pinned image with `--root`.
+
+- **It works at real size:** compile exit 0 in about 48 s; all 17 terms read back with **no** X001/X003; the same kinds of Metanorma message as the
+  original (no new kind). The total fell from 243 to 193, almost all STANDOC_7 (136 to 88); most plausibly the original's source-locator links, not checked.
+- **The carrier differs from existing practice.** The original keeps each SOSA/SSN address in the source line's locator link; this emitter writes a
+  "Mapping (<relation>): <address>" note and a bare source key. Checked against the original's hand-written terms, the gate reports X003 on `mappings`
+  for 10 terms for that reason alone: the address is not where the read-back looks. Owner decision pending (see the chat card): move the address into the source citation.
+- **Gaps in the term format shown by real terms:** no field for an `Example` (the Property entry has one); one `note` only (the directives allow several);
+  a definition is one string; the source's locator text (`definition 4.11`, `definition 4.1.4`) has nowhere to go (`source` is a key only);
+  the source status is identical or modified only (the 5-word relation has no counterpart in the document).
+- **A defect in that real document, not ours:** the Actuator entry cites `<<SOSA/SSN, SOSA-SSN, ...>>`, i.e. key `SOSA/SSN` where the bibliography anchor is
+  `SOSA-SSN`; the compiled XML has `bibitemid="SOSA/SSN"`, a dangling reference. This module's `source` check refuses a key with a slash.
+- **My parsing slips, not template issues:** a lowercase `Note:` (Sensor Network) was read as part of the definition.
