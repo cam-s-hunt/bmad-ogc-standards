@@ -79,29 +79,39 @@
 
 
 
-<terms id="_85027dc7-c751-5242-c494-29e924e06c80" obligation="normative">
+<terms id="_fe222681-895b-2275-685a-68d19e726194" obligation="normative">
 <title id="_dfb2eab2-f980-6365-3c47-81d0eb272962">Terms and definitions</title><p id="_8c49041f-8363-1e0b-0484-6e1046987489">This document uses the terms defined in <link target="https://portal.ogc.org/public_ogc/directives/directives.php">OGC Policy Directive 49</link>, which is based on the ISO/IEC Directives, Part 2, Rules for the structure and drafting of International Standards. In particular, the word “shall” (not “must”) is the verb form used to indicate a requirement to be strictly followed to conform to this document and OGC documents do not use the equivalent phrases in the ISO/IEC Directives, Part 2.</p>
 
 <p id="_7bbae1f8-9cf5-3d71-b33b-b85f9ba4c251">This document also uses terms defined in the OGC Standard for Modular specifications (<link target="https://portal.opengeospatial.org/files/?artifact_id=34762">OGC 08-131r3</link>), also known as the ‘ModSpec’. The definitions of terms such as standard, specification, requirement, and conformance test are provided in the ModSpec.</p>
 
 <p id="_548e409e-2890-5c36-8c0d-528166f290d6">For the purposes of this document, the following additional terms and definitions apply.</p>
-<term id="_097256a3-8888-47b9-b1d2-7c4ebfab1dfe" anchor="term-Observation"><preferred><expression>
-<name>Observation</name>
+<term id="_5c248340-70d0-5857-3ba7-070262badd84" anchor="term-Key-only"><preferred><expression>
+<name>Key only</name>
 </expression>
 </preferred>
-<definition id="_b9c57de8-6c24-2c65-1069-c3441d0fa0ee"><verbal-definition id="_c3839d5e-a3f7-92b9-0d2d-43390f5ea759"><p id="_6a06c1e4-1bd4-9490-2c4a-5f10d69b8bf1">The act of estimating a value.</p></verbal-definition></definition>
+<definition id="_affbe428-20f1-2ec4-d5e5-54387721eb61"><verbal-definition id="_fd67c20f-186c-c4c6-6d3d-d5c48f0987da"><p id="_1381cd98-bd41-1213-cad1-ada05bb2b0d5">Cited without an address.</p></verbal-definition></definition>
 
 
  <source status="identical" type="authoritative"><origin bibitemid="dep" type="inline" citeas="OGC 99-000"/></source></term>
 
-<term id="_9d71983a-e454-e503-2b1c-1e97cb110c29" anchor="term-Plain-term"><preferred><expression>
+<term id="_d83adf87-bf3a-7fa8-8530-ced10b6d5469" anchor="term-Observation"><preferred><expression>
+<name>Observation</name>
+</expression>
+</preferred>
+<definition id="_2a73db62-1790-6d51-4021-cb1cf41491c7"><verbal-definition id="_591369ad-3782-63bd-cb0f-8671d5788d99"><p id="_323fa2a9-72ee-90dc-2280-1cf022b1e397">The act of estimating a value.</p></verbal-definition></definition>
+
+
+ <source status="identical" type="authoritative"><origin bibitemid="dep" type="inline" citeas="OGC 99-000"><display-text>dep, <link target="https://example.org/onto#Observation"/></display-text></origin>
+</source></term>
+
+<term id="_df2e8a83-d422-893e-d2d0-f75f903a2c11" anchor="term-Plain-term"><preferred><expression>
 <name>Plain term</name>
 </expression>
 </preferred>
-<definition id="_6a06cb69-e03f-5861-40a8-df632a598f2c"><verbal-definition id="_834965d4-e0df-dad2-a952-96c624301240"><p id="_1babe76c-d2f4-4b83-df6e-ffdf9aa8483a">Nothing extra.</p></verbal-definition></definition>
+<definition id="_6003eb4f-f1dc-c8e3-a066-4b5e3e89f4bf"><verbal-definition id="_48839bf9-f43e-5334-a75e-be725e29df71"><p id="_f7f17852-934e-3a7d-2697-849a1e917279">Nothing extra.</p></verbal-definition></definition>
  </term>
 
-<term id="_e6bb3448-236c-4834-ad85-4ae7ed8691e4" anchor="term-Sensor-_physical_"><preferred><expression>
+<term id="_7c4baacc-c613-3aab-f3c9-74a5da820cc7" anchor="term-Sensor-_physical_"><preferred><expression>
 <name>Sensor (physical)</name>
 </expression>
 </preferred><admitted><expression>
@@ -116,27 +126,22 @@
 
 
 
-<definition id="_b90be324-acff-91d6-751b-029a749bd67d"><verbal-definition id="_ff425462-a70e-9be9-312c-0b932598570a"><p id="_cc25444e-f65b-36be-5a72-79e526fbaa06">A device &amp; its _probe_ that responds to a property of the world.</p></verbal-definition></definition>
+<definition id="_9d04ce3e-799a-629a-2e86-4f30e576b2de"><verbal-definition id="_a21f8dfa-f15c-4695-8a69-1152b84aa8e9"><p id="_37c96288-4ac0-45e9-fb94-213e33a7fe7e">A device &amp; its _probe_ that responds to a property of the world.</p></verbal-definition></definition>
 
 
 
 
-
-
-
-
- <termnote id="_a04788f1-c341-2f40-d112-280b04f59833"><p id="_19c63669-f8ca-c78a-53a8-f6525fd9302b">Mapping (close): <link target="https://example.org/onto#Sensor"/></p>
-</termnote><termnote id="_bd8f45c0-e8f1-b6a6-ad9f-528eaf2b51a4"><p id="_fd356113-1c26-7a38-df6d-75bbaf7d7a86">Mapping (broader): <link target="https://example.org/onto#System"/></p>
-</termnote><termnote id="_506b0c78-97f9-a5b9-77a9-59d8c5297c27"><p id="_9de34ae2-e1ea-2a11-d003-26a3bdf280ae">Software sensors are out of scope.</p>
-</termnote><source status="modified" type="authoritative"><origin bibitemid="dep" type="inline" citeas="OGC 99-000"/><modification><p id="_5f9bb980-77d5-aca0-ff73-0d697845ffb6">modified</p>
+ <termnote id="_2cab433d-b7a1-3ee6-8286-c599474990a1"><p id="_8ad9cf4a-c95d-fe17-fa17-76e5d475542a">Software sensors are out of scope.</p>
+</termnote><source status="modified" type="authoritative"><origin bibitemid="dep" type="inline" citeas="OGC 99-000"><display-text>dep, <link target="https://example.org/onto#Sensor">Sensor Class</link></display-text></origin>
+<modification><p id="_f320f040-91d9-fb4e-5bad-82b6b31a6da1">modified</p>
 </modification>
 </source></term>
 
-<term id="_c42689a3-b0b7-ee27-268f-93ffeb162cd5" anchor="term-hand-written"><preferred><expression>
+<term id="_afae87e7-35d3-2e27-9c36-c67c76420082" anchor="term-hand-written"><preferred><expression>
 <name>hand written</name>
 </expression>
 </preferred>
-<definition id="_a27d08b7-6183-96fd-7596-23d6424e0e25"><verbal-definition id="_cd650252-ffbb-1a77-8e16-3c4cb3f42f23"><p id="_0a35d2bf-cb18-4cb0-6e0e-c0ef044f8788">A term the records do not define.</p></verbal-definition></definition>
+<definition id="_3bf4634c-5630-49df-d1b4-17314cc8c1b2"><verbal-definition id="_76431a3b-c34b-e605-9204-03c80a6fdbfe"><p id="_23d98d0b-9786-7f90-4fb0-66be06eaf390">A term the records do not define.</p></verbal-definition></definition>
  </term>
 </terms>
 

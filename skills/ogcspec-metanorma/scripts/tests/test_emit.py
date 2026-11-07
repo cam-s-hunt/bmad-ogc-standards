@@ -314,18 +314,26 @@ class Step3RoundTrip(unittest.TestCase):
 
 class TermEmitUnitTests(unittest.TestCase):
     TERM = {"kind": "term", "id": "/term/sensor", "term": "Sensor (physical)", "aliases": ["detector"],
-            "definition": "A device & its _probe_.", "note": "Out of scope: software.", "source": "dep", "modified": True,
+            "definition": "A device & its _probe_.", "note": "Out of scope: software.", "modified": True,
+            "source": {"key": "dep", "iri": "https://example.org/onto#Sensor", "label": "Sensor Class"},
             "mappings": [{"relation": "close", "ontology": "o", "iri": "https://example.org/onto#Sensor", "note": "record-only"}]}
 
-    def test_a_term_becomes_one_literal_entry_in_terms_adoc(self):
+    def test_a_term_becomes_one_literal_entry_with_the_address_in_the_source_citation(self):
         text = emit.emit([self.TERM])["terms.adoc"]
         self.assertEqual(text, "\n".join([
             "=== pass:c[Sensor (physical)]", "alt:[pass:c[detector]]", "", "pass:c[A device & its _probe_.]", "",
-            "NOTE: Mapping (close): https://example.org/onto#Sensor", "", "NOTE: pass:c[Out of scope: software.]", "",
-            "[.source]", "<<dep>>, modified"]) + "\n")
+            "NOTE: pass:c[Out of scope: software.]", "",
+            "[.source]", "<<dep, dep, https://example.org/onto#Sensor[Sensor Class]>>, modified"]) + "\n")
 
-    def test_the_per_mapping_note_is_record_only(self):
-        self.assertNotIn("record-only", emit.emit([self.TERM])["terms.adoc"])
+    def test_mappings_are_record_only_and_never_emitted(self):
+        text = emit.emit([self.TERM])["terms.adoc"]
+        self.assertNotIn("record-only", text)
+        self.assertNotIn("Mapping", text)
+        self.assertNotIn("close", text)
+
+    def test_a_plain_string_source_is_the_key_alone(self):
+        text = emit.emit([dict(self.TERM, source="dep", modified=False)])["terms.adoc"]
+        self.assertTrue(text.endswith("[.source]\n<<dep>>\n"), text)
 
     def test_terms_adoc_is_written_only_when_there_are_terms(self):
         self.assertNotIn("terms.adoc", emit.emit(RECORDS))
@@ -343,11 +351,10 @@ class TermEmitUnitTests(unittest.TestCase):
         for field, value in (("term", "Bad]"), ("definition", "x\\"), ("note", "n]"), ("aliases", ["ok", "a]"])):
             with self.assertRaises(ValueError, msg=field):
                 emit.emit([dict(self.TERM, **{field: value})])
-        for iri in ("https://x/a b", "https://x/<a>", "https://x/[a]", ""):
-            with self.assertRaises(ValueError, msg=iri):
-                emit.emit([dict(self.TERM, mappings=[{"relation": "close", "ontology": "o", "iri": iri}])])
-        with self.assertRaises(ValueError):
-            emit.emit([dict(self.TERM, note="Mapping (close): https://example.org/x")])
+        for source in ({"key": "a b"}, {"key": "SOSA/SSN"}, {"key": "k", "iri": "https://x/a b"}, {"key": "k", "iri": "https://x/<a>"},
+                       {"key": "k", "iri": "https://x/a,b"}, {"key": "k", "iri": "https://x/a", "label": "bad]"}, {"key": ""}):
+            with self.assertRaises(ValueError, msg=str(source)):
+                emit.emit([dict(self.TERM, source=source)])
 
     def test_a_term_without_source_or_aliases_has_neither(self):
         text = emit.emit([{"kind": "term", "id": "/term/p", "term": "Plain", "definition": "d"}])["terms.adoc"]
@@ -359,9 +366,11 @@ TERM_RECORDS = [
      "definition": "A device & its _probe_ that responds to a property of the world.",
      "mappings": [{"relation": "close", "ontology": "example-onto", "iri": "https://example.org/onto#Sensor", "note": "record-only"},
                   {"relation": "broader", "ontology": "example-onto", "iri": "https://example.org/onto#System"}],
-     "note": "Software sensors are out of scope.", "source": "dep", "modified": True},
+     "note": "Software sensors are out of scope.", "modified": True,
+     "source": {"key": "dep", "iri": "https://example.org/onto#Sensor", "label": "Sensor Class"}},
     {"kind": "term", "id": "/term/observation", "term": "Observation", "definition": "The act of estimating a value.",
-     "source": "dep"},
+     "source": {"key": "dep", "iri": "https://example.org/onto#Observation"}},
+    {"kind": "term", "id": "/term/keyonly", "term": "Key only", "definition": "Cited without an address.", "source": "dep"},
     {"kind": "term", "id": "/term/plain", "term": "Plain term", "definition": "Nothing extra."},
 ]
 TERM_CONFIG = '''records_dir = "records"
@@ -411,15 +420,28 @@ class TermsRoundTrip(unittest.TestCase):
         self.assertEqual(fidelity, [])  # includes: the hand-written term in the same clause is not an X002
         self.assertEqual([f for f in summary["findings"] if f["rule"][0] in "GMPST"], [])
         messages = {f["key"] for f in summary["findings"] if f["rule"] == "X010"}
-        self.assertFalse([m for m in messages if m.startswith(("STANDOC_7", "STANDOC_20", "STANDOC_25"))], messages)
+        self.assertFalse([m for m in messages if m.startswith(("STANDOC_20", "STANDOC_25"))], messages)
+        # Observed 2026-11-07: an address in the source citation (the Connected Systems API's own form) draws STANDOC_7 XML
+        # syntax messages from Metanorma ('element "term" not allowed here', unexpected id/anchor); a key-only citation does not
+        # (next test). They are accepted through the baseline, as the CS API document's own are.
+        self.assertTrue([m for m in messages if m.startswith("STANDOC_7")], messages)
         xml_terms = {t["term"]: t for t in gate.terms_from_xml(root / "build" / "doc.xml")}
-        self.assertEqual(sorted(xml_terms), ["Observation", "Plain term", "Sensor (physical)", "hand written"])
+        self.assertEqual(sorted(xml_terms), ["Key only", "Observation", "Plain term", "Sensor (physical)", "hand written"])
         sensor = xml_terms["Sensor (physical)"]
         self.assertEqual(sensor["aliases"], ["detector", "sensing *device* & co"])
-        self.assertEqual([(m["relation"], m["iri"]) for m in sensor["mappings"]],
-                         [("close", "https://example.org/onto#Sensor"), ("broader", "https://example.org/onto#System")])
-        self.assertEqual((sensor["source"], sensor["modified"], sensor["note"]), ("dep", True, "Software sensors are out of scope."))
-        self.assertEqual((xml_terms["Observation"]["source"], xml_terms["Observation"]["modified"]), ("dep", False))
+        self.assertEqual((sensor["source"], sensor["source_iri"], sensor["source_label"], sensor["modified"]),
+                         ("dep", "https://example.org/onto#Sensor", "Sensor Class", True))
+        self.assertEqual(sensor["note"], "Software sensors are out of scope.")
+        self.assertEqual((xml_terms["Observation"]["source"], xml_terms["Observation"]["source_iri"],
+                          xml_terms["Observation"]["modified"]), ("dep", "https://example.org/onto#Observation", False))
+        self.assertEqual((xml_terms["Key only"]["source"], xml_terms["Key only"]["source_iri"]), ("dep", None))
+
+    def test_a_key_only_citation_draws_no_xml_syntax_message(self):
+        root = self.build([r for r in TERM_RECORDS if r["id"] in ("/term/keyonly", "/term/plain")])
+        summary = self.gate_findings(root)
+        messages = {f["key"] for f in summary["findings"] if f["rule"] == "X010"}
+        self.assertFalse([m for m in messages if m.startswith(("STANDOC_7", "STANDOC_20", "STANDOC_25"))], messages)
+        self.assertEqual([f for f in summary["findings"] if f["rule"] in ("X000", "X001", "X002", "X003")], [])
 
     def test_a_changed_record_and_a_missing_term_are_reported(self):
         root = self.build(TERM_RECORDS)
@@ -427,13 +449,12 @@ class TermsRoundTrip(unittest.TestCase):
         for r in changed:
             if r.get("id") == "/term/sensor":
                 r["definition"] = "Changed after the document was built."
-                r["mappings"][0]["iri"] = "https://example.org/onto#Other"
-                r["source"] = "other"
+                r["source"] = {"key": "other", "iri": "https://example.org/onto#Other", "label": "Other Class"}
         changed.append({"kind": "term", "id": "/term/ghost", "term": "Ghost", "definition": "Not in the document."})
         (root / "records" / "all.yaml").write_text(yaml.safe_dump(changed), encoding="utf-8")
         found = {(f["rule"], f["key"]) for f in self.gate_findings(root)["findings"]}
         self.assertIn(("X001", "term:/term/ghost"), found)
-        for field in ("definition", "mappings", "source"):
+        for field in ("definition", "source", "source.iri", "source.label"):
             self.assertIn(("X003", f"/term/sensor#{field}"), found)
         self.assertNotIn(("X003", "/term/observation#definition"), found)
         self.assertFalse([k for r, k in found if r == "X002" and "term" in k])

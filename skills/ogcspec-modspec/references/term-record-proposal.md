@@ -27,9 +27,9 @@ One YAML record per term, like the other kinds.
 | `term` | string | yes | the preferred designation as the standard writes it | **inferred** |
 | `definition` | string | yes | the definition as the standard states it, literal text like `statement` | **inferred** |
 | `aliases` | list of strings | no | admitted synonyms | **inferred** |
-| `mappings` | list of mapping entries | no | links to external ontology terms (section 3) | `ontology-grounding.md`, "what a target must supply" |
+| `mappings` | list of mapping entries | no | links to external ontology terms (section 3). **Record-only since decision D: checked by the gate, never written into the document** | `ontology-grounding.md`, "what a target must supply" |
 | `note` | string | no | free text; where the mapping is unresolved (for example software or virtual systems) say so here | **inferred** |
-| `source` | bibliography key (string) | no | the entry's `[SOURCE: ...]`, as the Connected Systems API does; the key must be an entry of the document's references | owner decision B, 2026-11-07; Directives Part 2 16.5.10 |
+| `source` | bibliography key (string), or `{key, iri, label}` | no | the entry's `[SOURCE: ...]` citation; with `iri` and `label` the ontology term's address is the citation's link (`<<key, key, iri[label]>>`), exactly where the Connected Systems API puts it; the key must be an entry of the document's references | owner decisions B and D, 2026-11-07; Directives Part 2 16.5.10 |
 | `modified` | `true` or `false` | no | the definition was changed from its source; needs `source` | owner decision B |
 | `status` | `proposed` or `accepted` | no | same meaning and same protection as on every other kind | `record-format-proposal.md` section 8 |
 
@@ -130,6 +130,7 @@ virtual systems are in scope, and whether definitions are normative (`ontology-g
 | 6 | Version | Keep 0.3.0. |
 | A | Where the mapping goes in the document | Follow the CS API pattern: a note on the entry (`Mapping (<relation>): <address>`), informative by default. |
 | B | `source` field | Add `source` and a `modified` flag. |
+| D | Where the ontology address goes in the document | After the dry run showed the CS API carries it in the source citation: **match OGC practice** (`source: {key, iri, label}`); `mappings` (five closeness words, several per term, per-mapping notes) stays record-only. The note-based carrier ("Mapping (<relation>): <address>") built the same day was removed. |
 | C | Marker for an unresolved mapping | None; an unresolved term has no `mappings` and a `note` saying why (under normative, T005 reports it and the baseline accepts it). |
 
 Consequence of 3: whichever status is chosen, the gate checks form only (known ontology, address prefix, relation word, and presence when
@@ -162,22 +163,23 @@ test, as for titles and profiles.
 ## 10. What was built (2026-11-07) and what it does not show
 
 - **Record and gate:** `term` kind with `term`, `definition`, `aliases`, `mappings`, `note`, `source`, `modified`; G002/G003 incl. mapping entries
-  (`<id>#mappings[i].<key>`), `source` must look like a bibliography key, `modified` needs `source`, a term `note` may not start with "Mapping (",
-  an address may not contain whitespace or brackets; T001-T005 as in section 5 (T005 only with `[terms] mappings = "normative"`).
-- **Emitter:** `terms.adoc`, written only when there are term records, one entry per term (heading, `alt:` lines, definition, one note per mapping,
-  the term's note, `[.source]` with `<<key>>` and `, modified`). All prose is literal text. A closing bracket or backslash in a term, alias,
+  (`<id>#mappings[i].<key>`), `source` is a key or `{key, iri, label}` (key a bibliography anchor, so no slash; address and label plain), `modified` needs
+  `source`, an address may not contain whitespace or brackets; T001-T005 as in section 5 (T005 only with `[terms] mappings = "normative"`).
+- **Emitter:** `terms.adoc`, written only when there are term records, one entry per term (heading, `alt:` lines, definition, the term's note,
+  `[.source]` with `<<key>>` or `<<key, key, iri[label]>>`, and `, modified`). `mappings` is not emitted (decision D). All prose is literal text. A closing bracket or backslash in a term, alias,
   definition or note, an unusable address, or a note starting "Mapping (" is refused (exit 2) rather than emitted.
 - **Document:** the project's terms clause must be marked `[heading=terms and definitions]` and `include::terms.adoc[]` (see `ogcspec-metanorma`).
   Hand-written terms beside the emitted ones are fine.
 - **Stage 2:** `terms_from_xml` (kept apart from `scan_xml`, so no corpus record count changes) and `term_fidelity`: each record term is matched to an XML
   entry by designation (ignoring case and spacing); not found is X001 (`term:<id>`); a field difference is X003 (`<id>#definition`, `aliases`,
-  `mappings`, `note`, `source`, `modified`). A term in the XML that the records do not define is **never** reported. A mapping's own `note` is
-  record-only and not compared.
-- **Tests:** gate 116 (3 skipped), emitter and round trip 34, including a real compile on the pinned image of three terms (special characters,
-  two mappings, a modified source, a hand-written neighbour) that come back identical, a mutated record reported as X003, and a missing term as X001.
+  `note`, `source`, `source.iri`, `source.label`, `modified`; the address and label are compared only when the record gives them). A term in the
+  XML that the records do not define is **never** reported. `mappings` is record-only and not compared.
+- **Tests:** gate 117 (3 skipped without the corpus), emitter and round trip 36, including a real compile on the pinned image of four terms (special
+  characters, a modified source with an address, a key-only source, a hand-written neighbour) that come back identical, a mutated record reported as X003,
+  a missing term as X001, and a control showing that a key-only citation draws no STANDOC_7.
   A real compiled document is kept as a gate fixture (`tests/fixtures/c8_terms`).
-- **Corpus:** the six real documents (rebuilt earlier the same day at their pinned SHAs) were re-checked after these changes: 116 gate tests ran with
-  none skipped and the per-rule counts equal the snapshot.
+- **Corpus:** the six real documents (rebuilt earlier the same day at their pinned SHAs) were re-checked after the first version of these changes
+  (116 gate tests, none skipped, counts equal the snapshot) and again after decision D (117 gate tests, none skipped, counts equal the snapshot).
 - **Not shown:** a real standard's terms clause; the editions of the Directives after 9.0; whether a `[SOURCE: ...]` key that is not in the
   document's references is caught by anything but Metanorma's own warning (STANDOC_32); that any mapping is correct.
 
@@ -189,9 +191,12 @@ its one hand-written sentence kept, the entries `include::`d), and compiled on t
 
 - **It works at real size:** compile exit 0 in about 48 s; all 17 terms read back with **no** X001/X003; the same kinds of Metanorma message as the
   original (no new kind). The total fell from 243 to 193, almost all STANDOC_7 (136 to 88); most plausibly the original's source-locator links, not checked.
-- **The carrier differs from existing practice.** The original keeps each SOSA/SSN address in the source line's locator link; this emitter writes a
-  "Mapping (<relation>): <address>" note and a bare source key. Checked against the original's hand-written terms, the gate reports X003 on `mappings`
-  for 10 terms for that reason alone: the address is not where the read-back looks. Owner decision pending (see the chat card): move the address into the source citation.
+- **The first carrier differed from existing practice** (a note "Mapping (<relation>): <address>" plus a bare key; against the original's hand-written terms the
+  gate reported X003 on `mappings` for 10 terms for that reason alone). After decision D the dry run was repeated with `source: {key, iri, label}` records:
+  compile exit 0; read-back of the emitted copy had **no** findings; against the **original hand-written clause** the 10 address differences are gone and
+  only three remain, all real: the Actuator entry's dangling key (below), the Property entry's `Example` paragraph and the Sensor Network entry's lowercase
+  `Note:` (the last is a slip of my parsing script). Metanorma's STANDOC_7 count went from 136 (original) to 137 (re-emitted): the source-locator link form draws
+  those XML-syntax messages in OGC's own document too, so a project using it baselines them.
 - **Gaps in the term format shown by real terms:** no field for an `Example` (the Property entry has one); one `note` only (the directives allow several);
   a definition is one string; the source's locator text (`definition 4.11`, `definition 4.1.4`) has nowhere to go (`source` is a key only);
   the source status is identical or modified only (the 5-word relation has no counterpart in the document).

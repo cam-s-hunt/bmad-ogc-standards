@@ -33,10 +33,12 @@ Added by record-format-proposal.md (plan step 3):
 Terms (term-record-proposal.md): a `term` record becomes one terminological entry in terms.adoc, written to be
 `include::`d inside the project's own terms clause, which must be marked `[heading=terms and definitions]` (observed: without
 it Metanorma aborts, STANDOC_25) and which Metanorma's OGC flavour precedes with its own boilerplate. The entry is
-`=== pass:c[term]`, one `alt:[pass:c[alias]]` line per alias, the definition as literal text, one `NOTE: Mapping (<relation>): <iri>`
-per mapping, the term's own `note` as `NOTE:`, and `[.source]` with `<<source>>` (and `, modified` when `modified: true`). A mapping's
-own `note` is record-only (it does not round-trip). terms.adoc is written only when there are term records. A term, alias,
-definition or note containing a closing bracket is refused rather than risk a malformed entry.
+`=== pass:c[term]`, one `alt:[pass:c[alias]]` line per alias, the definition as literal text, the term's own `note` as `NOTE:`, and
+`[.source]` with the citation (and `, modified` when `modified: true`). The citation is `<<key>>`, or, when the source gives an
+`iri`, `<<key, key, iri[label]>>`: the ontology term's address as a link inside the citation, which is how the Connected Systems API
+writes it (informative, ISO/IEC Directives Part 2 16.5.10). `mappings` is record-only and never emitted. terms.adoc is written only
+when there are term records. A term, alias, definition, note or label containing a closing bracket is refused rather than risk a
+malformed entry.
 
 Usage:
   emit.py --records <dir> --out <dir> [--config <ogcspec.gate.toml>]
@@ -151,19 +153,22 @@ def emit_term(r: dict) -> str:
     lines = [f"=== pass:c[{name}]"]
     lines += [f"alt:[pass:c[{bracket_safe('alias', a)}]]" for a in r.get("aliases") or []]
     lines += ["", f"pass:c[{bracket_safe('definition', r.get('definition', ''))}]"]
-    for m in r.get("mappings") or []:
-        if not isinstance(m, dict):
-            raise ValueError(f"term {r['id']}: a mapping entry is not a mapping")
-        iri = one_line(m.get("iri", ""))
-        if not iri or any(c in iri for c in " <>[]"):
-            raise ValueError(f"term {r['id']}: cannot emit mapping address {iri!r}")
-        lines += ["", f"NOTE: Mapping ({one_line(m.get('relation', ''))}): {iri}"]
     if r.get("note"):
-        if one_line(r["note"]).startswith("Mapping ("):
-            raise ValueError(f"term {r['id']}: a note may not start with 'Mapping (' (it would read back as a mapping)")
         lines += ["", f"NOTE: pass:c[{bracket_safe('note', r['note'])}]"]
     if r.get("source"):
-        lines += ["", "[.source]", f"<<{one_line(r['source'])}>>" + (", modified" if r.get("modified") else "")]
+        src = {"key": r["source"]} if isinstance(r["source"], str) else dict(r["source"])
+        key = one_line(src.get("key", ""))
+        if not key or any(c in key for c in " ,<>[]/"):
+            raise ValueError(f"term {r['id']}: cannot emit source key {key!r}")
+        if src.get("iri"):
+            iri = one_line(src["iri"])
+            if any(c in iri for c in " <>[],"):
+                raise ValueError(f"term {r['id']}: cannot emit source address {iri!r}")
+            label = bracket_safe("source label", src.get("label", "")) if src.get("label") else ""
+            cite = f"<<{key}, {key}, {iri}[{label}]>>"
+        else:
+            cite = f"<<{key}>>"
+        lines += ["", "[.source]", cite + (", modified" if r.get("modified") else "")]
     return "\n".join(lines) + "\n"
 
 

@@ -12,14 +12,18 @@
 #
 # The gate checks the form only (T001-T005, G002, G003): a known ontology, an address that starts with its prefix, one of
 # the five relation words, no duplicate word. It cannot tell whether a mapping is right; with normative mappings that is
-# the owner's and the reviewers' job. Terms are emitted as terms.adoc (see ogcspec-metanorma) and read back by stage 2.
+# the owner's and the reviewers' job. Terms are emitted as terms.adoc (see ogcspec-metanorma) and read back by stage 2. The `source`
+# (key, address, label) is written into the document as the entry's source citation; `mappings` stays in the records only.
 
 - kind: term
   id: /term/sensor
   status: proposed
   term: Sensor
   definition: A device that responds to a property of the world.
-  source: EXAMPLE-ONTOLOGY
+  source:
+    key: EXAMPLE-ONTOLOGY
+    iri: https://example.org/onto#Sensor
+    label: Sensor Class
   modified: true
   aliases:
     - detector

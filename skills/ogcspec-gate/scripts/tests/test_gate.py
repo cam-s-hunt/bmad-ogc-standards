@@ -183,22 +183,24 @@ class TermSourceAndReadBackTests(unittest.TestCase):
         return [
             {"id": "/term/sensor", "kind": "term", "term": "Sensor (physical)", "aliases": ["detector", "sensing *device* & co"],
              "definition": "A device & its _probe_ that responds to a property of the world.",
-             "mappings": [{"relation": "close", "iri": "https://example.org/onto#Sensor"},
-                          {"relation": "broader", "iri": "https://example.org/onto#System"}],
-             "note": "Software sensors are out of scope.", "source": "dep", "modified": True},
+             "mappings": [{"relation": "close", "ontology": "example-onto", "iri": "https://example.org/onto#Sensor"}],
+             "note": "Software sensors are out of scope.", "modified": True,
+             "source": {"key": "dep", "iri": "https://example.org/onto#Sensor", "label": "Sensor Class"}},
             {"id": "/term/observation", "kind": "term", "term": "Observation", "definition": "The act of estimating a value.",
-             "source": "dep"},
+             "source": {"key": "dep", "iri": "https://example.org/onto#Observation"}},
+            {"id": "/term/keyonly", "kind": "term", "term": "Key only", "definition": "Cited without an address.", "source": "dep"},
             {"id": "/term/plain", "kind": "term", "term": "Plain term", "definition": "Nothing extra."},
         ]
 
     def test_terms_are_read_back_from_a_real_compiled_document(self):
         xml = {t["term"]: t for t in gate.terms_from_xml(self.FIXTURE)}
-        self.assertEqual(sorted(xml), ["Observation", "Plain term", "Sensor (physical)", "hand written"])
+        self.assertEqual(sorted(xml), ["Key only", "Observation", "Plain term", "Sensor (physical)", "hand written"])
         sensor = xml["Sensor (physical)"]
         self.assertEqual(sensor["aliases"], ["detector", "sensing *device* & co"])
-        self.assertEqual([(m["relation"], m["iri"]) for m in sensor["mappings"]],
-                         [("close", "https://example.org/onto#Sensor"), ("broader", "https://example.org/onto#System")])
-        self.assertEqual((sensor["source"], sensor["modified"], sensor["note"]), ("dep", True, "Software sensors are out of scope."))
+        self.assertEqual((sensor["source"], sensor["source_iri"], sensor["source_label"], sensor["modified"]),
+                         ("dep", "https://example.org/onto#Sensor", "Sensor Class", True))
+        self.assertEqual(sensor["note"], "Software sensors are out of scope.")
+        self.assertEqual((xml["Key only"]["source"], xml["Key only"]["source_iri"]), ("dep", None))
         self.assertEqual(xml["Plain term"]["source"], None)
 
     def test_matching_records_have_no_fidelity_findings_and_a_hand_written_term_is_not_x002(self):
@@ -206,33 +208,45 @@ class TermSourceAndReadBackTests(unittest.TestCase):
 
     def test_each_field_difference_is_an_x003_and_a_missing_term_is_x001(self):
         terms = self.yaml_terms()
-        terms[0].update(definition="Different.", aliases=["detector"], note="Other note.", source="other", modified=False)
-        terms[0]["mappings"] = [{"relation": "exact", "iri": "https://example.org/onto#Sensor"}]
+        terms[0].update(definition="Different.", aliases=["detector"], note="Other note.", modified=False,
+                        source={"key": "other", "iri": "https://example.org/onto#Other", "label": "Other Class"})
         terms.append({"id": "/term/ghost", "kind": "term", "term": "Ghost", "definition": "d"})
         found = {(f.rule, f.key) for f in gate.term_fidelity(terms, gate.terms_from_xml(self.FIXTURE))}
         self.assertEqual(found, {("X001", "term:/term/ghost")} | {("X003", f"/term/sensor#{f}") for f in
-                         ("definition", "aliases", "note", "source", "modified", "mappings")})
+                         ("definition", "aliases", "note", "source", "modified", "source.iri", "source.label")})
+
+    def test_the_address_and_label_are_compared_only_when_the_record_gives_them(self):
+        terms = self.yaml_terms()
+        terms[0]["source"] = "dep"  # key only: the document's address and label are extra detail, not a difference
+        self.assertEqual(gate.term_fidelity(terms, gate.terms_from_xml(self.FIXTURE)), [])
 
     def test_designations_match_ignoring_case_and_spacing(self):
         terms = [{"id": "/term/p", "kind": "term", "term": "  PLAIN   term ", "definition": "Nothing extra."}]
         self.assertEqual(gate.term_fidelity(terms, gate.terms_from_xml(self.FIXTURE)), [])
 
-    def test_a_per_mapping_note_does_not_round_trip_and_is_not_compared(self):
+    def test_mappings_are_record_only_and_not_compared(self):
         terms = self.yaml_terms()
-        terms[0]["mappings"][0]["note"] = "record-only comment"
+        terms[0]["mappings"] = [{"relation": "exact", "ontology": "example-onto", "iri": "https://example.org/onto#Else"}]
         self.assertEqual(gate.term_fidelity(terms, gate.terms_from_xml(self.FIXTURE)), [])
 
-    def test_source_modified_iri_and_note_fields_are_checked(self):
+    def test_source_and_modified_fields_are_checked(self):
         def f(**fields):
             t = {"kind": "term", "id": "/term/x", "term": "X", "definition": "d"}
             t.update(fields)
             return {(r, k) for r, k in findings_of(with_terms(t))}
         self.assertIn(("G003", "/term/x#source"), f(source="two words"))
-        self.assertIn(("G003", "/term/x#source"), f(source=""))
+        self.assertIn(("G003", "/term/x#source"), f(source="SOSA/SSN"))  # a slash is not a bibliography anchor (the CS API's own Actuator entry has one)
+        self.assertIn(("G003", "/term/x#source"), f(source=42))
+        self.assertIn(("G003", "/term/x#source.key"), f(source={"iri": "https://x/y"}))
+        self.assertIn(("G002", "/term/x#source.url"), f(source={"key": "dep", "url": "https://x/y"}))
+        self.assertIn(("G003", "/term/x#source.iri"), f(source={"key": "dep", "iri": "https://x/a b"}))
+        self.assertIn(("G003", "/term/x#source.iri"), f(source={"key": "dep", "iri": "https://x/a,b"}))
+        self.assertIn(("G003", "/term/x#source.label"), f(source={"key": "dep", "label": "needs an iri"}))
+        self.assertIn(("G003", "/term/x#source.label"), f(source={"key": "dep", "iri": "https://x/y", "label": "bad]"}))
+        self.assertEqual(f(source={"key": "dep", "iri": "https://x/y", "label": "Y Class"}, modified=True), set())
+        self.assertEqual(f(source="dep", modified=True), set())
         self.assertIn(("G003", "/term/x#modified"), f(modified="yes", source="dep"))
         self.assertIn(("G003", "/term/x#modified"), f(modified=True))  # nothing to be modified from
-        self.assertEqual(f(source="dep", modified=True), set())
-        self.assertIn(("G003", "/term/x#note"), f(note="Mapping (close): https://example.org/onto#X"))
         bad = {"relation": "close", "ontology": "example-onto", "iri": "https://example.org/onto#a b"}
         self.assertIn(("G003", "/term/x#mappings[0].iri"), f(mappings=[bad]))
 

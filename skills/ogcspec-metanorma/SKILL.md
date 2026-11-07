@@ -19,7 +19,10 @@ the image is the digest the project pinned for its builds (`repo@sha256:...`); t
    clause, and that clause must be marked `[heading=terms and definitions]` above its title**: without it Metanorma does not
    recognise the clause and the compile aborts (STANDOC_25). Metanorma's OGC flavour adds its own boilerplate paragraphs at the top
    of that clause; hand-written terms may sit beside the emitted ones, and the gate ignores terms the records do not define. A
-   mapping becomes a note "Mapping (<relation>): <address>"; a mapping's own `note` is not emitted.
+   term's `source` becomes the entry's `[.source]` citation; with an `iri` it is written `<<key, key, iri[label]>>`, the ontology
+   term's address as a link in the citation, as the Connected Systems API does. Metanorma answers that form with STANDOC_7
+   XML-syntax messages (observed; the CS API document has the same): accept them through the baseline. `mappings` is record-only
+   and is not written into the document.
 2. **Compile**:
    `uv run {skill-scripts}/metanorma.py --image <repo@sha256:...> --adoc <doc.adoc> --formats xml > compile.json`
    If the document includes files from outside its own folder, add `--root <a directory containing them all>`;

@@ -30,8 +30,10 @@ Record files: YAML under `records_dir`, each file one mapping or a list of mappi
   recommendation      id  statement   (never needs a test)
   permission          id  statement   (never needs a test)
   term                id  term, definition, aliases[] (optional), mappings[] (optional: relation, ontology, iri, note),
-                      note (optional), source (optional: a bibliography key, emitted as the entry's [SOURCE: ...]),
-                      modified (optional boolean: the definition was changed from its source). A defined word and
+                      note (optional), source (optional: a bibliography key, or {key, iri, label}: emitted as the entry's
+                      [SOURCE: ...] line, with the ontology term's address as its locator link, as the Connected
+                      Systems API does), modified (optional boolean: the definition was changed from its source).
+                      `mappings` is record-only: it is checked but not written into the document. A defined word and
                       its links to ontology terms; see ogcspec-modspec/references/term-record-proposal.md. Rules
                       T001-T005, authored records only.
 Any kind may carry `status` (proposed or accepted, record-only). A field outside this table is G002. The rules for
@@ -111,7 +113,7 @@ KNOWN_FIELDS = {
 }
 MAPPING_FIELDS = frozenset({"relation", "ontology", "iri", "note"})
 SOURCE_REF = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.:-]*$")  # a bibliography anchor the emitter can cross-reference
-MAPPING_NOTE_PREFIX = "Mapping ("  # the emitter writes each mapping as the note "Mapping (<relation>): <iri>"
+SOURCE_FIELDS = frozenset({"key", "iri", "label"})
 MAPPING_RELATIONS = ("exact", "close", "broader", "narrower", "related")  # SKOS-style closeness words (owner, 2026-11-07)
 FIELD_HINTS = {
     ("conformance_class", "inherit"): "a conformance class's dependencies inside this document are derived from its "
@@ -142,7 +144,7 @@ RULES = {
              "term-record-proposal.md section 5: form only; says nothing about whether the meaning is right"),
     "T004": ("a term mapping's relation is one of exact, close, broader, narrower, related", "structure",
              "term-record-proposal.md section 3 (owner decision 2, 2026-11-07)"),
-    "T005": ("with normative mappings, every term carries at least one mapping", "structure",
+    "T005": ("with normative mappings, every term carries at least one mapping (record-only: not written to the document)", "structure",
              "term-record-proposal.md decisions 3 and 4 (2026-11-07): an absent or empty `mappings` is reported; there is no "
              "`unresolved` marker yet. Runs only when [terms] mappings = \"normative\"; the default is informative, as in the "
              "Connected Systems API (OGC 23-001)"),
@@ -286,11 +288,8 @@ def term_field_findings(r: dict, ident: str) -> list[Finding]:
             out.append(Finding("G003", f"{ident}#{field}", f"a term needs a non-empty string {field}, not {r.get(field)!r}"))
     if "note" in r and not (isinstance(r["note"], str) and r["note"].strip()):
         out.append(Finding("G003", f"{ident}#note", f"note must be a non-empty string, not {r['note']!r}"))
-    elif isinstance(r.get("note"), str) and r["note"].lstrip().startswith(MAPPING_NOTE_PREFIX):
-        out.append(Finding("G003", f"{ident}#note", f"a term note may not start with {MAPPING_NOTE_PREFIX!r}: the emitter writes "
-                           "mappings in that form, so the note could not be told apart from one on read-back"))
-    if "source" in r and not (isinstance(r["source"], str) and SOURCE_REF.match(r["source"])):
-        out.append(Finding("G003", f"{ident}#source", f"source must name a bibliography entry (letters, digits, _ . : -), not {r['source']!r}"))
+    if "source" in r:
+        out += term_source_findings(r["source"], ident)
     if "modified" in r and not isinstance(r["modified"], bool):
         out.append(Finding("G003", f"{ident}#modified", f"modified must be true or false, not {r['modified']!r}"))
     elif r.get("modified") is True and "source" not in r:
@@ -317,6 +316,34 @@ def term_field_findings(r: dict, ident: str) -> list[Finding]:
                 out.append(Finding("G003", f"{where}.iri", f"iri may not contain whitespace, '<', '>' or brackets: {m['iri']!r}"))
             if "note" in m and not (isinstance(m["note"], str) and m["note"].strip()):
                 out.append(Finding("G003", f"{where}.note", f"note must be a non-empty string, not {m['note']!r}"))
+    return out
+
+
+def term_source(value: object) -> dict | None:
+    """A term's `source` as {key, iri?, label?}: a plain string is the bibliography key alone. None if unusable."""
+    if isinstance(value, str):
+        return {"key": value}
+    return value if isinstance(value, dict) else None
+
+
+def term_source_findings(value: object, ident: str) -> list[Finding]:
+    src = term_source(value)
+    where = f"{ident}#source"
+    if src is None:
+        return [Finding("G003", where, "source must be a bibliography key or a mapping with key, iri and label")]
+    out: list[Finding] = []
+    for key in sorted(str(k) for k in src if k not in SOURCE_FIELDS):
+        out.append(Finding("G002", f"{where}.{key}", f"a source has no field {key!r}; known fields: {sorted(SOURCE_FIELDS)}"))
+    if not (isinstance(src.get("key"), str) and SOURCE_REF.match(src["key"])):
+        out.append(Finding("G003", f"{where}.key" if isinstance(value, dict) else where,
+                           f"a source key must name a bibliography entry (letters, digits, _ . : -), not {src.get('key')!r}"))
+    if "iri" in src and not (isinstance(src["iri"], str) and src["iri"].strip() and not re.search(r"[\s<>\]\[,]", src["iri"])):
+        out.append(Finding("G003", f"{where}.iri", f"a source iri must be one address without whitespace, commas or brackets, not {src['iri']!r}"))
+    if "label" in src:
+        if "iri" not in src:
+            out.append(Finding("G003", f"{where}.label", "a source label is the text of the iri link and needs an iri"))
+        elif not (isinstance(src["label"], str) and src["label"].strip() and not re.search(r"[\]<>]", src["label"])):
+            out.append(Finding("G003", f"{where}.label", f"a source label must be plain text without ']', '<' or '>', not {src['label']!r}"))
     return out
 
 
@@ -848,8 +875,9 @@ def terms_from_xml(path: Path) -> list[dict]:
 
     Kept apart from `scan_xml` on purpose: a real OGC document has hand-written terms, and counting them as records would
     change every document's record count and make X002 fire on each. `check_xml` uses this only for terms the YAML has.
-    A mapping is read from a note written as "Mapping (<relation>): <iri>" (the form `emit.py` writes); any other
-    note is the term's own `note`. A mapping's per-entry `note` is record-only and does not round-trip."""
+    The source is read as the Connected Systems API writes it: the bibliography key from `origin/@bibitemid`, and the
+    ontology term's address and label from the link inside the citation. `mappings` is record-only (not in the document).
+    All notes are joined as the term's `note`."""
     root = ET.parse(path).getroot()
     out: list[dict] = []
     for term in (e for e in root.iter() if _local(e.tag) == "term"):
@@ -860,19 +888,15 @@ def terms_from_xml(path: Path) -> list[dict]:
         name = " ".join(_text(n) for n in preferred.iter() if _local(n.tag) == "name")
         aliases = [" ".join(_text(n) for n in k.iter() if _local(n.tag) == "name") for k in kids if _local(k.tag) == "admitted"]
         definition = next((_text(k) for k in kids if _local(k.tag) == "definition"), "")
-        mappings, notes = [], []
-        for k in (k for k in kids if _local(k.tag) == "termnote"):
-            text = _text(k)
-            m = re.match(r"^Mapping \((\w+)\):\s*(\S+)$", text)
-            if m:
-                mappings.append({"relation": m.group(1), "iri": m.group(2)})
-            else:
-                notes.append(text)
+        notes = [_text(k) for k in kids if _local(k.tag) == "termnote"]
         source = next((k for k in kids if _local(k.tag) == "source"), None)
         origin = next((o for o in source.iter() if _local(o.tag) == "origin"), None) if source is not None else None
-        out.append({"term": name, "aliases": aliases, "definition": definition, "mappings": mappings,
+        link = next((e for e in origin.iter() if _local(e.tag) == "link"), None) if origin is not None else None
+        out.append({"term": name, "aliases": aliases, "definition": definition,
                     "note": " ".join(notes) or None,
                     "source": origin.get("bibitemid") if origin is not None else None,
+                    "source_iri": link.get("target") if link is not None else None,
+                    "source_label": " ".join("".join(link.itertext()).split()) if link is not None else None,
                     "modified": source is not None and source.get("status") == "modified"})
     return out
 
@@ -882,7 +906,7 @@ def designation(value: object) -> str:
 
 
 def term_fidelity(yaml_terms: list[dict], xml_terms: list[dict]) -> list[Finding]:
-    """X001/X003 for the terms the YAML has, matched by designation. The other direction (a term in the XML that the YAML
+    """X001/X003 for the terms the YAML has, matched by designation (`mappings` is record-only and not compared). The other direction (a term in the XML that the YAML
     lacks) is deliberately not reported: a document's terms clause may hold hand-written terms the records do not own."""
     out: list[Finding] = []
     by_name = {designation(t["term"]): t for t in xml_terms}
@@ -892,15 +916,18 @@ def term_fidelity(yaml_terms: list[dict], xml_terms: list[dict]) -> list[Finding
         if x is None:
             out.append(Finding("X001", f"term:{rid}", "in the YAML records but not in the compiled XML (matched by term)"))
             continue
+        src = term_source(r.get("source")) or {}
         pairs = {
             "definition": (canon(r.get("definition")), canon(x["definition"])),
             "aliases": (sorted(canon(a) for a in r.get("aliases") or []), sorted(canon(a) for a in x["aliases"])),
-            "mappings": (sorted((m.get("relation"), m.get("iri")) for m in r.get("mappings") or [] if isinstance(m, dict)),
-                         sorted((m["relation"], m["iri"]) for m in x["mappings"])),
             "note": (canon(r.get("note")), canon(x["note"])),
-            "source": (r.get("source") or "", x["source"] or ""),
+            "source": (src.get("key") or "", x["source"] or ""),
             "modified": (bool(r.get("modified")), bool(x["modified"])),
         }
+        if "iri" in src:  # the address and label are compared when the record gives them; a hand-written one may add more
+            pairs["source.iri"] = (src["iri"], x["source_iri"] or "")
+        if "label" in src:
+            pairs["source.label"] = (canon(src["label"]), canon(x["source_label"]))
         for field, (a, b) in pairs.items():
             if a != b:
                 out.append(Finding("X003", f"{rid}#{field}", f"YAML {a!r} vs XML {b!r}"))

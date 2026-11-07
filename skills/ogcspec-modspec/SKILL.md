@@ -18,7 +18,7 @@ generated from them (`ogcspec-metanorma`) and is never edited by hand.
 | `conformance_class` | `/conf/<class>` | `target` (a requirements class id), `tests[]`; optional `title`, `depends_on[]` |
 | `recommendation` | `/rec/<class>/<name>` | `statement` (never needs a test) |
 | `permission` | `/per/<class>/<name>` | `statement` (never needs a test) |
-| `term` | `/term/<name>` | `term`, `definition`; optional `aliases[]`, `mappings[]` (each: `relation`, `ontology`, `iri`, optional record-only `note`), `note`, `source` (a bibliography key), `modified` (true if the definition was changed from its source) |
+| `term` | `/term/<name>` | `term`, `definition`; optional `aliases[]`, `note`, `source` (a bibliography key, or `{key, iri, label}`: written as the entry's source citation, the ontology term's address as its link), `modified` (true if the definition was changed from its source), `mappings[]` (record-only, never written to the document: each `relation`, `ontology`, `iri`, optional `note`) |
 
 Any kind may carry `status: proposed` or `accepted`. Any other field is G002. The fields are explained, with their ModSpec
 basis and what each rule checks, in `references/record-format-proposal.md`; `references/record-format-example.yaml` uses all of
@@ -36,8 +36,9 @@ them. In short:
   config's `[[ontologies]]` and `iri` must start with that entry's `iri_prefix`. The owner chose the Connected Systems API pattern:
   mappings are **informative** by default (so T005, a term with no mapping, does not run unless `[terms] mappings = "normative"`). The gate
   checks the form only, never whether a mapping is correct. Terms are emitted into the document (`terms.adoc`, see `ogcspec-metanorma`) and
-  read back by the gate's stage 2 (matched by `term`, X001/X003). `source` names a bibliography entry as the entry's `[SOURCE: ...]`, as the
-  Connected Systems API does; write it only when the owner names the reference.
+  read back by the gate's stage 2 (matched by `term`, X001/X003). `source` is the entry's `[SOURCE: ...]` citation; its `iri` is the
+  ontology term's address, which is how the Connected Systems API ties its terms to SOSA/SSN. `mappings` (with the five closeness words,
+  several per term) stays in the records for analysis and is not in the document. Write a `source` only when the owner names the reference.
 - Recommended layout: one record per file, path = id without the leading `/` plus `.yaml` (`style = ["layout"]` checks it).
 
 A file holds one mapping or a list of them. Membership of a requirement in a class is the class's `requirements`
