@@ -48,7 +48,7 @@ tools), **inferred**, or **open**.
    pinned SHAs and matching the snapshot; `accepted` protected by branch protection in the target repository (owner decision, no gate rule). Leave the rest as HUMAN review steps in the BMAD workflow. ATS 12 and ATS 19 are "inspect the document" tests, so the
    gate checks structure only.
 4. **Put the questions to OGC** (list below) before encoding any contested reading as a blocking rule.
-5. **Ground the vocabulary** in BFO/CCO and SOSA/SSN. Working references (inference, caveats in
+5. **Ground the vocabulary** in BFO/CCO and SOSA/SSN. *2026-11-07: pins recorded in `ONTOLOGY-PINS` and the limits in `docs/research/ontology-grounding.md`; the mapping itself waits for a target standard's term list (the template has none) and an owner decision on a terms record kind.* Working references (inference, caveats in
    `docs/research/ontology-alignments.md`): SSN-to-BFO tag v2026-07-18 (`221c65a`, CC0, maps the 2017 SSN/SOSA against
    CCO 2024-11-06) for SOSA/SSN; PROV-to-BFO `main` `c60847a` (CC0) for PROV-O; pin BFO-2020 and CCO v2.2. The W3C
    `sosa-bfo.ttl` is a non-normative draft with a typo (`rdfs:subClassOF`) that drops its Planned Act axiom; the two SOSA

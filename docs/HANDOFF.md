@@ -62,6 +62,11 @@ a target standard repository, to be created later). Prototype; not registered wi
   by my reading: adversarial 12 ("not a defect") and 13 (its own caveat), and parts of 9 to 11 (for example a "title" on
   abstract tests, which the record format does not have). One run, one model family, tiny records: it shows the chain works end
   to end, not that the personas or lenses are good.
+- **Owner decisions 2026-11-07 (all executed):** MIT license (`LICENSE`); `backup/pre-squash` tag deleted; Architect and `ogcspec-modspec` now list what a
+  restating test step leaves undecided as open questions for the owner and keep the owner's verbal form (should stays should); maintainer
+  questions drafted in `docs/maintainer-questions.md` for the owner to post (nothing sent); a first eval pass ran (`docs/eval-report-2026-11-07.md`,
+  cases in `evals/`; quick look only, Architect and Editor not evaluated); ontology pins in `ONTOLOGY-PINS` and `docs/research/ontology-grounding.md`
+  (no mapping written: it needs a target term list). Next phase chosen by the owner: ontology grounding, which is blocked on the target's terms.
 - The installed copy in `.claude/skills/` is refreshed with `DISABLE_TELEMETRY=1 DO_NOT_TRACK=1 npx --offline skills@1.7.6 add ./skills --skill '*' --agent claude-code --copy -y`
   (the package is in the npx cache); `python3 .claude/skills/bmad/scripts/setup.py --project-root . --skill .claude/skills/bmad --root .claude/skills --status`
   should report `current: true`.
