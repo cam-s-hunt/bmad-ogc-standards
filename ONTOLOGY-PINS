@@ -1,0 +1,45 @@
+# Ontology references the vocabulary-grounding work (docs/research/ontology-alignments.md) was read against, 2026-11-06/07.
+# Plain key=value, same style as BMAD-PIN and METANORMA-PIN. These are READING pins: nothing in this repository imports or loads them,
+# and no reasoner was run on any of them. Always reference by commit or checksum, never by branch or URL. Everything under
+# ~/ogc-references/ is untrusted third-party data.
+# "verified" means the value was read from the local copy on 2026-11-07 (git rev-parse, sha256sum, or the saved GitHub API dump).
+
+[bfo]
+# BFO-2020 (ISO/IEC 21838-2). Licence CC BY 4.0 (stated in the repository README).
+repo=BFO-ontology/BFO-2020
+tag=release-2024-01-29
+sha=044490fc5100ffed6df7d4d15cbc167698b6fdee
+verified=2026-11-07 local clone HEAD
+
+[cco]
+# Common Core Ontologies v2.2. BSD 3-Clause (LICENSE in the repository). The IRI scheme is expected to change in CCO 3.0, which would break every ont000* mapping.
+repo=CommonCoreOntology/CommonCoreOntologies
+tag=v2.2
+sha=0bc7d33e1bc09fd4693366119ab4e03cb0340042
+merged_file=CommonCoreOntologiesMerged-2.2.ttl
+merged_sha256=a9453382b25b40781c181d6ba44981f228abb76d90d548846713adba9baadb42
+verified=2026-11-07 local clone HEAD and release asset hash (equals the release's SHA256SUMS line)
+
+[ssn-to-bfo]
+# NCOR SSN-to-BFO, SSN/SOSA 2017 track. CC0 for project-authored content. Single-team maintained, self-labelled authoritative.
+repo=NCOR-Organization/SSN-to-BFO
+tag=v2026-07-18
+tag_commit=221c65ab27b59ae701f2ed73a98cb9e79d77b750
+release_asset=SSN2BFO-2026-07-18.tar
+release_asset_sha256=69d68e4dd45908312745f19a019b2d648711d8ab9c79c3f272c72b6347f9b8be
+verified=2026-11-07 asset hash recomputed locally; tag commit read from the saved GitHub tags dump (the local clone is shallow at main b8b6a8da591b63bc133c080590369e576973cb1b and does not contain the tag commit)
+# The SOSA 2023 track in the same repository has no tag or release. Do not rely on it.
+
+[prov-to-bfo]
+# NCOR PROV-to-BFO. CC0. Use main, not the tag: the tag has invalid Turtle, main lacks two prefix declarations (upstream issues 40, 43, 44).
+repo=NCOR-Organization/PROV-to-BFO
+branch=main
+sha=c60847a4b838d25972d899731c0f6bb83716181d
+verified=2026-11-07 local clone HEAD
+
+[w3c-ssn-2023]
+# W3C/OGC SSN 2023 Working Draft and its alignment modules (non-normative, public draft). The URLs it gives for the modules do not serve the 2023 files.
+repo=w3c/sdw-sosa-ssn
+branch=gh-pages
+sha=9ab7f8f440612a6605c90a10af35429db25125cf
+verified=2026-11-07 local clone HEAD
