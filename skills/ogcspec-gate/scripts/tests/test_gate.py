@@ -3,6 +3,7 @@ import importlib.util
 import json
 import sys
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -329,6 +330,207 @@ class BaselineTests(unittest.TestCase):
             self.assertIn(basis, {"spec", "policy", "style", "structure", "stage2"}, rule)
             if basis in ("spec", "policy"):
                 self.assertNotIn("unconfirmed", source, rule)
+
+
+def with_profile(records, inherit=("/req/core", "/req/a"), **extra):
+    """GOOD plus a class /req/a (inherits the core) and a profile /req/prof built on `inherit`."""
+    add_class(records, "a", ["/req/core"])
+    records += [
+        {"kind": "requirements_class", "id": "/req/prof", "subject": "Capability specification document",
+         "profile": True, "inherit": list(inherit), "requirements": []},
+        {"kind": "conformance_class", "id": "/conf/prof", "target": "/req/prof", "tests": []},
+    ]
+    for record in records:
+        if record["id"] in ("/req/prof", "/conf/prof"):
+            record.update(extra.get(record["id"], {}))
+    return records
+
+
+def build_files(files, config):
+    """files: {relative path: record or list of records}. Returns (TemporaryDirectory, config path)."""
+    tmp = tempfile.TemporaryDirectory()
+    root = Path(tmp.name)
+    (root / "ogcspec.gate.toml").write_text(config, encoding="utf-8")
+    for name, content in files.items():
+        target = root / "records" / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(yaml.safe_dump(content), encoding="utf-8")
+    return tmp, root / "ogcspec.gate.toml"
+
+
+class RecordFormatTests(unittest.TestCase):
+    """Plan step 2/3: fields added by record-format-proposal.md and the rules about them."""
+
+    def keys(self, summary, rule):
+        return sorted(f["key"] for f in summary["findings"] if f["rule"] == rule)
+
+    def test_misspelled_field_is_g002_and_names_the_near_miss(self):
+        records = mutate(lambda r: r[0].update({"requirments": ["/req/core/valid-document"]}))
+        _, found, summary = rules(records)
+        self.assertIn("G002", found)
+        self.assertEqual(self.keys(summary, "G002"), ["/req/core#requirments"])
+        self.assertIn("'requirements'", summary["findings"][[f["rule"] for f in summary["findings"]].index("G002")]["message"])
+
+    def test_inherit_on_a_conformance_class_is_g002_and_points_to_depends_on(self):
+        records = mutate(lambda r: r[4].update({"inherit": ["/conf/x"]}))
+        _, _, summary = rules(records)
+        message = next(f["message"] for f in summary["findings"] if f["rule"] == "G002")
+        self.assertIn("depends_on", message)
+
+    def test_status_and_internal_keys_are_not_unknown_fields(self):
+        records = mutate(lambda r: [x.update({"status": "proposed"}) for x in r])
+        self.assertEqual(rules(records)[:2], (0, []))
+
+    def test_bad_values_are_g003(self):
+        def change(r):
+            r[0].update({"status": "approved", "profile": "yes", "uml_package": "", "title": 3})
+            r[4]["depends_on"] = "/conf/x"
+        _, found, summary = rules(mutate(change))
+        self.assertIn("G003", found)
+        self.assertEqual(self.keys(summary, "G003"),
+                         ["/conf/core#depends_on", "/req/core#profile", "/req/core#status", "/req/core#title", "/req/core#uml_package"])
+
+    def test_field_rules_do_not_run_on_records_rebuilt_from_xml(self):
+        record = {"kind": "conformance_class", "id": "/conf/core", "target": "/req/core", "tests": [], "inherit": ["/conf/x"],
+                  "_file": "doc.xml", "_anchor": "a"}
+        found, not_run = gate.check([record], {})
+        self.assertNotIn("G002", {f.rule for f in found})
+        self.assertIn("G002", not_run)
+
+    def test_depends_on_naming_a_class_of_this_document_is_g004(self):
+        def change(r):
+            add_class(r, "a", ["/req/core"])
+            r[-1]["depends_on"] = ["/conf/core"]
+        _, found, summary = rules(mutate(change))
+        self.assertEqual(found, ["G004"])
+        self.assertEqual(self.keys(summary, "G004"), ["/conf/a>/conf/core"])
+
+    def test_external_depends_on_resolves_against_declared_references(self):
+        ok = mutate(lambda r: r[4].update({"depends_on": [DEP]}))
+        self.assertEqual(rules(ok)[:2], (0, []))
+        bad = mutate(lambda r: r[4].update({"depends_on": ["https://example.org/elsewhere/conf/x"]}))
+        self.assertEqual(rules(bad)[1], ["M014"])
+        relative = mutate(lambda r: r[4].update({"depends_on": ["/conf/missing"]}))
+        self.assertEqual(rules(relative)[1], ["M014"])
+
+    def test_external_depends_on_is_not_checked_when_no_references_are_declared(self):
+        records = mutate(lambda r: r[4].update({"depends_on": ["https://example.org/elsewhere/conf/x"]}))
+        self.assertEqual(rules(records, 'core = "/req/core"\n')[1], [])
+
+    def test_a_profile_built_from_existing_kinds_is_clean(self):
+        code, found, _ = rules(with_profile(copy.deepcopy(GOOD)))
+        self.assertEqual((code, found), (0, []))
+
+    def test_profile_with_requirements_tests_or_no_base_is_m013(self):
+        own_requirement = with_profile(copy.deepcopy(GOOD), **{"/req/prof": {"requirements": ["/req/core/valid-document"]}})
+        self.assertIn("M013", rules(own_requirement)[1])
+        own_tests = with_profile(copy.deepcopy(GOOD), **{"/conf/prof": {"tests": ["/conf/core/valid-document"]}})
+        self.assertIn("M013", rules(own_tests)[1])
+        no_base = with_profile(copy.deepcopy(GOOD), inherit=())
+        _, found, summary = rules(no_base)
+        self.assertIn("M013", found)
+        self.assertEqual(self.keys(summary, "M013"), ["/req/prof>inherit"])
+
+    def test_profile_that_builds_only_on_a_non_core_class_meets_the_literal_core_rule_only_in_transitive_mode(self):
+        records = with_profile(copy.deepcopy(GOOD), inherit=("/req/a",))
+        _, found, summary = rules(records)
+        self.assertEqual(found, ["M012"])
+        self.assertEqual(self.keys(summary, "M012"), ["/req/prof>transitive"])
+        self.assertEqual(rules(records, 'core_dependency = "transitive"\n' + CONFIG)[1], [])
+
+    def test_profile_marker_changes_nothing_for_other_classes(self):
+        records = mutate(lambda r: r[0].update({"profile": False}))
+        self.assertEqual(rules(records)[:2], (0, []))
+
+    def test_uml_package_rules_are_off_by_default_and_opt_in(self):
+        records = mutate(lambda r: add_class(r, "a", ["/req/core"]))
+        _, found, summary = rules(records)
+        self.assertEqual(found, [])
+        self.assertIn("S003", summary["rules_not_run"])
+        _, found, summary = rules(records, 'style = ["uml"]\n' + CONFIG)
+        self.assertEqual(found, ["S003"])
+        self.assertEqual(self.keys(summary, "S003"), ["/req/a", "/req/core"])
+
+    def test_two_classes_naming_one_uml_package_is_s004(self):
+        def change(r):
+            add_class(r, "a", ["/req/core"])
+            r[0]["uml_package"] = r[-4]["uml_package"] = "example::shared"
+        _, found, summary = rules(mutate(change), 'style = ["uml"]\n' + CONFIG)
+        self.assertEqual(found, ["S004"])
+        self.assertEqual(self.keys(summary, "S004"), ["example::shared"])
+
+    def test_distinct_uml_packages_are_clean(self):
+        def change(r):
+            add_class(r, "a", ["/req/core"])
+            r[0]["uml_package"], r[-4]["uml_package"] = "example::core", "example::a"
+        self.assertEqual(rules(mutate(change), 'style = ["uml"]\n' + CONFIG)[:2], (0, []))
+
+    def layout_files(self, records, wrong=None):
+        files = {}
+        for r in records:
+            name = r["id"].lstrip("/") + ".yaml"
+            files[(wrong or {}).get(r["id"], name)] = r
+        return files
+
+    def test_layout_rule_accepts_path_following_id(self):
+        tmp, cfg = build_files(self.layout_files(GOOD), 'style = ["layout"]\n' + CONFIG)
+        with tmp:
+            code, summary = gate.run(cfg, None)
+        self.assertEqual((code, summary["findings"]), (0, []))
+
+    def test_layout_rule_reports_a_wrong_path_and_a_shared_file(self):
+        files = self.layout_files(GOOD, wrong={"/rec/core/stable-ids": "misc/other.yaml"})
+        del files["conf/core/valid-document.yaml"]  # the test now shares the requirement's file
+        files["req/core/valid-document.yaml"] = [GOOD[1], GOOD[3]]
+        tmp, cfg = build_files(files, 'style = ["layout"]\n' + CONFIG)
+        with tmp:
+            _, summary = gate.run(cfg, None)
+        self.assertEqual(sorted(f["key"] for f in summary["findings"] if f["rule"] == "S005"),
+                         ["/conf/core/valid-document#path", "/rec/core/stable-ids#path", "req/core/valid-document.yaml#records"])
+
+    def test_layout_rule_is_off_by_default(self):
+        tmp, cfg = build_files({"anything.yaml": GOOD}, CONFIG)
+        with tmp:
+            code, summary = gate.run(cfg, None)
+        self.assertEqual((code, summary["findings"]), (0, []))
+        self.assertIn("S005", summary["rules_not_run"])
+
+
+class ConformanceInheritTests(unittest.TestCase):
+    """The derived dependency list of a conformance class (Req 12, proposal section 4)."""
+
+    def derive(self, records, config=""):
+        return gate.conformance_inherit(records, tomllib.loads(config))
+
+    def test_internal_dependencies_are_derived_and_external_ones_are_not(self):
+        records = mutate(lambda r: add_class(r, "a", ["/req/core", DEP]))
+        self.assertEqual(self.derive(records), {"/conf/core": [], "/conf/a": ["/conf/core"]})
+
+    def test_depends_on_follows_derived_entries_and_duplicates_are_dropped(self):
+        def change(r):
+            add_class(r, "a", ["/req/core"])
+            r[-1]["depends_on"] = [DEP, DEP, "/conf/a"]
+        self.assertEqual(self.derive(mutate(change))["/conf/a"], ["/conf/core", DEP])
+
+    def test_namespace_absolute_entries_resolve_and_the_class_id_is_written_as_the_author_wrote_it(self):
+        ns = "https://www.opengis.net/spec/x-1/1.0"
+        def change(r):
+            r[4]["id"] = f"{ns}/conf/core"
+            add_class(r, "a", [f"{ns}/req/core"])
+        derived = self.derive(mutate(change), f'namespace = "{ns}"\n')
+        self.assertEqual(derived["/conf/a"], [f"{ns}/conf/core"])
+
+    def test_inherit_by_title_resolves(self):
+        def change(r):
+            r[0]["title"] = "Core"
+            add_class(r, "a", ["Core"])
+        self.assertEqual(self.derive(mutate(change))["/conf/a"], ["/conf/core"])
+
+    def test_a_class_without_exactly_one_conformance_class_derives_nothing(self):
+        def change(r):
+            add_class(r, "a", ["/req/core"])
+            r.append({"kind": "conformance_class", "id": "/conf/core-again", "target": "/req/core", "tests": []})
+        self.assertEqual(self.derive(mutate(change))["/conf/a"], [])
 
 
 if __name__ == "__main__":

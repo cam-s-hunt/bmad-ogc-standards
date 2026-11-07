@@ -20,12 +20,18 @@ Where a requirement admits two readings the rule implements the literal one and 
 
 Record files: YAML under `records_dir`, each file one mapping or a list of mappings with a `kind`:
   requirements_class  id  subject (the standardization target type), inherit[], requirements[], title (optional;
-                      an inherit entry may name a class by its title, as OGC API - Records does)
+                      an inherit entry may name a class by its title, as OGC API - Records does), uml_package
+                      (optional, record-only), profile (optional boolean: the class is a profile, Req 19)
   requirement         id  statement
   abstract_test       id  target (a requirement id), purpose, steps[] (optional)
-  conformance_class   id  target (a requirements class id), tests[]
+  conformance_class   id  target (a requirements class id), tests[], title (optional), depends_on[] (optional:
+                      conformance classes OUTSIDE this document; the ones inside are derived from the requirements
+                      class's `inherit`, see conformance_inherit)
   recommendation      id  statement   (never needs a test)
   permission          id  statement   (never needs a test)
+Any kind may carry `status` (proposed or accepted, record-only). A field outside this table is G002. The rules for
+these fields (G002-G004, M013, M014, S003-S005) run on authored YAML records only, never on records rebuilt from
+compiled XML, so they cannot fire on an approved OGC document. See ogcspec-modspec/references/record-format-proposal.md.
 
 Config (project-owned TOML, the gate's only configuration surface):
   records_dir   directory of record files, relative to the config file (default "records")
@@ -35,7 +41,8 @@ Config (project-owned TOML, the gate's only configuration surface):
   core          identifier of the core requirements class, e.g. "/req/core" (enables M011, M012)
   core_dependency  "direct" (default, the literal text of Req 22) or "transitive" (a chain through other classes
                 is accepted; a class that never reaches the core is still reported)
-  style         list of house-style rule groups to run, e.g. ["prefix"] (default none)
+  style         list of house-style rule groups to run: "prefix" (S001, S002), "uml" (S003, S004), "layout" (S005)
+                (default none)
   [verbal_forms]  optional override of the forms P002 looks for, per kind. Default: the preferred forms of
                 ISO/IEC Directives Part 2 (ed. 9.0, 2021-05) clause 7, matched ignoring case. Set
                 `iso_verbal_forms = false` to turn P002/P003 off.
@@ -61,6 +68,7 @@ usage error.
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
 import re
 import sys
@@ -82,6 +90,20 @@ STYLE_ID_PATTERNS = {
     "permission": re.compile(rf"^/per/{NAME}/{NAME}$"),
 }
 KINDS = tuple(STYLE_ID_PATTERNS)
+STATUS_VALUES = ("proposed", "accepted")
+COMMON_FIELDS = frozenset({"kind", "id", "status"})
+KNOWN_FIELDS = {
+    "requirements_class": frozenset({"subject", "inherit", "requirements", "title", "uml_package", "profile"}),
+    "requirement": frozenset({"statement"}),
+    "recommendation": frozenset({"statement"}),
+    "permission": frozenset({"statement"}),
+    "abstract_test": frozenset({"target", "purpose", "steps"}),
+    "conformance_class": frozenset({"target", "tests", "title", "depends_on"}),
+}
+FIELD_HINTS = {
+    ("conformance_class", "inherit"): "a conformance class's dependencies inside this document are derived from its "
+                                      "requirements class's `inherit`; write only dependencies outside the document as `depends_on`",
+}
 EXTERNAL = re.compile(r"^https?://")
 # ISO/IEC Directives Part 2 ed. 9.0 (2021-05), clause 7, preferred forms (first column of Tables 3-5), singular.
 ISO_VERBAL_FORMS = {"requirement": ["shall", "shall not"], "recommendation": ["should", "should not"],
@@ -92,6 +114,13 @@ FORBIDDEN_FORMS = ("must", "may not")
 # (the "Requirement N" labels in its clause 8) and were read against the source text on 2026-11-06.
 RULES = {
     "G001": ("record has a known kind", "structure", "record structure"),
+    "G002": ("a record carries only fields known for its kind", "structure",
+             "record-format-proposal.md section 11: an unknown or misspelled field is otherwise ignored silently"),
+    "G003": ("field values have the expected type and value (status, profile, uml_package, title, depends_on)", "structure",
+             "record-format-proposal.md section 3"),
+    "G004": ("depends_on names only conformance classes outside this document", "structure",
+             "record-format-proposal.md section 4: dependencies inside the document are derived from `inherit`, "
+             "so authoring them would give two sources of truth"),
     "M001": ("every component has an identifier, and identifiers are unique", "spec",
              "08-131r7 Req 2 (/req/core/all-components-assigned-uri)"),
     "M002": ("each requirement is listed by exactly one requirements class", "spec",
@@ -118,6 +147,13 @@ RULES = {
              "08-131r7 Req 22 B (req-class-not-core-stt-subtype-of-core); default is the literal reading (the core is in the "
              "class's own dependency list); `core_dependency = \"transitive\"` accepts a chain. Open question for the "
              "ModSpec maintainers; see docs/research/Req22-transitive-dependency.md"),
+    "M013": ("a profile has no requirements or tests of its own and builds on at least one class", "spec",
+             "08-131r7 Req 19 (/req/core/profile-conformance): a profile's tests are the union of a list of conformance "
+             "classes. 'No tests of its own' is that reading; 'no requirements of its own' is inferred (Req 1 / M007: a "
+             "requirement needs a test). The `profile` marker is this project's design (proposal section 9)"),
+    "M014": ("a conformance class's depends_on entries resolve to a relative id or a declared normative reference", "spec",
+             "08-131r7 Req 12 (/req/core/con-class-dependencies): a dependency that cannot be resolved cannot be tested; "
+             "ATS 12 is 'inspect the document', so whether the dependency is used to test is not checked"),
     "P001": ("abstract tests are in a normative annex", "policy",
              "25-001 (draft): the Abstract Test Suite annex SHALL be designated normative"),
     "P002": ("a provision contains the preferred verbal form for its kind", "policy",
@@ -128,6 +164,9 @@ RULES = {
              "'Do not use \"may not\" instead of \"shall not\"'; 'must' is reserved for external constraints (7.6)"),
     "S001": ("identifier matches the project's pattern for its kind", "style", "house style; not an OGC requirement"),
     "S002": ("a requirement's identifier prefix is its class's identifier", "style", "house style; not an OGC requirement"),
+    "S003": ("every requirements class names a uml_package", "style", "project convention for ModSpec Part 2 (which defines no notation); not required by any OGC document"),
+    "S004": ("no two requirements classes name the same uml_package", "style", "ModSpec Part 2 REQ005: each class is associated to a unique package; read via the digest"),
+    "S005": ("a record is alone in a file whose path follows its identifier", "style", "project layout convention; not required by any OGC document"),
     "X000": ("the compile produced a usable semantic XML document", "stage2", "fail closed: an aborted compile is not zero records"),
     "X001": ("every YAML record appears in the compiled XML", "stage2", "emitter and compiler fidelity"),
     "X002": ("every compiled record comes from a YAML record", "stage2", "emitter and compiler fidelity"),
@@ -168,6 +207,7 @@ def load_records(directory: Path) -> tuple[list[dict], list[Finding]]:
                 findings.append(Finding("G001", path.name, "record is not a mapping"))
                 continue
             item["_file"] = path.name
+            item["_path"] = path.relative_to(directory).as_posix()
             records.append(item)
     return records, findings
 
@@ -181,6 +221,69 @@ def make_norm(config: dict):
         return value
 
     return norm
+
+
+def field_findings(records: list[dict]) -> list[Finding]:
+    """G002 (fields outside the table for the kind) and G003 (wrong type or value), on authored records only."""
+    out: list[Finding] = []
+    for r in records:
+        kind = r.get("kind")
+        if kind not in KINDS:
+            continue
+        ident = r["id"] if isinstance(r.get("id"), str) and r["id"] else r.get("_file", "?")
+        allowed = COMMON_FIELDS | KNOWN_FIELDS[kind]
+        for field in sorted(str(k) for k in r if not str(k).startswith("_") and k not in allowed):
+            hint = FIELD_HINTS.get((kind, field))
+            if hint is None:
+                near = difflib.get_close_matches(field, sorted(allowed), n=1)
+                hint = f"did you mean {near[0]!r}?" if near else f"known fields: {sorted(allowed)}"
+            out.append(Finding("G002", f"{ident}#{field}", f"{kind} has no field {field!r}; {hint}"))
+        if "status" in r and r["status"] not in STATUS_VALUES:
+            out.append(Finding("G003", f"{ident}#status", f"status {r['status']!r} is not one of {list(STATUS_VALUES)}"))
+        if "profile" in r and not isinstance(r["profile"], bool):
+            out.append(Finding("G003", f"{ident}#profile", f"profile must be true or false, not {r['profile']!r}"))
+        for field in ("uml_package", "title"):
+            if field in r and not (isinstance(r[field], str) and r[field].strip()):
+                out.append(Finding("G003", f"{ident}#{field}", f"{field} must be a non-empty string, not {r[field]!r}"))
+        if "depends_on" in r and not (isinstance(r["depends_on"], list)
+                                      and all(isinstance(d, str) and d.strip() for d in r["depends_on"])):
+            out.append(Finding("G003", f"{ident}#depends_on", "depends_on must be a list of non-empty identifier strings"))
+    return out
+
+
+def conformance_inherit(records: list[dict], config: dict) -> dict[str, list[str]]:
+    """The dependency list each conformance class carries in the document (its `inherit::` lines), by the class's
+    identifier as written. Derived entries come first, in the order of the requirements class's `inherit`: for each
+    entry that names a requirements class of this document (by identifier, or by title), the identifier of that class's
+    one conformance class (Req 8). Then the authored `depends_on` entries. Duplicates and self-references are dropped.
+    ogcspec-metanorma/scripts/emit.py holds an identical copy for the emitter; a test keeps the two equal, and
+    stage 2 (X003) compares the result with the compiled document."""
+    norm = make_norm(config)
+
+    def key(value: object) -> str:
+        return norm(value) if isinstance(value, str) else ""
+
+    classes = {key(r.get("id")): r for r in records
+               if r.get("kind") == "requirements_class" and key(r.get("id"))}
+    by_title = {r["title"]: cid for cid, r in classes.items() if isinstance(r.get("title"), str)}
+    conf_for: dict[str, list[str]] = {}
+    for r in records:
+        if r.get("kind") == "conformance_class" and isinstance(r.get("id"), str):
+            conf_for.setdefault(key(r.get("target")), []).append(r["id"])
+    out: dict[str, list[str]] = {}
+    for r in records:
+        if r.get("kind") != "conformance_class" or not isinstance(r.get("id"), str):
+            continue
+        deps: list[str] = []
+        cls = classes.get(key(r.get("target")))
+        for entry in (cls.get("inherit") or []) if cls else []:
+            entry = str(entry)
+            target = by_title.get(entry) or (key(entry) if key(entry) in classes else None)
+            if target and len(conf_for.get(target, [])) == 1:
+                deps.append(conf_for[target][0])
+        deps += [str(d) for d in r.get("depends_on") or []]
+        out[r["id"]] = [d for i, d in enumerate(deps) if d != r["id"] and d not in deps[:i]]
+    return out
 
 
 def reach_from(graph: dict[str, set[str]], start: str) -> set[str]:
@@ -240,12 +343,19 @@ def dependency_graph(classes: dict[str, dict], config: dict) -> tuple[dict[str, 
     return graph, unresolved
 
 
-def check(records: list[dict], config: dict) -> tuple[list[Finding], dict[str, str]]:
-    """Run the record rules. Returns (findings, rules_not_run: id -> reason)."""
+def check(records: list[dict], config: dict, authored: bool = False) -> tuple[list[Finding], dict[str, str]]:
+    """Run the record rules. Returns (findings, rules_not_run: id -> reason). `authored` is true for YAML records
+    the project writes (see `run`), false for records rebuilt from compiled XML; the rules about fields only an
+    author can write (G002-G004, M013, M014, S003-S005) run only on authored records."""
     out: list[Finding] = []
     not_run: dict[str, str] = {}
     norm = make_norm(config)
     style = set(config.get("style") or [])
+    if authored:
+        out += field_findings(records)
+    else:
+        for rule in ("G002", "G003", "G004", "M013", "M014", "S003", "S004", "S005"):
+            not_run[rule] = "applies to authored YAML records only"
     valid: list[dict] = []
     for r in records:
         kind = r.get("kind")
@@ -254,7 +364,7 @@ def check(records: list[dict], config: dict) -> tuple[list[Finding], dict[str, s
         for f in ("target",):
             if isinstance(r.get(f), str):
                 r[f] = norm(r[f])
-        for f in ("inherit", "requirements", "tests"):
+        for f in ("inherit", "requirements", "tests", "depends_on"):
             if isinstance(r.get(f), list):
                 r[f] = [norm(x) for x in r[f]]
         if kind not in KINDS:
@@ -358,6 +468,33 @@ def check(records: list[dict], config: dict) -> tuple[list[Finding], dict[str, s
     else:
         not_run["M011"] = not_run["M012"] = "no `core` configured"
 
+    if authored:
+        refs = config.get("normative_references", [])
+        prefixes = [ref["uri_prefix"] for ref in refs if ref.get("uri_prefix")]
+        names = {ref["name"] for ref in refs if ref.get("name")}
+        for cid, c in confs.items():
+            for dep in c.get("depends_on") or []:
+                if not isinstance(dep, str):
+                    continue  # G003
+                if dep in confs:
+                    out.append(Finding("G004", f"{cid}>{dep}",
+                                       f"{cid} lists {dep}, a conformance class of this document, in depends_on; "
+                                       "it is derived from the requirements class's inherit, so remove it"))
+                elif dep.startswith("/"):
+                    out.append(Finding("M014", f"{cid}>{dep}", f"{cid}: depends_on target is not a conformance class of this document: {dep}"))
+                elif refs and not (dep in names or (EXTERNAL.match(dep) and any(dep.startswith(p) for p in prefixes))):
+                    out.append(Finding("M014", f"{cid}>{dep}", f"{cid}: depends_on target matches no declared normative reference: {dep}"))
+        for cid, c in classes.items():
+            if c.get("profile") is not True:
+                continue
+            if c.get("requirements"):
+                out.append(Finding("M013", f"{cid}>requirements", f"profile {cid} lists requirements of its own"))
+            for conf in conf_for.get(cid, []):
+                if confs[conf].get("tests"):
+                    out.append(Finding("M013", f"{cid}>tests", f"the conformance class {conf} of profile {cid} lists tests of its own"))
+            if not c.get("inherit"):
+                out.append(Finding("M013", f"{cid}>inherit", f"profile {cid} builds on no class (its inherit list is empty)"))
+
     if config.get("iso_verbal_forms", True) is False and not config.get("verbal_forms"):
         not_run["P002"] = not_run["P003"] = "iso_verbal_forms = false and no [verbal_forms] configured"
     else:
@@ -386,6 +523,35 @@ def check(records: list[dict], config: dict) -> tuple[list[Finding], dict[str, s
                     out.append(Finding("S002", rid, f"listed by {cid} but its identifier does not start with {cid}/"))
     else:
         not_run["S001"] = not_run["S002"] = "style group 'prefix' not enabled"
+    if authored:
+        if "uml" in style:
+            packages: dict[str, list[str]] = {}
+            for cid, c in classes.items():
+                package = c.get("uml_package")
+                if not isinstance(package, str) or not package.strip():
+                    out.append(Finding("S003", cid, f"requirements class {cid} names no uml_package"))
+                else:
+                    packages.setdefault(package, []).append(cid)
+            out += [Finding("S004", package, f"uml_package {package!r} is named by {sorted(ids)}")
+                    for package, ids in sorted(packages.items()) if len(ids) > 1]
+        else:
+            not_run["S003"] = not_run["S004"] = "style group 'uml' not enabled"
+        if "layout" in style:
+            per_file: dict[str, int] = {}
+            for r in valid:
+                per_file[r.get("_path", "?")] = per_file.get(r.get("_path", "?"), 0) + 1
+            for r in valid:
+                path = r.get("_path")
+                if path is None:
+                    continue
+                if not r["id"].startswith("/"):
+                    out.append(Finding("S005", f"{r['id']}#path", f"{r['id']} is not relative to the namespace, so no path can follow it"))
+                elif path not in (r["id"].lstrip("/") + ".yaml", r["id"].lstrip("/") + ".yml"):
+                    out.append(Finding("S005", f"{r['id']}#path", f"{r['id']} is in {path}, expected {r['id'].lstrip('/')}.yaml"))
+            out += [Finding("S005", f"{path}#records", f"{path} holds {n} records, expected 1")
+                    for path, n in sorted(per_file.items()) if n > 1]
+        else:
+            not_run["S005"] = "style group 'layout' not enabled"
     return out, not_run
 
 
@@ -533,6 +699,9 @@ def scan_xml(path: Path) -> tuple[list[dict], dict]:
         elif kind == "conformance_class":
             record["tests"] = nested
             record["inherit"] = [_inherit_value(c, anchors) for c in children if _local(c.tag) == "inherit"]
+            titles = [_text(c) for c in children if _local(c.tag) == "title"]
+            if titles:
+                record["title"] = titles[0]
         if kind in ("conformance_class", "abstract_test"):
             target = classes.get("target")
             if not target and kind == "conformance_class":
@@ -640,6 +809,9 @@ def check_xml(xml_path: Path, yaml_records: list[dict], config: dict,
     out += [Finding(f.rule, f"xml:{f.key}", f.message) for f in annex_findings(xml_path)]
 
     by_yaml = {(r.get("kind"), r.get("id")): r for r in yaml_records}
+    for ident, deps in conformance_inherit(yaml_records, config).items():  # what the emitter writes as inherit::
+        if ("conformance_class", ident) in by_yaml:
+            by_yaml[("conformance_class", ident)] = {**by_yaml[("conformance_class", ident)], "inherit": deps}
     by_xml = {(r["kind"], r["id"]): r for r in xml_records}
     for key in sorted(set(by_yaml) - set(by_xml), key=str):
         out.append(Finding("X001", f"{key[0]}:{key[1]}", "in the YAML records but not in the compiled XML"))
@@ -647,7 +819,7 @@ def check_xml(xml_path: Path, yaml_records: list[dict], config: dict,
         out.append(Finding("X002", f"{key[0]}:{key[1]}", "in the compiled XML but not in the YAML records"))
     for key in sorted(set(by_yaml) & set(by_xml), key=str):
         a, b = by_yaml[key], by_xml[key]
-        for field in ("subject", "target", "statement", "purpose"):
+        for field in ("subject", "target", "statement", "purpose", "title"):
             if field in a or field in b:
                 if canon(a.get(field)) != canon(b.get(field)):
                     out.append(Finding("X003", f"{key[1]}#{field}", f"YAML {a.get(field)!r} vs XML {b.get(field)!r}"))
@@ -665,7 +837,7 @@ def run(config_path: Path, baseline_path: Path | None, xml_path: Path | None = N
     config = tomllib.loads(config_path.read_text(encoding="utf-8"))
     directory = config_path.parent / config.get("records_dir", "records")
     records, findings = load_records(directory)
-    found, not_run = check(records, config)
+    found, not_run = check(records, config, authored=True)
     findings += found
     notes: dict = {}
     if xml_path is not None:
