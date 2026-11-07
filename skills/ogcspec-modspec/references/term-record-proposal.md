@@ -1,6 +1,6 @@
 # A `term` record kind: proposal (not implemented)
 
-**Status: proposal for the owner, 2026-11-07.** The owner chose option A ("add a `term` record kind") on 2026-11-07. This file is the
+**Status: decided by the owner on 2026-11-07 (see 'Decisions' at the end); not yet implemented.** The owner chose option A ("add a `term` record kind") on 2026-11-07. This file is the
 design for approval. **No code has changed**: the gate and the emitter still reject a `term` record (G001 unknown kind; the emitter
 exits 2, see `record-format-proposal.md` section 1). Approving this file starts the work; it does not do it.
 
@@ -114,3 +114,40 @@ that terms are record-only (checked by the gate, not emitted), which still gives
 
 Still needed from a target standard before any real mapping: its term list, the SOSA/SSN edition (2017 or 2023), whether software and
 virtual systems are in scope, and whether definitions are normative (`ontology-grounding.md`).
+
+## Decisions (owner, 2026-11-07)
+
+| # | question | decision |
+|---|---|---|
+| 1 | Shape of the record | Approved as proposed: `/term/<slug>` ids, `aliases` kept. |
+| 2 | Mapping relations | Five words: exact, close, broader, narrower, related. |
+| 3 | Mapping status | **Normative** (the owner chose this against the research note's informative recommendation, after being told that the SOSA/SSN-to-BFO sources contradict each other on Sensor, Property, Observation, Sample and System). The document-level setting `[terms] mappings` defaults to the owner's choice, `"normative"`. |
+| 4 | Gate rules | T001-T004 plus a rule for a term with no mapping or an `unresolved` one (a finding the baseline may accept deliberately). T005 (defined but never used) and T006 (used but never defined) not built. |
+| 5 | Emit or record-only | Experiment first (a test compile on the pinned image), then propose emit or record-only with evidence. **Run 2026-11-07; results in section 9; the emit-or-not decision is still the owner's.** |
+| 6 | Version | Keep 0.3.0. |
+
+Consequence of 3: with normative mappings the owner and reviewers carry the correctness of each link, and the gate checks only form (known
+ontology, address prefix, relation word, presence). The skill and docs must say so; nothing here claims a mapping is correct.
+
+## 9. Experiment: how Metanorma carries terms (observed 2026-11-07, pinned image `daa12cf0...`, metanorma 2.5.16, offline)
+
+Four hand-written test documents (a made-up "spike" header; not a real standard; kept in the session scratchpad, not in the repository),
+compiled with `metanorma.py` on the pinned image. **Observed**, not inferred, unless marked.
+
+| what I wrote | result |
+|---|---|
+| `== Terms and definitions` with `=== sensor`, `alt:[detector]`, a definition paragraph, a `NOTE:`, a `[.source]` reference, no extra attribute | compile **aborted** (exit 1, `doc.xml.abort`): STANDOC_25 "Clause not recognised as a term clause, but contains designation markup" |
+| the same with `[heading=terms and definitions]` above the title, and the references marked `[bibliography]` | **exit 0.** Each term becomes `<term>` with `<preferred><expression><name>`, `<admitted>` for `alt:[...]`, `<definition><verbal-definition><p>`, `<termnote>` for a NOTE, and `<source><origin bibitemid=...>` for `[.source]` |
+| a mapping to an ontology written as a `NOTE:` containing the address, e.g. `NOTE: Maps to https://example.org/ontology#Sensor (close).` | **clean:** a `<termnote>` with a `<link target="...">`; no term-specific message |
+| a mapping written as a `[%metadata]` definition list (`mapping:: close https://...`) inside the term | compiles (exit 0), the list lands in the XML as `<dl metadata="true">` inside the `<term>`, but with STANDOC_20 ("Metadata definition list does not follow a term designation") and three STANDOC_7 schema complaints (`element "term" not allowed here`, attribute `anchor`/`id` not allowed). **Not a clean carrier.** |
+
+Also observed: the OGC flavour inserts its own boilerplate paragraphs at the top of the terms clause (the OGC Policy Directive 49 and ModSpec
+sentences), so an emitter must account for them; and `[heading=terms and definitions]` is needed for the clause to be recognised (the
+spike's earlier plain "No terms." clause compiled without it only because it held no designation markup).
+
+**What this suggests (inferred, not built):** terms *can* be emitted from records: term as the `===` heading, aliases as `alt:[...]`,
+definition as a paragraph, the mapping as a fixed-form `NOTE:` (relation word plus address) that the extractor reads back from
+`<termnote>`, and the clause preceded by `[heading=terms and definitions]`. Still unknown: how the emitter's fragments are spliced into
+a real OGC document's existing terms clause (the boilerplate), whether the extractor can read terms back the way it reads requirements
+(not written), and whether a real standard's terms clause (not my spike header) behaves the same. The round trip would need its own
+test, as for titles and profiles.
