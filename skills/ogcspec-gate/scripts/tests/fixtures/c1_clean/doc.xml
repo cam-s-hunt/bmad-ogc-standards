@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metanorma xmlns="https://www.metanorma.org/ns/standoc" type="semantic" version="2.10.2" schema-version="v2.3.0" flavor="ogc">
+<bibdata type="standard">
+<title language="en" type="main">Example Spike Standard</title>
+<docidentifier type="ogc-internal" primary="true">99-999</docidentifier><docidentifier type="ogc-external">http://www.opengis.net/doc/IS/spike/1.0</docidentifier><docnumber>99-999</docnumber><date type="published"><on>2026-11-06</on></date><date type="issued"><on>2026-11-06</on></date><date type="received"><on>2026-11-06</on></date><contributor><role type="author"/><organization>
+<name>Example Org</name>
+</organization></contributor><contributor><role type="editor"/><person>
+<name><completename>Spike Author</completename></name>
+</person></contributor><contributor><role type="author"><description>committee</description></role><organization>
+<name>Open Geospatial Consortium</name>
+<subdivision type="Committee">
+<name>technical</name>
+</subdivision><abbreviation>OGC</abbreviation></organization></contributor><contributor><role type="publisher"/><organization>
+<name>Open Geospatial Consortium</name>
+<abbreviation>OGC</abbreviation></organization></contributor><edition>1.0.0</edition><language>en</language><script>Latn</script><abstract><p>Spike document.</p>
+</abstract><status><stage>swg-draft</stage></status><copyright><from>2026</from><owner><organization>
+<name>Open Geospatial Consortium</name>
+<abbreviation>OGC</abbreviation></organization></owner></copyright><keyword><vocab>ogcdoc</vocab></keyword><keyword><vocab>OGC document</vocab></keyword><keyword><vocab>spike</vocab></keyword><ext><doctype>standard</doctype><subdoctype>implementation</subdoctype><flavor>ogc</flavor><stage>swg-draft</stage></ext></bibdata><metanorma-extension><semantic-metadata><stage-published>false</stage-published></semantic-metadata>
+<presentation-metadata><document-scheme>2026</document-scheme><output-extensions>xml</output-extensions><color-admonition-caution>rgb(79, 129, 189)</color-admonition-caution><color-admonition-editor>rgb(79, 129, 189)</color-admonition-editor><color-admonition-important>rgb(79, 129, 189)</color-admonition-important><color-admonition-note>rgb(79, 129, 189)</color-admonition-note><color-admonition-safety-precaution>rgb(79, 129, 189)</color-admonition-safety-precaution><color-admonition-tip>rgb(79, 129, 189)</color-admonition-tip><color-admonition-todo>rgb(79, 129, 189)</color-admonition-todo><color-admonition-warning>rgb(79, 129, 189)</color-admonition-warning><color-background-definition-description>rgb(242, 251, 255)</color-background-definition-description><color-background-definition-term>rgb(215, 243, 255)</color-background-definition-term><color-background-page>rgb(33, 55, 92)</color-background-page><color-background-table-header>rgb(33, 55, 92)</color-background-table-header><color-background-table-row-even>rgb(252, 246, 222)</color-background-table-row-even><color-background-table-row-odd>rgb(254, 252, 245)</color-background-table-row-odd><color-background-term-admitted-label>rgb(223, 236, 249)</color-background-term-admitted-label><color-background-term-deprecated-label>rgb(237, 237, 238)</color-background-term-deprecated-label><color-background-term-preferred-label>rgb(249, 235, 187)</color-background-term-preferred-label><color-background-text-label-legacy>rgb(33, 60, 107)</color-background-text-label-legacy><color-secondary-shade-1>rgb(0, 177, 255)</color-secondary-shade-1><color-secondary-shade-2>rgb(0, 177, 255)</color-secondary-shade-2><color-text>rgb(88, 89, 91)</color-text><color-text-title>rgb(33, 55, 92)</color-text-title><toc-heading-levels>2</toc-heading-levels><html-toc-heading-levels>2</html-toc-heading-levels><doc-toc-heading-levels>2</doc-toc-heading-levels><pdf-toc-heading-levels>2</pdf-toc-heading-levels></presentation-metadata><table anchor="_misccontainer_anchor_aliases" id="_514aefc1-6c7b-b23a-9726-991cf3177dc5"><tbody><tr><th>/conf/core</th><td>/conf/core</td><td>_conf_core</td></tr><tr><th>/req/core</th><td>/req/core</td><td>_req_core</td></tr><tr><th>/req/core/valid-document</th><td>/req/core/valid-document</td><td>_req_core_valid-document</td></tr><tr><th>/rec/core/stable-ids</th><td>/rec/core/stable-ids</td><td>_rec_core_stable-ids</td></tr><tr><th>/per/core/extra-fields</th><td>/per/core/extra-fields</td><td>_per_core_extra-fields</td></tr><tr><th>/conf/core/valid-document</th><td>/conf/core/valid-document</td><td>_conf_core_valid-document</td></tr></tbody></table></metanorma-extension>
+<boilerplate><copyright-statement>
+
+<clause id="_2cd773fc-8495-2dfa-91a1-d57da3fc5833" obligation="normative">
+<title id="_19604a82-a482-3c87-1356-705ef7b11f09">Copyright notice</title>
+<p id="_f3c4258f-6b29-424c-cd01-337c0e916a04" align="center">Copyright © 2026 Open Geospatial Consortium<br/> To obtain additional rights of use, visit <link target="https://www.ogc.org/legal"/></p>
+</clause>
+
+<clause id="_6908548e-204b-56e7-9062-6924cccf2315" obligation="normative">
+<title id="_db83e2f6-5841-eaeb-0d35-1277ee9d3f6a">Note</title>
+<p id="_e1d5d5c4-54c3-2761-be2c-22547f01c057" align="left">Attention is drawn to the possibility that some of the elements of this document may be the subject of patent rights. The Open Geospatial Consortium shall not be held responsible for identifying any or all such patent rights.</p>
+
+<p id="_02892e94-7b43-630a-129c-d2e0f75ff92b" align="left">Recipients of this document are requested to submit, with their comments, notification of any relevant patent claims or other intellectual property rights of which they may be aware that might be infringed by any implementation of the standard set forth in this document, and to provide supporting documentation.</p>
+</clause>
+</copyright-statement>
+
+<license-statement>
+
+<clause id="_45f6bdf5-80f3-f775-9740-2adafc90b1f7" obligation="normative">
+<title id="_3788828e-41fb-3895-6acc-52071643abed">License Agreement</title>
+<p id="_772872dd-928c-666f-92c5-676f7f5d3071">Use of this document is subject to the license agreement at <link target="https://www.ogc.org/license"/></p>
+</clause>
+</license-statement>
+
+<legal-statement>
+
+<clause id="_d969cbc1-a2ce-fc29-9ca8-2b6bf8626cdf" obligation="normative">
+<title id="_58a63032-6943-6f37-087e-470a8982dad8">Notice for Drafts</title>
+<p id="_da556f2c-cb53-8902-19fe-a5f8a6222f48">This document is not an OGC Standard. This document is distributed for review and comment. This document is subject to change without notice and may not be referred to as an OGC Standard.</p>
+
+<p id="_e8629e34-594d-6076-a18a-23d7b5df19ba">Recipients of this document are invited to submit, with their comments, notification of any relevant patent rights of which they are aware and to provide supporting documentation.</p>
+</clause>
+</legal-statement>
+
+<feedback-statement>
+
+<clause id="_4b48acd6-973f-402f-97b5-d1794d313105" anchor="boilerplate-standard-feedback" obligation="normative"><p id="_cb0581b2-acf2-995c-21c5-080c40d2dfd0">Suggested additions, changes and comments on this document are welcome and encouraged. Such suggestions may be submitted using the online change request form on OGC web site: <link target="http://ogc.standardstracker.org/"/></p>
+</clause>
+</feedback-statement>
+</boilerplate><preface><abstract id="_8a9c1519-4a8a-95bf-37af-633ba63810e7"><title id="_37c298bf-5619-a5c6-817b-d777b5ead0b1">Abstract</title><p id="_2734ced1-5d65-2dc8-4be5-5dcd2c9a21a0">Spike document.</p>
+</abstract><foreword id="_cbd8ab77-4790-b163-2bb9-295e0b0ee88c" obligation="informative">
+<title id="_67001cd2-f272-ceff-f849-7a43bc65e67d">Preface</title>
+<p id="_ce28f70c-fdbf-0aca-146e-59f0127f0e41">Spike preface.</p>
+</foreword><clause type="security" id="_11f014e9-c98a-c81d-eeb6-de3baa47ebea" obligation="informative">
+  <title id="_4d477b3a-b165-d2d5-db7e-e8925fda06e7">Security considerations</title>
+  <p id="_87632f48-a936-3f14-4cc0-36d21a86a8b8">No security considerations have been made for this document.</p></clause>
+</preface><sections>
+
+<clause id="_554e7000-2537-30f4-541c-a7b61048fa38" type="scope" obligation="normative">
+<title id="_f70b6ff6-6131-0e24-81e1-850dbe94b63d">Scope</title>
+<p id="_dd14507c-432e-a306-2699-ab802f8cf4b3">Spike scope.</p>
+</clause>
+
+<clause id="_304da4a2-0445-96ba-ba71-039281402b87" type="conformance" obligation="normative">
+<title id="_e246d3c1-cf3f-232c-cb69-d9b3793ef60f">Conformance</title>
+<p id="_aba806d7-305f-7f2c-044e-de78eda75978">This standard defines one conformance class.</p>
+
+<requirement id="_f08d26c1-1c4f-3fb5-55f4-867b8160b537" model="ogc" type="conformanceclass" anchor="/conf/core"><identifier>/conf/core</identifier><classification><tag>target</tag><value>/req/core</value></classification> <requirement id="_b8eea209-f480-4598-3c32-44c0e5edce60" model="ogc" type="verification"> <identifier>/conf/core/valid-document</identifier></requirement>
+</requirement>
+</clause>
+
+
+
+<terms id="_596041b5-8d50-e4a6-2c00-54b741ebdb31" obligation="normative">
+<title id="_dfb2eab2-f980-6365-3c47-81d0eb272962">Terms and definitions</title><p id="_9608c37a-eaae-1098-3a4b-f705fd512d85">No terms and definitions are listed in this document.</p>
+<p id="_b84a5f67-1da2-e2ba-7006-663f72271448">No terms.</p>
+</terms>
+
+<clause id="_bbc335b6-eef5-3aa7-2cb4-0497c35aab5e" obligation="normative">
+<title id="_00a3a9d1-9a92-33e3-1c7d-488ac67ed73b">Core requirements class</title>
+<requirement id="_d744b121-8294-22b8-ea6a-9f8551bc2c82" model="ogc" type="class" anchor="/req/core"><identifier>/req/core</identifier><subject>Example document</subject><inherit>http://www.opengis.net/spec/example-dep/1.0/conf/core</inherit> <requirement id="_241b2609-d566-d510-bdd4-c7b025b57263" model="ogc" type="general"> <identifier>/req/core/valid-document</identifier></requirement>
+</requirement>
+
+<requirement id="_55a80d70-13dc-33fa-c00b-5f58994cbfcc" model="ogc" anchor="/req/core/valid-document"> <identifier>/req/core/valid-document</identifier><component id="_31dd2038-555e-8f89-b9fc-280d682db694" class="part"><p id="_4475ccc3-5872-93a6-dabb-348c3817eabb">A document SHALL validate against the schema.</p>
+</component>
+</requirement>
+
+<recommendation id="_f829f772-3596-6823-30be-79698606504b" model="ogc" anchor="/rec/core/stable-ids"> <identifier>/rec/core/stable-ids</identifier><component id="_81652058-f752-a7af-f063-fdfde50c3159" class="part"><p id="_56afcbd1-f14c-a1b8-cef1-915257d6a862">A document SHOULD keep ids stable.</p>
+</component>
+</recommendation>
+
+<permission id="_92f8ca16-b517-b845-176e-75bb33e3ccf0" model="ogc" anchor="/per/core/extra-fields"> <identifier>/per/core/extra-fields</identifier><component id="_87782ee0-98f0-8514-a6e1-160c0f7a463b" class="part"><p id="_364174eb-0a18-6f23-664b-2be2e102008f">A document MAY carry extra fields.</p>
+</component>
+</permission>
+</clause>
+
+
+</sections><annex id="_02da1841-5fd7-d5aa-4664-71ef549b50d6" obligation="informative">
+<title id="_a35624d2-6c9c-8346-4edb-b16c9c991b18">Abstract test suite</title>
+<requirement id="_27fec08b-8695-86b8-2ded-c138a13cff36" model="ogc" type="abstracttest" anchor="/conf/core/valid-document"><identifier>/conf/core/valid-document</identifier><classification><tag>target</tag><value>/req/core/valid-document</value></classification> <component id="_2cbc167e-765d-1843-b2da-2c5ac7f372fb" class="test-purpose"><p id="_f19c7713-cc7c-7c26-7aed-c2cd3c707184">Verify validity.</p>
+</component><component id="_2fcf1ec4-7089-40fa-58f6-d34711fdbd9e" class="test-method"><component id="_fbdb8d6b-a5d9-84b3-a0e5-07b6b8118156" class="step"><p id="_651ef437-0b94-3b3e-af3a-c746e36b0c3b">Validate the document against the schema.</p>
+</component>
+</component>
+</requirement>
+</annex><bibliography><references id="_4bfc5fd3-96f8-5e23-a2a6-02fd57f69993" normative="true" obligation="informative">
+<title id="_461cd77a-5cfe-f57e-70ab-04e5c4142c2b">Normative references</title><p id="_cf4fafa1-7328-7d25-f309-bb194339feef">There are no normative references in this document.</p>
+</references></bibliography>
+</metanorma>

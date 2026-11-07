@@ -1,0 +1,149 @@
+# Pinned pointers to upstream repositories. Nothing is cloned by default.
+# Fetch one:  git submodule update --init --depth 1 docs/references/git/<name>
+# These are links, not copies: upstream licences differ (see docs/references/REFERENCES.md).
+
+[submodule "opengeospatial-ogcapi-connected-systems"]
+	path = docs/references/git/opengeospatial-ogcapi-connected-systems
+	url = https://github.com/opengeospatial/ogcapi-connected-systems
+	shallow = true
+
+[submodule "opengeospatial-ogcapi-features"]
+	path = docs/references/git/opengeospatial-ogcapi-features
+	url = https://github.com/opengeospatial/ogcapi-features
+	shallow = true
+
+[submodule "opengeospatial-ogcapi-common"]
+	path = docs/references/git/opengeospatial-ogcapi-common
+	url = https://github.com/opengeospatial/ogcapi-common
+	shallow = true
+
+[submodule "opengeospatial-ogcapi-processes"]
+	path = docs/references/git/opengeospatial-ogcapi-processes
+	url = https://github.com/opengeospatial/ogcapi-processes
+	shallow = true
+
+[submodule "opengeospatial-ogcapi-records"]
+	path = docs/references/git/opengeospatial-ogcapi-records
+	url = https://github.com/opengeospatial/ogcapi-records
+	shallow = true
+
+[submodule "opengeospatial-sensorthings"]
+	path = docs/references/git/opengeospatial-sensorthings
+	url = https://github.com/opengeospatial/sensorthings
+	shallow = true
+
+[submodule "opengeospatial-om-swg"]
+	path = docs/references/git/opengeospatial-om-swg
+	url = https://github.com/opengeospatial/om-swg
+	shallow = true
+
+[submodule "opengeospatial-geopose"]
+	path = docs/references/git/opengeospatial-geopose
+	url = https://github.com/opengeospatial/GeoPose
+	shallow = true
+
+[submodule "opengeospatial-ogc-modspec"]
+	path = docs/references/git/opengeospatial-ogc-modspec
+	url = https://github.com/opengeospatial/ogc-modspec
+	shallow = true
+
+[submodule "opengeospatial-policy"]
+	path = docs/references/git/opengeospatial-policy
+	url = https://github.com/opengeospatial/policy
+	shallow = true
+
+[submodule "opengeospatial-model-driven-standards-guide"]
+	path = docs/references/git/opengeospatial-model-driven-standards-guide
+	url = https://github.com/opengeospatial/model-driven-standards-guide
+	shallow = true
+
+[submodule "opengeospatial-templates"]
+	path = docs/references/git/opengeospatial-templates
+	url = https://github.com/opengeospatial/templates
+	shallow = true
+
+[submodule "ogcincubator-ogc-llm-skills"]
+	path = docs/references/git/ogcincubator-ogc-llm-skills
+	url = https://github.com/ogcincubator/ogc-llm-skills
+	shallow = true
+
+[submodule "opengeospatial-ogc-web-api-guidelines"]
+	path = docs/references/git/opengeospatial-ogc-web-api-guidelines
+	url = https://github.com/opengeospatial/OGC-Web-API-Guidelines
+	shallow = true
+
+[submodule "opengeospatial-namingauthority"]
+	path = docs/references/git/opengeospatial-namingauthority
+	url = https://github.com/opengeospatial/NamingAuthority
+	shallow = true
+	update = none
+
+[submodule "opengeospatial-bblock-template"]
+	path = docs/references/git/opengeospatial-bblock-template
+	url = https://github.com/opengeospatial/bblock-template
+	shallow = true
+
+[submodule "opengeospatial-bblocks-postprocess"]
+	path = docs/references/git/opengeospatial-bblocks-postprocess
+	url = https://github.com/opengeospatial/bblocks-postprocess
+	shallow = true
+
+[submodule "ogcincubator-bblocks-docs"]
+	path = docs/references/git/ogcincubator-bblocks-docs
+	url = https://github.com/ogcincubator/bblocks-docs
+	shallow = true
+
+[submodule "opengeospatial-bblocks"]
+	path = docs/references/git/opengeospatial-bblocks
+	url = https://github.com/opengeospatial/bblocks
+	shallow = true
+
+[submodule "ogcincubator-bblocks-sta"]
+	path = docs/references/git/ogcincubator-bblocks-sta
+	url = https://github.com/ogcincubator/bblocks-sta
+	shallow = true
+
+[submodule "opengeospatial-ets-sensorml30"]
+	path = docs/references/git/opengeospatial-ets-sensorml30
+	url = https://github.com/opengeospatial/ets-sensorml30
+	shallow = true
+
+[submodule "opengeospatial-ets-swecommon30"]
+	path = docs/references/git/opengeospatial-ets-swecommon30
+	url = https://github.com/opengeospatial/ets-swecommon30
+	shallow = true
+
+[submodule "opengeospatial-ontologies"]
+	path = docs/references/git/opengeospatial-ontologies
+	url = https://github.com/opengeospatial/ontologies
+	shallow = true
+
+[submodule "opengeospatial-ogcapi-sosa"]
+	path = docs/references/git/opengeospatial-ogcapi-sosa
+	url = https://github.com/opengeospatial/ogcapi-sosa
+	shallow = true
+
+[submodule "w3c-sdw-sosa-ssn"]
+	path = docs/references/git/w3c-sdw-sosa-ssn
+	url = https://github.com/w3c/sdw-sosa-ssn
+	shallow = true
+
+[submodule "bfo-ontology-bfo-2020"]
+	path = docs/references/git/bfo-ontology-bfo-2020
+	url = https://github.com/BFO-ontology/BFO-2020
+	shallow = true
+
+[submodule "commoncoreontology-commoncoreontologies"]
+	path = docs/references/git/commoncoreontology-commoncoreontologies
+	url = https://github.com/CommonCoreOntology/CommonCoreOntologies
+	shallow = true
+
+[submodule "ncor-organization-ssn-to-bfo"]
+	path = docs/references/git/ncor-organization-ssn-to-bfo
+	url = https://github.com/NCOR-Organization/SSN-to-BFO
+	shallow = true
+
+[submodule "ncor-organization-prov-to-bfo"]
+	path = docs/references/git/ncor-organization-prov-to-bfo
+	url = https://github.com/NCOR-Organization/PROV-to-BFO
+	shallow = true

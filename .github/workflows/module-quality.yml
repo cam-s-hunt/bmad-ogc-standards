@@ -1,0 +1,30 @@
+# Module repository integrity: BMAD's own validator at the pinned commit, plus unit tests.
+# NOT YET RUN: this repository has no remote yet. Action versions are unverified as current.
+name: module-quality
+on: [push, pull_request]
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Fetch BMAD at the pinned commit
+        run: |
+          . ./BMAD-PIN
+          git init -q "$RUNNER_TEMP/bmad"
+          git -C "$RUNNER_TEMP/bmad" fetch -q --depth 1 "https://github.com/${repo}.git" "${sha}"
+          git -C "$RUNNER_TEMP/bmad" checkout -q FETCH_HEAD
+      - name: Validate manifests
+        run: uv run "$RUNNER_TEMP/bmad/skills/bmad/scripts/validate_manifests.py" --project-root .
+      - name: Check each skill and its scripts
+        run: |
+          for s in skills/ogcspec-*; do
+            uv run "$RUNNER_TEMP/bmad/skills/bmad-toolsmith/scripts/init_skill.py" --check "$s" --any-name
+          done
+          for s in skills/ogcspec-gate skills/ogcspec-metanorma; do
+            uv run "$RUNNER_TEMP/bmad/skills/bmad-toolsmith/scripts/scan_scripts.py" "$s"
+          done
+      - name: Unit tests
+        run: |
+          (cd skills/ogcspec-gate/scripts && uv run --with pyyaml python -m unittest discover -s tests)
+          (cd skills/ogcspec-metanorma/scripts && uv run python -m unittest discover -s tests)

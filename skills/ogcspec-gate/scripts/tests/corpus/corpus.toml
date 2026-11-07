@@ -1,0 +1,83 @@
+# Manifest of the real OGC documents the gate is exercised against. The documents themselves are NOT
+# stored in this repository (their licence is not established here and they are large). To run, check
+# each repository out at `sha` under a corpus root, compile with the pinned Metanorma image
+# (see compile), and point OGCSPEC_CORPUS at the root. Each `xml` path is relative to <root>/<dir>.
+#
+# compile: uv run skills/ogcspec-metanorma/scripts/metanorma.py --image <pinned digest> \
+#            --root <root>/<dir> --adoc <root>/<dir>/<adoc> --formats xml
+# (offline, as the wrapper does by default). Observed 2026-11-06.
+
+[[document]]
+name = "modspec-1"
+repo = "opengeospatial/ogc-modspec"
+sha = "726e64744e909899ba36174dde0fcbee6fde4f85"
+dir = "ogc-modspec"
+adoc = "sources/08-131r7.adoc"
+xml = "sources/08-131r7.xml"
+namespace = "https://www.opengis.net/spec/modspec-1/1.1"
+core = "/req/req-class-core"
+status = "approved (08-131r7)"
+
+[[document]]
+name = "processes-1"
+repo = "opengeospatial/ogcapi-processes"
+sha = "0f9c3d88ccdb1802f6356fd39e7963df7b8dadae"
+dir = "ogcapi-processes"
+adoc = "18-062.adoc"
+xml = "18-062.xml"
+namespace = "https://www.opengis.net/spec/ogcapi-processes-1/2.0"
+core = "/req/core"
+status = "draft (Part 1 v2.0)"
+
+[[document]]
+name = "records-1"
+repo = "opengeospatial/ogcapi-records"
+sha = "6f68a79a198118cd153017be8b8665bfd4f019e5"
+dir = "ogcapi-records"
+adoc = "core/standard/20-004r1.adoc"
+xml = "core/standard/20-004r1.xml"
+namespace = "http://www.opengis.net/spec/ogcapi-records-1/1.0"
+core = "/req/record-core"
+status = "approved (20-004r1)"
+
+[[document]]
+name = "csapi-1"
+repo = "opengeospatial/ogcapi-connected-systems"
+sha = "8e03b236a049849f2ccc24b4fd9fdce5ff69bed2"   # tag v1.0-schemabundle; the v1.0.0 release (2026-04-08) per the reference manifest
+dir = "csapi-v1.0"
+adoc = "api/part1/standard/23-001r0.adoc"
+xml = "api/part1/standard/23-001r0.xml"
+namespace = ""
+status = "approved (23-001); identical gate results at master fb858be"
+
+[[document]]
+name = "csapi-2"
+repo = "opengeospatial/ogcapi-connected-systems"
+sha = "8e03b236a049849f2ccc24b4fd9fdce5ff69bed2"
+dir = "csapi-v1.0"
+adoc = "api/part2/standard/23-002r0.adoc"
+xml = "api/part2/standard/23-002r0.xml"
+namespace = ""
+status = "approved (23-002); identical gate results at master fb858be"
+
+[[document]]
+name = "csapi-3-draft"
+repo = "opengeospatial/ogcapi-connected-systems"
+sha = "9b45e5f394add94ccc9692e233dfe46c3a77c471"   # branch integrate/part3-swg-approved-2026-09-17
+dir = "csapi-part3-branch"
+adoc = "api/part3/standard/23-003r0.adoc"
+xml = "api/part3/standard/23-003r0.xml"
+namespace = ""
+status = "SWG draft (Pub/Sub)"
+
+# Does not compile with the pinned toolchain: Ruby NoMethodError in Metanorma::Utils::LineStatus#process
+# (metanorma-utils 2.0.11) at the first embedded include. Kept to exercise the fail-closed path.
+[[document]]
+name = "features-1"
+repo = "opengeospatial/ogcapi-features"
+sha = "c80b53d96320bf42c75e448c291f936f9fb80d75"
+dir = "ogcapi-features"
+adoc = "core/standard/17-069.adoc"
+xml = "core/standard/17-069.xml"
+expect_compile_failure = true
+status = "approved (17-069); uses table-style requirements"

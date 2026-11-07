@@ -1,0 +1,11 @@
+[skill]
+bmod = "bmod-ogcspec"
+source = "github:cam-s-hunt/bmad-ogc-standards/skills"
+
+# Invoked by the menu items EL (bmad-advanced-elicitation) and DC (the decision-record template, shipped with the Method module via bmad-facilitate).
+# bmad-walkthrough is a Method-module skill and stands for requiring that module.
+required_skills = [
+  { skill = "bmad-advanced-elicitation", source = "github:bmad-code-org/BMAD-METHOD/skills" },
+  { skill = "bmad-facilitate", source = "github:bmad-code-org/BMAD-METHOD/skills" },
+  { skill = "bmad-walkthrough", source = "github:bmad-code-org/BMAD-METHOD/skills" },
+]

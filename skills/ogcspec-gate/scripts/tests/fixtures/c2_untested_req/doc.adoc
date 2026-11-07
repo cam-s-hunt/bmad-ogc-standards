@@ -1,0 +1,84 @@
+= Example Spike Standard
+:doctype: standard
+:encoding: utf-8
+:lang: en
+:status: swg-draft
+:committee: technical
+:external-id: http://www.opengis.net/doc/IS/spike/1.0
+:docnumber: 99-999
+:received-date: 2026-11-06
+:issued-date: 2026-11-06
+:published-date: 2026-11-06
+:fullname: Spike Author
+:docsubtype: implementation
+:keywords: ogcdoc, OGC document, spike
+:submitting-organizations: Example Org
+:mn-document-class: ogc
+:mn-output-extensions: xml
+:local-cache-only:
+:data-uri-image:
+:edition: 1.0.0
+
+[abstract]
+== Abstract
+Spike document.
+
+== Preface
+Spike preface.
+
+== Scope
+Spike scope.
+
+== Conformance
+This standard defines one conformance class.
+
+[conformance_class]
+====
+[%metadata]
+identifier:: /conf/core
+target:: /req/core
+conformance-test:: /conf/core/valid-document
+====
+
+== Normative references
+* [[[dep,OGC 99-000]]], Example dependency
+
+== Terms and definitions
+No terms.
+
+== Core requirements class
+
+[requirements_class]
+====
+[%metadata]
+identifier:: /req/core
+subject:: Example document
+inherit:: http://www.opengis.net/spec/example-dep/1.0/conf/core
+requirement:: /req/core/valid-document
+====
+
+[requirement,model=ogc]
+====
+[%metadata]
+identifier:: /req/core/valid-document
+part:: A document SHALL validate against the schema.
+====
+
+[recommendation,model=ogc]
+====
+[%metadata]
+identifier:: /rec/core/stable-ids
+part:: A document SHOULD keep ids stable.
+====
+
+[permission,model=ogc]
+====
+[%metadata]
+identifier:: /per/core/extra-fields
+part:: A document MAY carry extra fields.
+====
+
+[appendix]
+== Abstract test suite
+
+

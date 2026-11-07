@@ -1,0 +1,3 @@
+[skill]
+bmod = "bmod-ogcspec"
+source = "github:cam-s-hunt/bmad-ogc-standards/skills"

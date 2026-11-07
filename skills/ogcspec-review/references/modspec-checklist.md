@@ -1,0 +1,12 @@
+# ModSpec review checklist
+
+Areas for the reviewers to keep in mind alongside their normal method. The gate already checks the rules it lists as `M`, `P`, `S` and `X`; these are the things it cannot.
+
+- **Testability.** Could someone decide pass or fail from a requirement's `statement` alone? Flag vague quantities, unstated conditions, and statements joining two things that could fail separately.
+- **Test fidelity.** Does each abstract test's `purpose` and `steps` check what its requirement says, no more and no less? A step that tests behaviour the requirement never states is a finding, and so is a requirement whose stated condition no step reaches.
+- **Verbal form against kind.** A requirement reads as an obligation, a recommendation as advice, a permission as an option. Flag a statement whose wording does not match its record kind. Do not rule on which verbal form the standard should use; that is the owner's decision.
+- **Subject consistency.** Does every requirement in a class concern the class's single `subject`?
+- **Scope.** Compare the records with the owner's description. Flag a requirement the description does not support, and behaviour the description states that no record covers.
+- **Terms.** Flag a term used in a statement that no record, definition or referenced standard defines, and a term used with two meanings.
+- **Dependencies.** Flag an `inherit` that names a class the requirement text relies on without listing it, and one listed but unused.
+- **Contested readings.** Flag any place where the records depend on a reading of ModSpec that has two answers, such as whether a transitive dependency on the core class counts. Do not choose between them.

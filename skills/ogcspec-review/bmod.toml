@@ -1,0 +1,8 @@
+[skill]
+bmod = "bmod-ogcspec"
+source = "github:cam-s-hunt/bmad-ogc-standards/skills"
+
+# Invokes bmad-review for every review.
+required_skills = [
+  { skill = "bmad-review", source = "github:bmad-code-org/BMAD-METHOD/skills" },
+]

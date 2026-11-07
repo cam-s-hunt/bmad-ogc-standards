@@ -1,0 +1,180 @@
+{
+ "observed_on": "2026-11-06",
+ "gate": "stage-2 rules M*,P* over compiled XML; counts only",
+ "documents": [
+  {
+   "name": "modspec-1",
+   "records": 70,
+   "rules": {
+    "M003": 1,
+    "M008": 2,
+    "M007": 1,
+    "M006": 1
+   },
+   "notes": {
+    "shorthand_without_identifier": 0,
+    "unmapped_types": {}
+   },
+   "agreement": {
+    "MODSPEC_1": 1,
+    "M007": 1,
+    "MODSPEC_1_not_M007": [],
+    "M007_not_MODSPEC_1": [],
+    "MODSPEC_2": 0,
+    "unresolved_inherit": 0,
+    "MODSPEC_2_not_ours": [],
+    "ours_not_MODSPEC_2": []
+   }
+  },
+  {
+   "name": "processes-1",
+   "records": 374,
+   "rules": {
+    "M001": 2,
+    "M002": 8,
+    "M008": 7,
+    "M007": 24,
+    "M006": 56,
+    "M005": 9,
+    "M010": 1,
+    "M012": 4
+   },
+   "notes": {
+    "shorthand_without_identifier": 3,
+    "unmapped_types": {},
+    "recovered_from_description_list": 3
+   },
+   "agreement": {
+    "MODSPEC_1": 24,
+    "M007": 24,
+    "MODSPEC_1_not_M007": [],
+    "M007_not_MODSPEC_1": [],
+    "MODSPEC_2": 13,
+    "unresolved_inherit": 7,
+    "MODSPEC_2_not_ours": [
+     "/req/callback",
+     "/req/collection-input",
+     "/req/dismiss",
+     "/req/job-list"
+    ],
+    "ours_not_MODSPEC_2": [
+     "/req/oas30",
+     "/req/oas31"
+    ]
+   }
+  },
+  {
+   "name": "records-1",
+   "records": 290,
+   "rules": {
+    "M001": 5,
+    "M002": 2,
+    "M008": 11,
+    "M007": 11,
+    "M006": 5,
+    "M005": 6,
+    "M010": 1,
+    "M012": 15,
+    "P002": 2,
+    "P003": 1
+   },
+   "notes": {
+    "shorthand_without_identifier": 0,
+    "unmapped_types": {}
+   },
+   "agreement": {
+    "MODSPEC_1": 11,
+    "M007": 11,
+    "MODSPEC_1_not_M007": [],
+    "M007_not_MODSPEC_1": [],
+    "MODSPEC_2": 15,
+    "unresolved_inherit": 5,
+    "MODSPEC_2_not_ours": [
+     "/req/autodiscovery",
+     "/req/crawlable-catalog",
+     "/req/local-resources-catalog",
+     "/req/local-resources-catalog/filtering"
+    ],
+    "ours_not_MODSPEC_2": []
+   }
+  },
+  {
+   "name": "csapi-1",
+   "records": 244,
+   "rules": {
+    "M003": 1,
+    "M008": 7,
+    "P002": 2,
+    "P003": 2
+   },
+   "notes": {
+    "shorthand_without_identifier": 0,
+    "unmapped_types": {}
+   },
+   "agreement": {
+    "MODSPEC_1": 0,
+    "M007": 0,
+    "MODSPEC_1_not_M007": [],
+    "M007_not_MODSPEC_1": [],
+    "MODSPEC_2": 6,
+    "unresolved_inherit": 5,
+    "MODSPEC_2_not_ours": [
+     "/req/advanced-filtering"
+    ],
+    "ours_not_MODSPEC_2": []
+   }
+  },
+  {
+   "name": "csapi-2",
+   "records": 284,
+   "rules": {},
+   "notes": {
+    "shorthand_without_identifier": 0,
+    "unmapped_types": {}
+   },
+   "agreement": {
+    "MODSPEC_1": 0,
+    "M007": 0,
+    "MODSPEC_1_not_M007": [],
+    "M007_not_MODSPEC_1": [],
+    "MODSPEC_2": 9,
+    "unresolved_inherit": 9,
+    "MODSPEC_2_not_ours": [],
+    "ours_not_MODSPEC_2": []
+   }
+  },
+  {
+   "name": "csapi-3-draft",
+   "records": 31,
+   "rules": {
+    "M007": 26,
+    "M005": 5
+   },
+   "notes": {
+    "shorthand_without_identifier": 0,
+    "unmapped_types": {}
+   },
+   "agreement": {
+    "MODSPEC_1": 26,
+    "M007": 26,
+    "MODSPEC_1_not_M007": [],
+    "M007_not_MODSPEC_1": [],
+    "MODSPEC_2": 2,
+    "unresolved_inherit": 1,
+    "MODSPEC_2_not_ours": [
+     "/req/mqtt"
+    ],
+    "ours_not_MODSPEC_2": []
+   }
+  },
+  {
+   "name": "features-1",
+   "records": null,
+   "rules": {
+    "X000": 1
+   },
+   "notes": null,
+   "agreement": null
+  }
+ ]
+}

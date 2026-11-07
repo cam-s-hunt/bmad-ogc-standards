@@ -1,0 +1,5 @@
+# Metanorma image the spike and gate calibration were observed against. Always reference by digest.
+image=metanorma/metanorma@sha256:daa12cf09812b34c6a62e67f5f78325847d56da534d7b7a23a45885496d36ae6
+tag_at_pull=latest
+pulled_on=2026-11-06
+metanorma=2.5.16  metanorma-cli=1.18.4  standoc=3.5.11  mn-requirements=0.5.15

@@ -1,0 +1,35 @@
+[bmod]
+code = "ogcspec"
+version = "0.2.0"
+# Published source. Every member skill's [skill] source must equal this value.
+update_source = "github:cam-s-hunt/bmad-ogc-standards/skills"
+skills = [
+  "ogcspec-modspec",
+  "ogcspec-metanorma",
+  "ogcspec-gate",
+  "ogcspec-review",
+  "ogcspec-agent-architect",
+  "ogcspec-agent-editor",
+]
+required_skills = [
+  { skill = "bmad", version = "6.13.0", source = "github:bmad-code-org/BMAD-METHOD/skills" },
+]
+pre_install_message = ""
+post_install_message = """OGC Spec module installed. The ModSpec Architect and Metanorma Editor agents and the review skill help draft, check and build a standard's requirement records.
+The authoritative checks live in the standard's own repository CI and read that repository's gate config.
+Compiling with Metanorma needs uv and a pinned metanorma/metanorma Docker image (never pulled by these scripts)."""
+
+[[bmod.config_questions]]
+key = "ogc_doctype"
+prompt = "OGC doctype attribute for the document (for example standard, best-practice, abstract-specification-topic)"
+default = "standard"
+
+[[bmod.config_questions]]
+key = "gate_config_path"
+prompt = "Path, relative to the standard's repository root, of the project-owned gate config the gate reads (the gate has no other configuration surface)"
+default = "ogcspec.gate.toml"
+
+[[bmod.config_questions]]
+key = "decisions_dir"
+prompt = "Folder, relative to the standard's repository root, where decision records for contested readings of ModSpec are kept"
+default = "docs/decisions"

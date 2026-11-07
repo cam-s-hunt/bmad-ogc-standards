@@ -1,0 +1,4 @@
+[skill]
+bmod = "bmod-ogcspec"
+source = "github:cam-s-hunt/bmad-ogc-standards/skills"
+scripts = ["scripts/metanorma.py", "scripts/emit.py"]

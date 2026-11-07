@@ -1,0 +1,61 @@
+<html><head><title>./doc.err.html errors</title>
+<meta charset="UTF-8"/>
+<style> pre { white-space: pre-wrap; }
+thead th { font-weight: bold; background-color: aqua; }
+.severity0 { font-weight: bold; background-color: lightpink }
+.severity1 { font-weight: bold; }
+.severity2 { }
+.severity3 { font-style: italic; color: grey; }
+</style>
+</head><body><h1>./doc.err.html errors</h1>
+<ul><li><p><b><a href="#AsciiDoc_Input">AsciiDoc Input</a></b>: Severity 1: <b>1</b> error; Severity 2: <b>1</b> error</p></li>
+
+<li><p><b><a href="#Style">Style</a></b>: Severity 2: <b>1</b> error</p></li>
+
+<li><p><b><a href="#Requirements">Requirements</a></b>: Severity 2: <b>3</b> errors</p></li>
+</ul>
+<h2 id="AsciiDoc_Input">AsciiDoc Input</h2>
+<table border="1">
+<thead><th width="5%">Line</th><th width="20%">ID</th><th width="10%">Error</th>
+<th width="20%">Message</th><th width="40%">Context</th><th width="5%">Severity</th></thead>
+<tbody>
+<tr class="severity2">
+<td></td><th><code>--</code></th><td>STANDOC_16</td>
+<td>Section not marked up as [bibliography]!</td><td><pre>#&lt;Asciidoctor::Section@10648 {level: 1, title: &quot;Normative references&quot;, blocks: 1}&gt;</pre></td><td>2</td></tr>
+<tr class="severity1">
+<td></td><th><code>--</code></th><td>STANDOC_43</td>
+<td>no anchor on reference, markup may be malformed: see
+https://www.metanorma.org/author/topics/sections/bibliography/ ,
+https://www.metanorma.org/author/iso/topics/markup/#bibliographies : [​<bookmark id="_​7fbea705-e4f8-40e1-9058-1862ec9a31bb" anchor=​"dep"/>], Example dependency
+</td><td><pre>#&lt;Asciidoctor::List@10656 {context: :ulist, style: nil, items: 1}&gt;</pre></td><td>1</td></tr>
+</tbody></table>
+<h2 id="Style">Style</h2>
+<table border="1">
+<thead><th width="5%">Line</th><th width="20%">ID</th><th width="10%">Error</th>
+<th width="20%">Message</th><th width="40%">Context</th><th width="5%">Severity</th></thead>
+<tbody>
+<tr class="severity2">
+<td></td><th><code>--</code></th><td>OGC_14</td>
+<td>Submitters is missing!</td><td><pre></pre></td><td>2</td></tr>
+</tbody></table>
+<h2 id="Requirements">Requirements</h2>
+<table border="1">
+<thead><th width="5%">Line</th><th width="20%">ID</th><th width="10%">Error</th>
+<th width="20%">Message</th><th width="40%">Context</th><th width="5%">Severity</th></thead>
+<tbody>
+<tr class="severity2">
+<td>000089</td><th><code><a href='./doc.html#_req_core'>/req/core</a></code></th><td>MODSPEC_2</td>
+<td>Requirements linkage: Provision /req/​core points to Prerequisite http://​www.opengis.​net/spec/​example-dep/1.0/​conf/core outside this document</td><td><pre>&lt;requirement id=&quot;_d744b121-8294-22b8-ea6a-9f8551bc2c82&quot; model=&quot;ogc&quot; type=&quot;class&quot; anchor=&quot;/req/core&quot;&gt; &lt;identifier&gt;/req/core&lt;/identifier&gt; &lt;subject&gt;Example document&lt;/subject&gt; &lt;inherit&gt;http://www.opengis.net/spec/example-dep/1.0/conf/core&lt;/inherit&gt; &lt;requirement id=&quot;_241b2609-d566-d510-bdd4-c7b025b57263&quot; model=&quot;ogc&quot; type=&quot;general&quot;&gt; &lt;identifier&gt;/req/core/valid-document&lt;/identifier&gt; &lt;/requirement&gt;
+&lt;/requirement&gt;</pre></td><td>2</td></tr>
+<tr class="severity2">
+<td>000096</td><th><code><a href='./doc.html#_rec_core_stable-ids'>/rec/core/​stable-ids</a></code></th><td>MODSPEC_1</td>
+<td>Requirements linkage: Requirement /rec/​core/stable-ids has no corresponding Conformance test</td><td><pre>&lt;recommendation id=&quot;_f829f772-3596-6823-30be-79698606504b&quot; model=&quot;ogc&quot; anchor=&quot;/rec/core/stable-ids&quot;&gt; &lt;identifier&gt;/rec/core/stable-ids&lt;/identifier&gt; &lt;component id=&quot;_81652058-f752-a7af-f063-fdfde50c3159&quot; class=&quot;part&quot;&gt; &lt;p id=&quot;_56afcbd1-f14c-a1b8-cef1-915257d6a862&quot;&gt;A document SHOULD keep ids stable.&lt;/p&gt;
+&lt;/component&gt;
+&lt;/recommendation&gt;</pre></td><td>2</td></tr>
+<tr class="severity2">
+<td>000100</td><th><code><a href='./doc.html#_per_core_extra-fields'>/per/core/​extra-fields</a></code></th><td>MODSPEC_1</td>
+<td>Requirements linkage: Requirement /per/​core/extra-fields has no corresponding Conformance test</td><td><pre>&lt;permission id=&quot;_92f8ca16-b517-b845-176e-75bb33e3ccf0&quot; model=&quot;ogc&quot; anchor=&quot;/per/core/extra-fields&quot;&gt; &lt;identifier&gt;/per/core/extra-fields&lt;/identifier&gt; &lt;component id=&quot;_87782ee0-98f0-8514-a6e1-160c0f7a463b&quot; class=&quot;part&quot;&gt; &lt;p id=&quot;_364174eb-0a18-6f23-664b-2be2e102008f&quot;&gt;A document MAY carry extra fields.&lt;/p&gt;
+&lt;/component&gt;
+&lt;/permission&gt;</pre></td><td>2</td></tr>
+</tbody></table>
+</body></html>

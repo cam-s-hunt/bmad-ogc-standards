@@ -1,0 +1,6 @@
+# BMAD ref this module is built and tested against (v7 preview alpha, unreleased).
+# validate_manifests.py is fetched from this exact commit, never from a moving branch.
+repo=bmad-code-org/BMAD-METHOD
+sha=e734d3ac3c0f4ea31cc2c2bbbe79e86e54f2cae6
+version_string=6.13.0-next
+pinned_on=2026-11-06
