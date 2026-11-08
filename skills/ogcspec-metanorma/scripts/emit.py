@@ -11,7 +11,7 @@ project owns. Nothing here invents content: a field the record does not carry is
 
 Prose (statement, purpose, steps) is emitted as literal text, so AsciiDoc markup in a record is not
 interpreted: `*x*`, `_x_`, `<<x>>`, `{x}` and URLs come back as written. Metanorma's own typography still
-applies afterwards (`--` becomes a dash, straight quotes become curly); the gate's fidelity check
+applies afterwards (`--` and a spaced hyphen ` - ` become a dash, straight quotes become curly); the gate's fidelity check
 normalises exactly those. Formatted prose (emphasis, cross-references) is therefore not expressible in a
 record yet.
 

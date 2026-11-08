@@ -82,6 +82,9 @@ class ExtractorTests(unittest.TestCase):
 class CanonTests(unittest.TestCase):
     def test_typography_is_normalised_and_nothing_else(self):
         self.assertEqual(gate.canon("a \u2018b\u2019 \u201cc\u201d \u2014 d\u2026"), "a 'b' \"c\" -- d...")
+        # observed 2026-11-07: Metanorma turns a spaced hyphen into an em dash; an unspaced hyphen is left alone
+        self.assertEqual(gate.canon("OGC API - Connected Systems"), gate.canon("OGC API \u2014 Connected Systems"))
+        self.assertEqual(gate.canon("a control-stream resource"), "a control-stream resource")
         self.assertNotEqual(gate.canon("a SHALL b"), gate.canon("a SHOULD b"))
         self.assertNotEqual(gate.canon("a <<x>> b"), gate.canon("a b"))
 

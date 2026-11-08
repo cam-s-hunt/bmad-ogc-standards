@@ -735,7 +735,8 @@ def canon(value: object) -> str:
     """Whitespace-collapse and undo the typography Metanorma applies after the emitter (smart quotes,
     dashes, ellipsis). Anything else that differs is a real change."""
     text = " ".join(str(value or "").translate(TYPOGRAPHY).split())
-    return text.replace("—", "--").replace("…", "...")
+    text = text.replace("—", "--").replace("…", "...")
+    return re.sub(r"(?<= )-(?= )", "--", text)  # Metanorma also turns a spaced hyphen ("OGC API - Features") into a dash (observed)
 
 
 def _identifier(element: ET.Element) -> str:
