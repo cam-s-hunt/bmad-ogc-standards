@@ -10,6 +10,10 @@ the draft Policy (OGC 25-001); the Policy sources are in the `opengeospatial/pol
 which channel they prefer. **Not checked:** whether each tracker accepts outside issues, and whether the maintainers prefer one issue
 or several. Questions 1 and 6 are close cousins (both ask what a "dependency" means) and could be one issue.
 
+**Question 7 (added 2026-11-07)** is different in kind: it reports a probable typo in the Connected Systems API source, and goes to
+`github.com/opengeospatial/ogcapi-connected-systems` (issues are enabled there, checked with the GitHub API on 2026-11-07). The file on its
+default branch still had the same lines on that date; the repository's last push was 2026-10-08.
+
 Do not name individual people in the issues (the research notes list frequent committers; whether to address anyone is the owner's call).
 
 ---
@@ -135,3 +139,28 @@ We have not surveyed how approved documents handle this, so we offer no count.
 Why we ask: in our record format a conformance class's in-document dependencies are derived from its requirements class, and only external
 ones are written by hand. We deliberately wrote no rule that every conformance class must list each dependency, because it would encode
 one reading of Req 12 and would flag documents that OGC has already approved.
+
+---
+
+## 7. Connected Systems API Parts 1 and 2: some terms cite a bibliography key that does not exist
+
+**Title:** Terms and definitions: source keys `SOSA/SSN`, `ISO19101` and `ISO19143` have no bibliography entry (Parts 1 and 2)
+
+In `api/part1/standard/sections/clause_4_terms_and_definitions.adoc` the Actuator entry reads
+`<<SOSA/SSN, SOSA-SSN, http://www.w3.org/ns/sosa/Actuator[Actuator Class]>>` (line 15). In this form the first item is the bibliography key and
+the second the display text. Clause 3 defines the key `SOSA-SSN`, which the other SOSA entries use (for example
+`<<SOSA-SSN, SOSA/SSN, http://www.w3.org/ns/sosa/Observation[Observation Class]>>`), so the first item here looks swapped with the second.
+Part 2 has the same form on two entries, Actuation (line 15) and Actuator (line 22), of
+`api/part2/standard/sections/clause_4_terms_and_definitions.adoc`.
+
+Metanorma 2.5.16 reports each of these when the document is compiled (STANDOC_32, "... does not have a corresponding anchor ID in the
+bibliography"): in Part 1 for `SOSA/SSN`, `ISO19101` and `ISO19143`; in Part 2 for `SOSA/SSN` (twice), `ISO19101` and `ISO19143`. The compiled
+XML carries `bibitemid="SOSA/SSN"` and so on. I did not find entries for `ISO19101` and `ISO19143` in the clause 3 list or the annex
+bibliography file; if they are defined somewhere else, please disregard that part.
+
+Question: is swapping the two items on the three SOSA lines (so the key is `SOSA-SSN`) the intended fix, and are `ISO19101` and `ISO19143`
+meant to be bibliography entries?
+
+Why we ask: we read these documents to test a tool that checks the terms of a standard against its source records, and it flagged the keys.
+The text and links look correct to a reader; only the link from the citation to the bibliography is affected. Found with the v1.0 source
+(commit 8e03b236) and the same lines on `master` on 2026-11-07.
