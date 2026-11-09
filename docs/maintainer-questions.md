@@ -5,7 +5,7 @@ and posts them under their own account. Each is written to stand alone so it can
 against the published 08-131r7 HTML (`~/ogc-references/modspec/08-131r7.html`), the research notes in `docs/research/`, and (question 2
 only) the public commit history on GitHub, read on 2026-11-07. Where a claim rests on something else, the draft says so.
 
-Where to post: ModSpec issues go to `github.com/opengeospatial/ogc-modspec` (issues), questions 1, 2, 3, 4 and 6. Question 5 is about
+Where to post: ModSpec issues go to `github.com/opengeospatial/ogc-modspec` (issues), questions 1, 2, 3, 4, 6 and 8. Question 5 is about
 the draft Policy (OGC 25-001); the Policy sources are in the `opengeospatial/policy` repository, so open it there or ask OGC staff
 which channel they prefer. **Not checked:** whether each tracker accepts outside issues, and whether the maintainers prefer one issue
 or several. Questions 1 and 6 are close cousins (both ask what a "dependency" means) and could be one issue.
@@ -164,3 +164,26 @@ meant to be bibliography entries?
 Why we ask: we read these documents to test a tool that checks the terms of a standard against its source records, and it flagged the keys.
 The text and links look correct to a reader; only the link from the citation to the bibliography is affected. Found with the v1.0 source
 (commit 8e03b236) and the same lines on `master` on 2026-11-07.
+
+---
+
+## 8. Indirect dependency within one standard: recorded in the conformance class only, or also in the requirements class?
+
+**Title:** Req 12 and an indirect dependency between two requirements classes of the same standard: where is it recorded?
+
+Part 1 (08-131r7) defines two kinds of dependency. Clause 6.1.3: a **direct dependency** is "another requirements class (the dependency) whose requirements are defined to also be requirements of this requirements class",
+and "will have the same standardization target as the current requirements class". Clause 6.1.5: an **indirect dependency** is a "requirements class with a different standardization target which is used by, produced by, or
+associated with the implementation of this requirements class", and "Such a requirement may be stated as the associated licensing service has a certificate of conformance of a particular kind." Requirement 12 says: "A. A Conformance
+class SHALL specify any other conformance class upon which it is dependent and B. That other conformance class SHALL be used to test the specified dependency. Such referenced conformance classes may be in the same standard or may be a
+conformance class of another standard", and gives an indirect-dependency example (a service whose output must conform to another standard's conformance class).
+
+Our situation, in generic terms: one standard has requirements class A, whose standardization target is a specification document, and requirements class B, whose target is a binding document that must refer to a document conforming
+to A. Both targets are subtypes of the core's target (Requirement 22 A). B depends on A indirectly in the sense of 6.1.5: B states "the referenced document conforms to class A", and a test of B uses A's conformance class.
+
+Questions: (a) Is the intended place to record this the conformance class of B (Requirement 12 A: B's conformance class specifies A's conformance class as a dependency), with the requirements class B listing nothing? (b) Or should
+requirements class B also list A in its own dependency list (the `inherit` entries in Metanorma markup)? If so, does listing it make A's requirements "also requirements of" B, which 6.1.3 says is a direct dependency for the
+same target, and which would then apply A's requirements to binding documents? (c) Does Metanorma's `inherit` carry any meaning for a class with a different target, or is it only for direct dependencies?
+
+Why we ask: our checker reads `inherit` as a graph of direct dependencies (cycle checks; Requirement 22 B: the core as a direct dependency) and derives the dependencies of each conformance class from it. An indirect dependency
+cannot be derived that way, so the format needs a second way to write it, and which way depends on the answer. We have not found published examples that settle it; we have not surveyed approved documents.
+
