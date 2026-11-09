@@ -132,3 +132,4 @@ To reproduce: fetch the pinned commit, run `add <dir> --skill '*' --agent claude
 `docs/PLAN.md` lists the plan and the five questions for the ModSpec maintainers. Ontology alignment results (PROV-O to BFO,
 SSN to BFO, W3C SSN 2023 alignment modules) are in `docs/research/ontology-alignments.md`; a first answer for the earlier
 claim that no SOSA/SSN-to-BFO alignment exists: that was wrong, NCOR's SSN-to-BFO exists (and is CC0).
+- **Starting a standard in an existing repository:** `docs/starting-a-target-repo.md` (rehearsed 2026-11-09 in a scratch clone; steps, surprises and what was not tested).
