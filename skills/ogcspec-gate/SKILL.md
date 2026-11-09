@@ -21,8 +21,8 @@ Rules (the table in `gate.py` gives each one's basis and source text):
 - `P001`-`P003` come from the ModSpec Policy (draft 25-001) and ISO/IEC Directives Part 2 clause 7: normative test
   annex; the preferred verbal form per kind; no `must` / `may not` in a provision.
 - `G002`/`G003` report fields outside the table for a record's kind and wrong types or values (`status`, `profile`,
-  `uml_package`, `title`, `depends_on`). `G004` is a `depends_on` entry naming a conformance class of the same document (it is
-  derived). `M013` checks a profile (Req 19: no requirements or tests of its own, builds on at least one class) and `M014` that
+  `uml_package`, `title`, `depends_on`). `G004` is a `depends_on` entry that repeats a dependency already derived from the requirements class's `inherit`
+  (an indirect dependency on another class of the same document, which `inherit` cannot give, is allowed there). `M013` checks a profile (Req 19: no requirements or tests of its own, builds on at least one class) and `M014` that
   `depends_on` entries resolve (Req 12). These run on authored YAML records only, never on records rebuilt from compiled XML.
 - `T001`-`T005` check term records (authored YAML only): a word is not defined twice, a mapping names a declared ontology
   (`[[ontologies]]`), its address starts with that ontology's prefix, its relation is one of the five words, and (only with

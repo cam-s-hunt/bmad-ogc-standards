@@ -26,8 +26,9 @@ them. In short:
 
 - `title`: the class's name in the document. `uml_package`: the UML package of a requirements class (record-only, the
   project's own convention). `status`: record-only workflow marker.
-- `depends_on`: conformance classes **outside** this document that a conformance class depends on (Req 12). Dependencies on
-  other classes of this document are derived from the requirements class's `inherit`; writing one is G004.
+- `depends_on`: conformance classes that a conformance class depends on (Req 12) and that its requirements class's `inherit` does not already give: classes **outside** this document, or an
+  **indirect dependency** inside it, on a class with a different target (ModSpec 6.1.5), for example a binding class whose requirement says the document it refers to conforms to a specification class.
+  Direct dependencies on classes of this document are derived from `inherit`; writing one again is G004. Do not list the other class in `inherit` for an indirect dependency (that would make its requirements apply to the wrong target).
 - A **profile** (Req 19) is a requirements class with `profile: true`, no `requirements` and the classes it builds on in
   `inherit`, plus its conformance class with no `tests`. Metanorma warns that both are empty (`MODSPEC_1`); that is expected and
   goes in the baseline.

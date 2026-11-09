@@ -622,13 +622,33 @@ class RecordFormatTests(unittest.TestCase):
         self.assertNotIn("G002", {f.rule for f in found})
         self.assertIn("G002", not_run)
 
-    def test_depends_on_naming_a_class_of_this_document_is_g004(self):
+    def test_depends_on_repeating_a_derived_dependency_is_g004(self):
         def change(r):
             add_class(r, "a", ["/req/core"])
             r[-1]["depends_on"] = ["/conf/core"]
         _, found, summary = rules(mutate(change))
         self.assertEqual(found, ["G004"])
         self.assertEqual(self.keys(summary, "G004"), ["/conf/a>/conf/core"])
+
+    def test_an_indirect_dependency_inside_the_document_is_written_in_depends_on(self):
+        # class b has a different target and does not inherit class a, so /conf/a cannot be derived for it (ModSpec 6.1.5, Req 12)
+        def change(r):
+            add_class(r, "a", ["/req/core"])
+            add_class(r, "b", ["/req/core"])
+            r[-1]["depends_on"] = ["/conf/a"]
+        _, found, summary = rules(mutate(change))
+        self.assertEqual(found, [], summary["findings"])
+        self.assertEqual(gate.conformance_inherit(mutate(change), {})["/conf/b"], ["/conf/core", "/conf/a"])
+
+    def test_an_indirect_dependency_must_still_exist_and_may_not_be_the_class_itself(self):
+        def missing(r):
+            add_class(r, "a", ["/req/core"])
+            r[-1]["depends_on"] = ["/conf/nowhere"]
+        self.assertEqual(self.keys(rules(mutate(missing))[2], "M014"), ["/conf/a>/conf/nowhere"])
+        def itself(r):
+            add_class(r, "a", ["/req/core"])
+            r[-1]["depends_on"] = ["/conf/a"]
+        self.assertEqual(self.keys(rules(mutate(itself))[2], "M014"), ["/conf/a>/conf/a"])
 
     def test_external_depends_on_resolves_against_declared_references(self):
         ok = mutate(lambda r: r[4].update({"depends_on": [DEP]}))

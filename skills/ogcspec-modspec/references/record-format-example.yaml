@@ -59,7 +59,8 @@
   target: /req/core
   # Req 12: the other conformance class this one depends on. External only. The dependency on `/conf/core`
   # that /conf/ext has is NOT written here: it is derived from /req/ext's `inherit` (proposal, section 4).
-  # Writing an internal one here is G004.
+  # Writing a derived internal one here is G004; an indirect dependency on a class of this document with a different
+  # target (which `inherit` cannot give) is written here (proposal, section 4).
   depends_on:
     - https://example.org/spec/dep/1.0/conf/base
   tests:

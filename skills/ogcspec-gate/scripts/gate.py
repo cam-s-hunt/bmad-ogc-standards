@@ -25,8 +25,9 @@ Record files: YAML under `records_dir`, each file one mapping or a list of mappi
   requirement         id  statement
   abstract_test       id  target (a requirement id), purpose, steps[] (optional)
   conformance_class   id  target (a requirements class id), tests[], title (optional), depends_on[] (optional:
-                      conformance classes OUTSIDE this document; the ones inside are derived from the requirements
-                      class's `inherit`, see conformance_inherit)
+                      conformance classes the requirements class's `inherit` does not already give: ones OUTSIDE this
+                      document, or an indirect dependency inside it on a class with a different target (ModSpec 6.1.5,
+                      Req 12); the direct ones are derived from `inherit`, see conformance_inherit)
   recommendation      id  statement   (never needs a test)
   permission          id  statement   (never needs a test)
   term                id  term, definition, aliases[] (optional), mappings[] (optional: relation, ontology, iri, note),
@@ -134,9 +135,11 @@ RULES = {
              "record-format-proposal.md section 11: an unknown or misspelled field is otherwise ignored silently"),
     "G003": ("field values have the expected type and value (status, profile, uml_package, title, depends_on, term fields)", "structure",
              "record-format-proposal.md section 3"),
-    "G004": ("depends_on names only conformance classes outside this document", "structure",
-             "record-format-proposal.md section 4: dependencies inside the document are derived from `inherit`, "
-             "so authoring them would give two sources of truth"),
+    "G004": ("depends_on does not repeat a dependency already derived from the requirements class's inherit", "structure",
+             "record-format-proposal.md section 4: direct dependencies inside the document are derived from `inherit`, "
+             "so authoring one again would give two sources of truth. A dependency `inherit` cannot give (outside the "
+             "document, or an indirect dependency on a class with a different target, ModSpec 6.1.5 and Req 12) is written "
+             "in depends_on"),
     "T001": ("no two terms share a designation (term or alias, ignoring case)", "structure",
              "term-record-proposal.md section 5: a word with two definitions is ambiguous"),
     "T002": ("a term mapping names an ontology declared in the gate config", "structure",
@@ -617,14 +620,19 @@ def check(records: list[dict], config: dict, authored: bool = False) -> tuple[li
         refs = config.get("normative_references", [])
         prefixes = [ref["uri_prefix"] for ref in refs if ref.get("uri_prefix")]
         names = {ref["name"] for ref in refs if ref.get("name")}
+        derived_only = conformance_inherit([{k: v for k, v in r.items() if k != "depends_on"} for r in valid], config)
         for cid, c in confs.items():
             for dep in c.get("depends_on") or []:
                 if not isinstance(dep, str):
                     continue  # G003
-                if dep in confs:
+                if dep == cid:
+                    out.append(Finding("M014", f"{cid}>{dep}", f"{cid} lists itself in depends_on"))
+                elif dep in confs and dep in derived_only.get(cid, []):
                     out.append(Finding("G004", f"{cid}>{dep}",
-                                       f"{cid} lists {dep}, a conformance class of this document, in depends_on; "
-                                       "it is derived from the requirements class's inherit, so remove it"))
+                                       f"{cid} lists {dep} in depends_on, but it is already derived from the requirements class's "
+                                       "inherit; remove it"))
+                elif dep in confs:
+                    pass  # an indirect dependency inside the document: not derivable from inherit, so written here (Req 12)
                 elif dep.startswith("/"):
                     out.append(Finding("M014", f"{cid}>{dep}", f"{cid}: depends_on target is not a conformance class of this document: {dep}"))
                 elif refs and not (dep in names or (EXTERNAL.match(dep) and any(dep.startswith(p) for p in prefixes))):

@@ -460,6 +460,38 @@ class TermsRoundTrip(unittest.TestCase):
         self.assertFalse([k for r, k in found if r == "X002" and "term" in k])
 
 
+@unittest.skipUnless(image_available(), "SKIPPED: pinned Metanorma image not present locally; round trip not run")
+class IndirectDependencyRoundTrip(unittest.TestCase):
+    def test_an_indirect_dependency_inside_the_document_is_emitted_compiled_and_read_back(self):
+        # class c has a different target and does not inherit class b, so /conf/b cannot be derived for it:
+        # its conformance class says so in depends_on (ModSpec 6.1.5 and Req 12)
+        extra = []
+        for name, subject in (("b", "Other document"), ("c", "Third document")):
+            extra += [
+                {"kind": "requirements_class", "id": f"/req/{name}", "subject": subject, "inherit": ["/req/core"], "requirements": [f"/req/{name}/r"]},
+                {"kind": "requirement", "id": f"/req/{name}/r", "statement": f"A document SHALL do thing {name}."},
+                {"kind": "abstract_test", "id": f"/conf/{name}/r", "target": f"/req/{name}/r", "purpose": "Verify it."},
+                {"kind": "conformance_class", "id": f"/conf/{name}", "target": f"/req/{name}", "tests": [f"/conf/{name}/r"]},
+            ]
+        extra[-1]["depends_on"] = ["/conf/b"]
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t)
+            (root / "records").mkdir()
+            (root / "records" / "all.yaml").write_text(yaml.safe_dump(RECORDS + extra), encoding="utf-8")
+            (root / "ogcspec.gate.toml").write_text('records_dir = "records"\n', encoding="utf-8")
+            self.assertEqual(emit.main(["--records", str(root / "records"), "--out", str(root / "build"),
+                                        "--config", str(root / "ogcspec.gate.toml")]), 0)
+            (root / "build" / "doc.adoc").write_text(HEADER, encoding="utf-8")
+            proc = subprocess.run([sys.executable, str(HERE.parent / "metanorma.py"), "--image", IMAGE,
+                                   "--adoc", str(root / "build" / "doc.adoc"), "--formats", "xml"], capture_output=True, text=True)
+            (root / "build" / "compile.json").write_text(proc.stdout or "{}", encoding="utf-8")
+            self.assertEqual(proc.returncode, 0, proc.stdout[-1500:])
+            _, summary = gate.run(root / "ogcspec.gate.toml", None, root / "build" / "doc.xml",
+                                  root / "build" / "compile.json", root / "build" / "doc.err.html")
+            self.assertEqual([f for f in summary["findings"] if f["rule"] in ("G004", "M014", "X000", "X001", "X002", "X003")], [], summary["findings"])
+            self.assertIn("/conf/b", emit.conformance_inherit(RECORDS + extra)["/conf/c"])
+
+
 SKELETON = HERE.parent.parent / "references" / "document-skeleton.adoc"
 
 

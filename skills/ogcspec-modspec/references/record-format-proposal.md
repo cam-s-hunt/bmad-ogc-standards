@@ -68,8 +68,14 @@ derives each conformance class's dependency list; the emitter writes it as `inhe
 the compiled document (X003), so any drift between the two derivations shows up as a build failure. The rules about it run
 on authored records only: they never run on a document rebuilt from compiled XML, because a completeness rule for Req 12
 would encode the contested reading (maintainer question 6) and fire on approved OGC documents. Only `depends_on` is
-checked: G004 (names a class of this document) and M014 (a relative id that is no class here, or an external id matching no
+checked: G004 (repeats a dependency already derived from `inherit`; changed 2026-11-09, see below) and M014 (a relative id that is no class here, or an external id matching no
 declared normative reference, when references are declared).
+
+**Changed 2026-11-09 (owner decision, after a trial needed it).** G004 originally fired on any `depends_on` entry naming a class of this document. That made an **indirect dependency** inside the document impossible
+to write: ModSpec 6.1.5 defines it as a dependency on a class with a different standardization target, and Req 12 says the dependency may be "in the same standard"; such a class cannot be derived from `inherit` (and must not be
+listed there, since `inherit` of the same target is a direct dependency, 6.1.3). Now G004 fires only when the entry repeats a dependency already derived from `inherit`; an entry for a class of this document that `inherit`
+cannot give is allowed (M014 still checks that it exists, and that it is not the class itself). The emitter already writes derived entries and then authored ones. Whether ModSpec intends the requirements class to list it too is
+maintainer question 8; the format changes again if they answer differently.
 
 Options:
 
