@@ -23,6 +23,8 @@ the image is the digest the project pinned for its builds (`repo@sha256:...`); t
    term's address as a link in the citation, as the Connected Systems API does. Metanorma answers that form with STANDOC_7
    XML-syntax messages (observed; the CS API document has the same): accept them through the baseline. `mappings` is record-only
    and is not written into the document.
+   The fragments are `include::`d by a master document you own. `references/document-skeleton.adoc` is a starting point (every `OWNER` line is yours to decide; it compiled on the pinned image); the terms clause
+   must be marked `[heading=terms and definitions]` once term records are emitted.
 2. **Compile**:
    `uv run {skill-scripts}/metanorma.py --image <repo@sha256:...> --adoc <doc.adoc> --formats xml > compile.json`
    If the document includes files from outside its own folder, add `--root <a directory containing them all>`;

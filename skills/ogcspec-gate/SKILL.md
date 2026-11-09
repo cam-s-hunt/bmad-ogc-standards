@@ -36,5 +36,5 @@ Rules (the table in `gate.py` gives each one's basis and source text):
 
 The output lists `rules_run` and `rules_not_run` with reasons; say when a rule you would expect did not run.
 Exit 0: findings equal the baseline (or there are none). Exit 1: any finding not in the baseline, or any baselined
-finding that has disappeared. Exit 2: usage error. Report `findings` as they are, with `rule`, `key`, `basis` and
+finding that has disappeared (in stage 1, baseline entries from the X rules are ignored because stage 1 cannot produce them, so one baseline serves both stages). Exit 2: usage error. Report `findings` as they are, with `rule`, `key`, `basis` and
 `clause`. Never edit the baseline to silence a finding without a human decision.

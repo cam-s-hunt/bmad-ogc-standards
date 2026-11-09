@@ -71,7 +71,8 @@ each Metanorma log message into a finding (X010). A compile that failed is X000 
 
 Output: one JSON object on stdout {"records", "findings", "rules_run", "rules_not_run", "notes",
 "baseline"}. Exit 0 when the findings equal the baseline (or there are none), 1 otherwise, 2 on a
-usage error.
+usage error. In stage 1 (no --xml) the X rules are listed under rules_not_run and baseline entries from
+the X rules are ignored, so one baseline file can serve both stages.
 """
 
 from __future__ import annotations
@@ -1059,6 +1060,10 @@ def run(config_path: Path, baseline_path: Path | None, xml_path: Path | None = N
         findings += extra
     findings.sort(key=lambda f: (f.rule, f.key, f.message))
     idents = {f.ident for f in findings}
+    if xml_path is None:  # stage 1 cannot produce the compiled-document rules; say so rather than leave them unlisted
+        for rule in RULES:
+            if rule.startswith("X"):
+                not_run[rule] = "needs the compiled document (stage 2: --xml)"
     summary: dict = {
         "records": len(records),
         "findings": [f.as_dict() for f in findings],
@@ -1069,6 +1074,8 @@ def run(config_path: Path, baseline_path: Path | None, xml_path: Path | None = N
     if baseline_path is None:
         return (1 if findings else 0), summary
     expected = set(json.loads(baseline_path.read_text(encoding="utf-8")).get("expected", []))
+    if xml_path is None:  # a stage-2 baseline (it lists Metanorma's messages) must not make a stage-1 run fail: those entries cannot appear
+        expected = {e for e in expected if not e.startswith("X")}
     summary["baseline"] = {"unexpected": sorted(idents - expected), "missing": sorted(expected - idents)}
     return (1 if (idents - expected or expected - idents) else 0), summary
 

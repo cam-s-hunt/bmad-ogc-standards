@@ -21,6 +21,32 @@ endorsed by OGC.**
   BMAD says v7 skills, install path and docs change often; expect rework when v7 ships.
 - `update_source` is `github:cam-s-hunt/bmad-ogc-standards/skills`; every member skill's `source` must equal it. For a local trial, temporarily point both at a `file:` path.
 
+## Using it in a target repository
+
+Rehearsed end to end in a scratch clone on 2026-11-09: see `docs/starting-a-target-repo.md` for the steps, the surprises and what was not tested. In short: install BMAD at the commit in
+`BMAD-PIN` and this module with `skills@1.7.6 add`, register the module, add a gate config and a records folder, emit, compile on the pinned image, run the gate.
+Two details that are not obvious:
+
+- The module setup takes its answers from a TOML file in exactly this form (JSON and a flat table are rejected):
+  ```toml
+  [modules.ogcspec]
+  ogc_doctype = "standard"
+  gate_config_path = "ogcspec.gate.toml"
+  decisions_dir = "docs/decisions"
+  ```
+  `python3 .claude/skills/bmad/scripts/setup.py --project-root . --skill .claude/skills/bmad --root .claude/skills --module-answers answers.toml`
+- The install leaves generated files untracked. Add this to the target repository's `.gitignore` (`skills-lock.json` records the local path of the BMAD clone and must not be committed;
+  `_bmad/config.toml` and `_bmad/custom/` are meant to be shared):
+  ```gitignore
+  .claude/skills/
+  skills-lock.json
+  _bmad/scripts/
+  _bmad/*/scripts/
+  _bmad-output/
+  build/
+  ```
+- `ogcspec-metanorma` has a master document skeleton to start from: `skills/ogcspec-metanorma/references/document-skeleton.adoc` (placeholders are marked `OWNER`).
+
 ## Verified so far (2026-11-06)
 
 - BMAD's `validate_manifests.py` and `scan_scripts.py` pass at the pinned commit. `init_skill.py --check` passes

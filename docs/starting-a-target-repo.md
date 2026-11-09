@@ -36,13 +36,13 @@ This is what was run, in order, and every surprise. Anything not listed under "N
 8. **Start the agent.** In Claude Code, started in the repository, "Talk to the ModSpec Architect" activated the persona (it loaded the skill, resolved its configuration from `_bmad/`, and on a read-only request ran the
    installed gate and reported findings and the rules that did not run). One session, run once; not a measure of quality.
 
-## Surprises and gaps found (none fixed by the rehearsal itself)
+## Surprises and gaps found (the rehearsal itself fixed none; later fixes are marked)
 
-- The `--module-answers` format above is documented nowhere in this module; it is BMAD's, found by reading the setup script.
-- **One baseline cannot serve both stages.** A baseline that lists Metanorma's messages (X010, needed for stage 2) makes a stage-1 run exit 1, because the gate reports baselined findings that "disappeared" even
-  though stage 1 cannot produce them; and the X rules do not appear under `rules_not_run` in stage 1 (the persona noticed both). Until changed, keep a separate baseline file per stage.
-- No master document skeleton ships with the module (step 7).
-- The generated folders are untracked until the project's `.gitignore` is edited (step 5).
+- The `--module-answers` format above was documented nowhere in this module; it is BMAD's, found by reading the setup script. The README now shows it.
+- **One baseline could not serve both stages** (fixed after the rehearsal, 2026-11-09). A baseline that lists Metanorma's messages (X010, needed for stage 2) made a stage-1 run exit 1, because the gate reported baselined findings that "disappeared" even
+  though stage 1 cannot produce them; and the X rules did not appear under `rules_not_run` in stage 1 (the persona noticed both). Now stage 1 lists the X rules as not run and ignores X entries in the baseline.
+- No master document skeleton shipped with the module (step 7); fixed after the rehearsal: `skills/ogcspec-metanorma/references/document-skeleton.adoc`.
+- The generated folders are untracked until the project's `.gitignore` is edited (step 5); the README now has a ready block.
 - The module's setup asks three questions that already have defaults; the defaults are fine for a first run.
 
 ## Not tested

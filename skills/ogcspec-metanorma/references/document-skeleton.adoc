@@ -1,0 +1,67 @@
+// STARTING POINT ONLY. This is a master document skeleton for the fragments `emit.py` writes. Every line marked
+// "OWNER" is a decision or a fact that belongs to the standard's author; the values below are placeholders, not
+// proposals. It compiled on the pinned Metanorma image (offline) with the module's worked example; a real document
+// needs a real header, bibliography and terms clause.
+//
+// Use: copy it next to the emitted fragments (the --out folder of emit.py) as doc.adoc and compile it with
+// metanorma.py (see the ogcspec-metanorma skill).
+= OWNER: the title of the standard
+:doctype: standard
+:encoding: utf-8
+:lang: en
+// OWNER: status, committee and docsubtype are OGC document metadata; check them against OGC's current rules.
+:status: swg-draft
+:committee: technical
+:docsubtype: implementation
+// OWNER: the external identifier and the document number are assigned by OGC (never by this tool); these are placeholders.
+:external-id: http://www.opengis.net/doc/IS/CHANGE-ME/1.0
+:docnumber: 00-000
+// OWNER: dates, author and submitting organizations.
+:received-date: 2000-01-01
+:issued-date: 2000-01-01
+:published-date: 2000-01-01
+:fullname: OWNER: author name
+:submitting-organizations: OWNER: organization
+:keywords: ogcdoc, OGC document
+:edition: 1.0.0
+// Tool settings: offline compile to the semantic XML the gate reads. Keep these.
+:mn-document-class: ogc
+:mn-output-extensions: xml
+:local-cache-only:
+:data-uri-image:
+
+[abstract]
+== Abstract
+OWNER: write the abstract.
+
+== Preface
+OWNER: write the preface.
+
+== Scope
+OWNER: write the scope.
+
+== Conformance
+OWNER: describe how conformance to this standard is claimed.
+
+include::conformance-classes.adoc[]
+
+// OWNER: replace the placeholder with the standard's real normative references. Every reference key that a record
+// cites (for example a term's `source`) must exist here, or Metanorma reports a missing anchor.
+[bibliography]
+== Normative references
+* [[[placeholder,OGC 00-000]]], OWNER: replace this placeholder reference
+
+// The terms clause MUST be marked as below: without `heading=terms and definitions` Metanorma does not recognise it
+// and the compile aborts once term records are emitted. With term records, replace the "No terms." line by
+// `include::terms.adoc[]` (emit.py writes terms.adoc only when there are term records).
+[heading=terms and definitions]
+== Terms and definitions
+No terms.
+
+== Requirements
+include::requirements.adoc[]
+
+[appendix,obligation=normative]
+== Abstract test suite
+
+include::abstract-tests.adoc[]

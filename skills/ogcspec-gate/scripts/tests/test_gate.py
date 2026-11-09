@@ -519,6 +519,22 @@ class BaselineTests(unittest.TestCase):
             self.assertEqual(code, 1)
             self.assertEqual(summary["baseline"]["missing"], ["M007:/req/core/gone"])
 
+    def test_stage_1_lists_the_x_rules_as_not_run_and_ignores_x_baseline_entries(self):
+        tmp, cfg = build(GOOD)
+        with tmp:
+            base = cfg.parent / "baseline.json"
+            base.write_text(json.dumps({"expected": ["X010:MODSPEC_1:/req/x", "X010:OGC_14:Submitters is missing!"]}), encoding="utf-8")
+            code, summary = gate.run(cfg, base)
+            self.assertEqual(code, 0)
+            self.assertEqual(summary["baseline"], {"unexpected": [], "missing": []})
+            for rule in ("X000", "X001", "X002", "X003", "X004", "X010"):
+                self.assertIn(rule, summary["rules_not_run"])
+            # a baselined non-X finding that has disappeared is still reported
+            base.write_text(json.dumps({"expected": ["X010:a", "M007:/req/core/gone"]}), encoding="utf-8")
+            code, summary = gate.run(cfg, base)
+            self.assertEqual(code, 1)
+            self.assertEqual(summary["baseline"]["missing"], ["M007:/req/core/gone"])
+
     def test_malformed_baselines_are_a_usage_error_not_a_crash(self):
         tmp, cfg = build(GOOD)
         with tmp:

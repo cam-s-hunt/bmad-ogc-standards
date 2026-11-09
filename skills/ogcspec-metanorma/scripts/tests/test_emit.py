@@ -460,6 +460,36 @@ class TermsRoundTrip(unittest.TestCase):
         self.assertFalse([k for r, k in found if r == "X002" and "term" in k])
 
 
+SKELETON = HERE.parent.parent / "references" / "document-skeleton.adoc"
+
+
+class SkeletonUnitTests(unittest.TestCase):
+    def test_skeleton_includes_the_three_fragments_and_marks_the_terms_clause(self):
+        text = SKELETON.read_text(encoding="utf-8")
+        for fragment in ("conformance-classes.adoc", "requirements.adoc", "abstract-tests.adoc"):
+            self.assertIn(f"include::{fragment}[]", text)
+        self.assertIn("[heading=terms and definitions]", text)
+        self.assertIn("OWNER", text)  # placeholders are marked, not passed off as values
+        self.assertNotIn("99-9", text)  # no leftover test identifiers
+
+
+@unittest.skipUnless(image_available(), "SKIPPED: pinned Metanorma image not present locally; round trip not run")
+class SkeletonCompiles(unittest.TestCase):
+    def test_the_skeleton_compiles_with_emitted_fragments_and_term_records(self):
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t)
+            (root / "records").mkdir()
+            records = RECORDS + [{"kind": "term", "id": "/term/plain", "term": "Plain", "definition": "No extras."}]
+            (root / "records" / "all.yaml").write_text(yaml.safe_dump(records), encoding="utf-8")
+            self.assertEqual(emit.main(["--records", str(root / "records"), "--out", str(root / "build")]), 0)
+            text = SKELETON.read_text(encoding="utf-8").replace("No terms.", "include::terms.adoc[]")
+            (root / "build" / "doc.adoc").write_text(text, encoding="utf-8")
+            proc = subprocess.run([sys.executable, str(HERE.parent / "metanorma.py"), "--image", IMAGE,
+                                   "--adoc", str(root / "build" / "doc.adoc"), "--formats", "xml"], capture_output=True, text=True)
+            self.assertEqual(proc.returncode, 0, proc.stdout[-1500:])
+            self.assertTrue((root / "build" / "doc.xml").is_file())
+
+
 @unittest.skipUnless(image_available(), "SKIPPED: pinned Metanorma image not present locally; round trip not run")
 class WorkedExampleBaseline(unittest.TestCase):
     """The worked example in ogcspec-modspec/references passes the gate, stage 2 included, with exactly its baseline file.
